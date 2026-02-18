@@ -14,6 +14,7 @@ interface HiddenElement {
   preview: string;
   timestamp: number;
   isHidden: boolean;
+  thumbnail?: string;
 }
 
 type PopupMessage =
@@ -102,6 +103,43 @@ async function addHiddenElement(el: HiddenElement): Promise<void> {
   const existing = await loadHiddenElements();
   if (!existing.some((e) => e.selector === el.selector)) {
     await saveHiddenElements([...existing, el]);
+  }
+}
+
+// ─── Thumbnail capture ────────────────────────────────────────────────────────
+
+async function captureThumbnail(rect: DOMRect): Promise<string | undefined> {
+  if (rect.width === 0 || rect.height === 0) return undefined;
+  try {
+    const res = await chrome.runtime.sendMessage({ type: "CAPTURE_VISIBLE_TAB" }) as
+      | { dataUrl?: string }
+      | undefined;
+    if (!res?.dataUrl) return undefined;
+
+    const dpr = window.devicePixelRatio || 1;
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const i = new Image();
+      i.onload = () => resolve(i);
+      i.onerror = reject;
+      i.src = res.dataUrl!;
+    });
+
+    const MAX_W = 200;
+    const scale = Math.min(1, MAX_W / rect.width);
+    const w = Math.max(1, Math.round(rect.width * scale));
+    const h = Math.max(1, Math.round(rect.height * scale));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    canvas.getContext("2d")!.drawImage(
+      img,
+      rect.left * dpr, rect.top * dpr, rect.width * dpr, rect.height * dpr,
+      0, 0, w, h
+    );
+    return canvas.toDataURL("image/jpeg", 0.85);
+  } catch {
+    return undefined;
   }
 }
 
@@ -272,9 +310,12 @@ function PickerApp() {
 
     const selector = getUniqueCssSelector(target);
     const preview = buildPreview(target);
+    const rect = target.getBoundingClientRect();
 
+    // サムネイルを撮影してから要素を隠す
+    const thumbnail = await captureThumbnail(rect);
     hideElement(target);
-    await addHiddenElement({ selector, preview, timestamp: Date.now() });
+    await addHiddenElement({ selector, preview, timestamp: Date.now(), isHidden: true, thumbnail });
     chrome.runtime.sendMessage({ type: "ELEMENT_HIDDEN", selector, preview });
 
     setIsPickerActive(false);

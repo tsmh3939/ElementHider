@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+
 import {
   IconStop,
   IconPicker,
@@ -12,6 +13,7 @@ interface ManagedElement {
   preview: string;
   timestamp: number;
   isHidden: boolean;
+  thumbnail?: string;
 }
 
 type Message =
@@ -222,14 +224,23 @@ export default function App() {
             <p className="text-sm">管理中の要素はありません</p>
           </div>
         ) : (
-          <ul className="menu menu-sm p-2 gap-1">
+          <ul className="p-2 flex flex-col gap-1 list-none">
             {managedElements.map((el) => (
               <li key={el.selector}>
-                <div className="flex items-center gap-2 rounded-lg bg-base-200 p-2 hover:bg-base-300">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-mono text-xs text-primary truncate">
-                      {el.selector}
-                    </p>
+                <div className="flex items-center gap-1 rounded-lg bg-base-200 overflow-hidden hover:bg-base-300">
+                  <div className="flex-1 min-w-0 overflow-hidden flex justify-center">
+                    {el.thumbnail ? (
+                      <img
+                        src={el.thumbnail}
+                        alt=""
+                        title={el.selector}
+                        className="h-12 w-auto max-w-full object-contain"
+                      />
+                    ) : (
+                      <div className="h-12 w-12 flex items-center justify-center text-base-content/20">
+                        <IconEyeOff className="h-5 w-5" />
+                      </div>
+                    )}
                   </div>
 
                   {/* 表示/非表示トグル */}
