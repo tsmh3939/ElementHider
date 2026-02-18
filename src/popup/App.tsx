@@ -230,11 +230,6 @@ export default function App() {
                     <p className="font-mono text-xs text-primary truncate">
                       {el.selector}
                     </p>
-                    {el.preview && (
-                      <p className="text-xs text-base-content/60 truncate mt-0.5">
-                        {el.preview}
-                      </p>
-                    )}
                   </div>
 
                   {/* 表示/非表示トグル */}
