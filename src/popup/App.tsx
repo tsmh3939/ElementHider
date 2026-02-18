@@ -1,4 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
+import {
+  IconStop,
+  IconPicker,
+  IconEyeOff,
+  IconEye,
+  IconTrash,
+} from "./icons";
 
 interface ManagedElement {
   selector: string;
@@ -181,33 +188,12 @@ export default function App() {
           >
             {isPickerActive ? (
               <>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="15" y1="9" x2="9" y2="15" />
-                  <line x1="9" y1="9" x2="15" y2="15" />
-                </svg>
+                <IconStop className="h-4 w-4" />
                 ピッカーを停止
               </>
             ) : (
               <>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z" />
-                  <path d="M13 13l6 6" />
-                </svg>
+                <IconPicker className="h-4 w-4" />
                 要素を選択して非表示
               </>
             )}
@@ -229,18 +215,7 @@ export default function App() {
       <div className="flex-1 overflow-y-auto">
         {managedElements.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-10 text-base-content/40">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-10 w-10 mb-2"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-            >
-              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
-              <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
-              <line x1="1" y1="1" x2="23" y2="23" />
-            </svg>
+            <IconEyeOff className="h-10 w-10 mb-2" />
             <p className="text-sm">管理中の要素はありません</p>
           </div>
         ) : (
@@ -268,32 +243,9 @@ export default function App() {
                     title={el.isHidden ? "表示する" : "非表示にする"}
                   >
                     {el.isHidden ? (
-                      // 目に斜線: 現在非表示
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-3.5 w-3.5"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
-                        <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
-                        <line x1="1" y1="1" x2="23" y2="23" />
-                      </svg>
+                      <IconEyeOff className="h-3.5 w-3.5" />
                     ) : (
-                      // 目: 現在表示中
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-3.5 w-3.5"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                        <circle cx="12" cy="12" r="3" />
-                      </svg>
+                      <IconEye className="h-3.5 w-3.5" />
                     )}
                   </button>
 
@@ -303,20 +255,7 @@ export default function App() {
                     onClick={() => deleteElement(el.selector)}
                     title="管理から削除"
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-3.5 w-3.5"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <polyline points="3 6 5 6 21 6" />
-                      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                      <path d="M10 11v6" />
-                      <path d="M14 11v6" />
-                      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-                    </svg>
+                    <IconTrash className="h-3.5 w-3.5" />
                   </button>
                 </div>
               </li>
