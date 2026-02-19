@@ -97,9 +97,23 @@ async function addManagedElement(el: ManagedElement): Promise<void> {
   }
 }
 
+const EH_TIMER_KEY = "__ehHighlightTimer";
+
+function clearHighlight(el: Element) {
+  const timer = (el as Element & { [EH_TIMER_KEY]?: ReturnType<typeof setTimeout> })[EH_TIMER_KEY];
+  if (timer !== undefined) {
+    clearTimeout(timer);
+    delete (el as Element & { [EH_TIMER_KEY]?: ReturnType<typeof setTimeout> })[EH_TIMER_KEY];
+  }
+  el.classList.remove("eh-highlight");
+}
+
 function hideElementBySelector(selector: string) {
   try {
-    document.querySelectorAll(selector).forEach(hideElement);
+    document.querySelectorAll(selector).forEach((el) => {
+      clearHighlight(el);
+      hideElement(el);
+    });
   } catch {
     // invalid selector
   }
@@ -114,8 +128,13 @@ function showElementBySelector(selector: string) {
     document.querySelectorAll(selector).forEach((el) => {
       (el as HTMLElement).style.removeProperty("display");
       (el as HTMLElement).scrollIntoView({ behavior: "smooth", block: "center" });
+      clearHighlight(el);
       el.classList.add("eh-highlight");
-      setTimeout(() => el.classList.remove("eh-highlight"), 2500);
+      const timer = setTimeout(() => {
+        el.classList.remove("eh-highlight");
+        delete (el as Element & { [EH_TIMER_KEY]?: ReturnType<typeof setTimeout> })[EH_TIMER_KEY];
+      }, 2500);
+      (el as Element & { [EH_TIMER_KEY]?: ReturnType<typeof setTimeout> })[EH_TIMER_KEY] = timer;
     });
   } catch {
     // invalid selector
