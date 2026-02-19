@@ -21,7 +21,6 @@
 
 .eh-highlight {
   outline: 3px solid hsl(var(--eh-hue), 85%, 65%) !important;
-  outline-offset: 2px !important;
 
   /* 選択領域の背景も outline と同じ --eh-hue を参照して連動して変化する */
   background-color: hsla(var(--eh-hue), 70%, 60%, 0.4) !important;
