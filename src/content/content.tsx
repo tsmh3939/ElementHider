@@ -11,51 +11,7 @@ import type { ManagedElement, Message } from "../shared/messages";
 // ─── CSS Selector Generation ──────────────────────────────────────────────────
 
 function getUniqueCssSelector(el: Element): string {
-  const path: string[] = [];
-  let current: Element | null = el;
-
-  while (current && current !== document.body) {
-    let segment = current.tagName.toLowerCase();
-
-    if (current.id) {
-      path.unshift(`#${CSS.escape(current.id)}`);
-      break;
-    }
-
-    const classes = Array.from(current.classList)
-      .filter((c) => !c.startsWith("eh-"))
-      .slice(0, 2)
-      .map((c) => `.${CSS.escape(c)}`)
-      .join("");
-
-    if (classes) segment += classes;
-
-    const parent = current.parentElement;
-    if (parent) {
-      const siblings = Array.from(parent.children).filter(
-        (c) => c.tagName === current!.tagName
-      );
-      if (siblings.length > 1) {
-        segment += `:nth-of-type(${siblings.indexOf(current) + 1})`;
-      }
-    }
-
-    path.unshift(segment);
-    current = current.parentElement;
-  }
-
-  if (current === document.body) path.unshift("body");
-
-  for (let i = path.length - 1; i >= 0; i--) {
-    const selector = path.slice(i).join(" > ");
-    try {
-      if (document.querySelectorAll(selector).length === 1) return selector;
-    } catch {
-      // ignore invalid selectors
-    }
-  }
-
-  return path.join(" > ");
+  return el.id ? `#${CSS.escape(el.id)}` : "";
 }
 
 function buildLabel(el: Element): string {
@@ -76,6 +32,11 @@ function buildLabel(el: Element): string {
   const id = el.id ? `#${el.id}` : "";
   const cls = el.classList[0] ? `.${el.classList[0]}` : "";
   return `<${tag}${id}${cls}>`;
+}
+
+/** id を持つ要素のみ選択可能とする。 */
+function isSelectableTarget(el: Element): boolean {
+  return !!el.id;
 }
 
 // ─── Storage helpers ──────────────────────────────────────────────────────────
@@ -250,14 +211,18 @@ function PickerApp() {
       return;
     }
     highlightedRef.current?.classList.remove("eh-highlight");
+    highlightedRef.current = null;
     if (
       target &&
       target !== document.documentElement &&
-      target !== document.body
+      target !== document.body &&
+      isSelectableTarget(target)
     ) {
       target.classList.add("eh-highlight");
       highlightedRef.current = target;
       setTooltipState({ x: e.clientX, y: e.clientY, element: target });
+    } else {
+      setTooltipState(null);
     }
   }, []);
 
@@ -271,6 +236,9 @@ function PickerApp() {
       target === document.body
     )
       return;
+
+    // id がない、または id がページ内でユニークでない要素は選択不可
+    if (!isSelectableTarget(target)) return;
 
     const selector = getUniqueCssSelector(target);
     const label = buildLabel(target);
