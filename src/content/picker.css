@@ -21,18 +21,21 @@
 
 .eh-highlight {
   outline: 3px solid hsl(var(--eh-hue), 85%, 65%) !important;
+  outline-offset: -3px !important;
 
   /* 選択領域の背景も outline と同じ --eh-hue を参照して連動して変化する */
   background-color: hsla(var(--eh-hue), 70%, 60%, 0.4) !important;
 
-  cursor: crosshair !important;
+  /* 内側の光彩：これがあるだけで一気に「選んでる感」が出ます */
+  box-shadow: inset 0 0 15px hsla(var(--eh-hue), 80%, 60%, 0.5) !important;
 
   /*
    * --eh-hue をアニメーションすることで outline-color が変化する。
    * outline 自体に !important があっても、var() 経由の --eh-hue は
    * カスタムプロパティとして独立してアニメーションされるため機能する。
    */
-  animation: eh-hue-rotate 2s linear infinite !important;
+  cursor: crosshair !important;
+  animation: eh-hue-rotate 3s linear infinite !important;
   transition: none !important;
 }
 
