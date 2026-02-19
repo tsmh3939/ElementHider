@@ -1,53 +1,39 @@
 /* ElementHider - Picker highlight styles */
 
 /*
- * グラデーション枠線のアニメーションに使用するカスタムプロパティ。
- * @property で型を宣言することで、ブラウザが補間(アニメーション)できるようになる。
+ * outline の色相をアニメーションするカスタムプロパティ。
+ * @property で数値型を宣言することで HSL 色相の補間が可能になる。
+ *
+ * border-image でグラデーション枠線を描画する方法もあるが、
+ * border はボックスモデルに影響して要素サイズが変化するため採用しない。
+ * outline はボックスモデル外なのでレイアウトに影響しない。
  */
-@property --eh-angle {
-  syntax: "<angle>";
-  initial-value: 0deg;
+@property --eh-hue {
+  syntax: "<number>";
+  initial-value: 220;
   inherits: false;
 }
 
-@keyframes eh-border-rotate {
-  to { --eh-angle: 360deg; }
+@keyframes eh-hue-rotate {
+  /* 220(青) → 580(220+360) で色相を1周させる */
+  to { --eh-hue: 580; }
 }
 
 .eh-highlight {
-  /*
-   * border-image でグラデーション枠線を描画する。
-   * outline はグラデーション非対応のため使わない。
-   * border-width: 3px で枠線の太さを確保し、
-   * border-image: conic-gradient(...) 1 で全辺をグラデーションで塗る。
-   *
-   * 注意: border-image は border-radius と併用できないため
-   *       角丸のある要素では角が直角になる。
-   */
-  outline: none !important;
-  border-width: 3px !important;
-  border-style: solid !important;
-  border-image: conic-gradient(
-    from var(--eh-angle),
-    #3b82f6,
-    #6366f1,
-    #a855f7,
-    #38bdf8,
-    #3b82f6
-  ) 1 !important;
+  outline: 3px solid hsl(var(--eh-hue), 85%, 65%) !important;
+  outline-offset: 2px !important;
 
   /* 選択領域を視認しやすくする薄い背景 */
-  background-color: rgba(59, 130, 246, 0.1) !important;
+  background-color: rgba(59, 130, 246, 0.3) !important;
 
   cursor: crosshair !important;
 
   /*
-   * --eh-angle を animate することで border-image 内の conic-gradient が
-   * 連続的に回転して見える。
-   * !important は animation プロパティ自体に付与し、ページの animation 指定を上書きする。
-   * keyframes 内では !important は使えないが、--eh-angle は独立したプロパティなので問題ない。
+   * --eh-hue をアニメーションすることで outline-color が変化する。
+   * outline 自体に !important があっても、var() 経由の --eh-hue は
+   * カスタムプロパティとして独立してアニメーションされるため機能する。
    */
-  animation: eh-border-rotate 2s linear infinite !important;
+  animation: eh-hue-rotate 2s linear infinite !important;
   transition: none !important;
 }
 
