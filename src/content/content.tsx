@@ -296,6 +296,13 @@ function PickerApp() {
     const preview = buildPreview(target);
     const rect = target.getBoundingClientRect();
 
+    // ハイライト枠線が映り込まないよう、撮影前にクラスを除去して再描画を待つ
+    target.classList.remove("eh-highlight");
+    highlightedRef.current = null;
+    await new Promise<void>((resolve) =>
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+    );
+
     // サムネイルを撮影してから要素を隠す
     const thumbnail = await captureThumbnail(rect);
     hideElement(target);
