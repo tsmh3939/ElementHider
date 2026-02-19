@@ -6,22 +6,7 @@
 
 import { createRoot } from "react-dom/client";
 import { useState, useEffect, useRef, useCallback } from "react";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface HiddenElement {
-  selector: string;
-  label: string;
-  timestamp: number;
-  isHidden: boolean;
-}
-
-type PopupMessage =
-  | { type: "START_PICKER" }
-  | { type: "STOP_PICKER" }
-  | { type: "SHOW_ELEMENT"; selector: string }
-  | { type: "HIDE_ELEMENT"; selector: string }
-  | { type: "GET_STATUS" };
+import type { ManagedElement, Message } from "../shared/messages";
 
 // ─── CSS Selector Generation ──────────────────────────────────────────────────
 
@@ -93,22 +78,22 @@ function buildLabel(el: Element): string {
 
 const getHostname = () => window.location.hostname;
 
-async function loadHiddenElements(): Promise<HiddenElement[]> {
+async function loadManagedElements(): Promise<ManagedElement[]> {
   const host = getHostname();
   const result = await chrome.storage.local.get(host);
-  const raw = (result[host] ?? []) as Array<Partial<HiddenElement>>;
+  const raw = (result[host] ?? []) as Array<Partial<ManagedElement>>;
   // Backward-compat: old entries without isHidden are treated as hidden
-  return raw.map((e) => ({ ...e, isHidden: e.isHidden ?? true } as HiddenElement));
+  return raw.map((e) => ({ ...e, isHidden: e.isHidden ?? true } as ManagedElement));
 }
 
-async function saveHiddenElements(elements: HiddenElement[]): Promise<void> {
+async function saveManagedElements(elements: ManagedElement[]): Promise<void> {
   await chrome.storage.local.set({ [getHostname()]: elements });
 }
 
-async function addHiddenElement(el: HiddenElement): Promise<void> {
-  const existing = await loadHiddenElements();
+async function addManagedElement(el: ManagedElement): Promise<void> {
+  const existing = await loadManagedElements();
   if (!existing.some((e) => e.selector === el.selector)) {
-    await saveHiddenElements([...existing, el]);
+    await saveManagedElements([...existing, el]);
   }
 }
 
@@ -195,7 +180,7 @@ function PickerApp() {
   // ── Message handler (registered once) ────────────────────────────────────
   useEffect(() => {
     const handler = (
-      message: PopupMessage,
+      message: Message,
       _sender: chrome.runtime.MessageSender,
       sendResponse: (response?: unknown) => void
     ): void => {
@@ -271,7 +256,7 @@ function PickerApp() {
     highlightedRef.current = null;
 
     hideElement(target);
-    await addHiddenElement({ selector, label, timestamp: Date.now(), isHidden: true });
+    await addManagedElement({ selector, label, timestamp: Date.now(), isHidden: true });
     chrome.runtime.sendMessage({ type: "ELEMENT_HIDDEN", selector, label });
 
     setIsPickerActive(false);
@@ -338,7 +323,7 @@ function mountPickerApp() {
   mountPickerApp();
 
   // Restore hidden elements from previous session
-  const elements = await loadHiddenElements();
+  const elements = await loadManagedElements();
   elements.forEach((el) => {
     try {
       document.querySelectorAll(el.selector).forEach(hideElement);
