@@ -59,7 +59,11 @@ function getUniqueCssSelector(el: Element): string {
 }
 
 function buildLabel(el: Element): string {
-  const text = el.textContent?.trim().slice(0, 60) ?? "";
+  const raw = el instanceof HTMLElement ? el.innerText : el.textContent;
+  const normalized = raw?.trim().replace(/\s+/g, " ") ?? "";
+  const text = normalized.length > 60
+    ? normalized.slice(0, normalized.lastIndexOf(" ", 60) || 60) + "…"
+    : normalized;
   if (text) return text;
   const tooltip =
     el.getAttribute("title") ||
