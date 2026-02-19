@@ -11,10 +11,9 @@ import { useState, useEffect, useRef, useCallback } from "react";
 
 interface HiddenElement {
   selector: string;
-  preview: string;
+  label: string;
   timestamp: number;
   isHidden: boolean;
-  thumbnail?: string;
 }
 
 type PopupMessage =
@@ -74,9 +73,16 @@ function getUniqueCssSelector(el: Element): string {
   return path.join(" > ");
 }
 
-function buildPreview(el: Element): string {
+function buildLabel(el: Element): string {
   const text = el.textContent?.trim().slice(0, 60) ?? "";
   if (text) return text;
+  const tooltip =
+    el.getAttribute("title") ||
+    el.getAttribute("aria-label") ||
+    el.getAttribute("alt") ||
+    (el as HTMLInputElement).placeholder ||
+    "";
+  if (tooltip) return tooltip.slice(0, 60);
   const tag = el.tagName.toLowerCase();
   const id = el.id ? `#${el.id}` : "";
   const cls = el.classList[0] ? `.${el.classList[0]}` : "";
@@ -103,43 +109,6 @@ async function addHiddenElement(el: HiddenElement): Promise<void> {
   const existing = await loadHiddenElements();
   if (!existing.some((e) => e.selector === el.selector)) {
     await saveHiddenElements([...existing, el]);
-  }
-}
-
-// ─── Thumbnail capture ────────────────────────────────────────────────────────
-
-async function captureThumbnail(rect: DOMRect): Promise<string | undefined> {
-  if (rect.width === 0 || rect.height === 0) return undefined;
-  try {
-    const res = await chrome.runtime.sendMessage({ type: "CAPTURE_VISIBLE_TAB" }) as
-      | { dataUrl?: string }
-      | undefined;
-    if (!res?.dataUrl) return undefined;
-
-    const dpr = window.devicePixelRatio || 1;
-    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
-      const i = new Image();
-      i.onload = () => resolve(i);
-      i.onerror = reject;
-      i.src = res.dataUrl!;
-    });
-
-    const MAX_W = 200;
-    const scale = Math.min(1, MAX_W / rect.width);
-    const w = Math.max(1, Math.round(rect.width * scale));
-    const h = Math.max(1, Math.round(rect.height * scale));
-
-    const canvas = document.createElement("canvas");
-    canvas.width = w;
-    canvas.height = h;
-    canvas.getContext("2d")!.drawImage(
-      img,
-      rect.left * dpr, rect.top * dpr, rect.width * dpr, rect.height * dpr,
-      0, 0, w, h
-    );
-    return canvas.toDataURL("image/jpeg", 0.85);
-  } catch {
-    return undefined;
   }
 }
 
@@ -293,38 +262,14 @@ function PickerApp() {
       return;
 
     const selector = getUniqueCssSelector(target);
-    const preview = buildPreview(target);
-    const rect = target.getBoundingClientRect();
+    const label = buildLabel(target);
 
-    // ハイライト枠線が映り込まないよう、撮影前にクラスを除去する
     target.classList.remove("eh-highlight");
     highlightedRef.current = null;
 
-    // :hover 状態を解除するため、対象要素の上に透明なオーバーレイを置く。
-    // ブラウザのヒットテストがオーバーレイに当たることで target の :hover が外れ、
-    // ホバー時のスタイル変化が元に戻る。
-    const overlay = document.createElement("div");
-    overlay.style.cssText = `position:fixed;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;height:${rect.height}px;z-index:2147483646;pointer-events:all;background:transparent;`;
-    document.documentElement.appendChild(overlay);
-
-    // :hover 解除によって発生する CSS トランジションの完了を待つ
-    const computed = window.getComputedStyle(target);
-    const durations = computed.transitionDuration.split(",").map(parseFloat);
-    const delays    = computed.transitionDelay.split(",").map(parseFloat);
-    const maxMs = Math.max(0, ...durations.map((d, i) => (d + (delays[i] ?? 0)) * 1000));
-    await new Promise<void>((resolve) => setTimeout(resolve, maxMs + 50));
-
-    // トランジション後の描画を確実に待つ
-    await new Promise<void>((resolve) =>
-      requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
-    );
-
-    // サムネイルを撮影してから要素を隠す
-    const thumbnail = await captureThumbnail(rect);
-    overlay.remove();
     hideElement(target);
-    await addHiddenElement({ selector, preview, timestamp: Date.now(), isHidden: true, thumbnail });
-    chrome.runtime.sendMessage({ type: "ELEMENT_HIDDEN", selector, preview, thumbnail });
+    await addHiddenElement({ selector, label, timestamp: Date.now(), isHidden: true });
+    chrome.runtime.sendMessage({ type: "ELEMENT_HIDDEN", selector, label });
 
     setIsPickerActive(false);
   }, []);

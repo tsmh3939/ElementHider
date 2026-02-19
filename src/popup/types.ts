@@ -1,9 +1,8 @@
 export interface ManagedElement {
   selector: string;
-  preview: string;
+  label: string;
   timestamp: number;
   isHidden: boolean;
-  thumbnail?: string;
 }
 
 export type Message =
@@ -14,5 +13,5 @@ export type Message =
   | { type: "GET_STATUS" };
 
 export type ContentMessage =
-  | { type: "ELEMENT_HIDDEN"; selector: string; preview: string; thumbnail?: string }
+  | { type: "ELEMENT_HIDDEN"; selector: string; label: string }
   | { type: "STATUS"; isPickerActive: boolean };

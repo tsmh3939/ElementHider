@@ -46,10 +46,9 @@ export default function App() {
       if (message.type === "ELEMENT_HIDDEN") {
         addElement({
           selector: message.selector,
-          preview: message.preview,
+          label: message.label,
           timestamp: Date.now(),
           isHidden: true,
-          thumbnail: message.thumbnail,
         });
         setIsPickerActive(false);
       }

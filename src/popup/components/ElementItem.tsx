@@ -11,19 +11,8 @@ export function ElementItem({ element, onToggle, onDelete }: Props) {
   return (
     <li>
       <div className="flex items-center gap-1 rounded-lg bg-base-200 overflow-hidden hover:bg-base-300">
-        <div className="flex-1 min-w-0 overflow-hidden flex justify-center">
-          {element.thumbnail ? (
-            <img
-              src={element.thumbnail}
-              alt=""
-              title={element.selector}
-              className="h-12 w-auto max-w-full object-contain"
-            />
-          ) : (
-            <div className="h-12 w-12 flex items-center justify-center text-base-content/20">
-              <IconEyeOff className="h-5 w-5" />
-            </div>
-          )}
+        <div className="flex-1 min-w-0 px-2 py-3" title={element.selector}>
+          <p className="text-xs text-base-content/70 truncate">{element.label}</p>
         </div>
 
         <button
