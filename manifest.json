@@ -3,9 +3,11 @@
   "name": "ElementHider",
   "version": "1.0.0",
   "description": "Hide page elements with a DevTools-like picker",
-  "permissions": ["activeTab", "scripting", "storage", "tabs"],
+  "permissions": ["activeTab", "scripting", "storage", "tabs", "sidePanel"],
+  "side_panel": {
+    "default_path": "src/popup/index.html"
+  },
   "action": {
-    "default_popup": "src/popup/index.html",
     "default_icon": {
       "16": "icons/icon-16.png",
       "48": "icons/icon-48.png",

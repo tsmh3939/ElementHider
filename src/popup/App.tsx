@@ -24,7 +24,7 @@ type Message =
   | { type: "GET_STATUS" };
 
 type ContentMessage =
-  | { type: "ELEMENT_HIDDEN"; selector: string; preview: string }
+  | { type: "ELEMENT_HIDDEN"; selector: string; preview: string; thumbnail?: string }
   | { type: "STATUS"; isPickerActive: boolean };
 
 async function sendToActiveTab(message: Message): Promise<void> {
@@ -97,6 +97,7 @@ export default function App() {
           preview: message.preview,
           timestamp: Date.now(),
           isHidden: true,
+          thumbnail: message.thumbnail,
         };
         setManagedElements((prev) => {
           if (prev.some((e) => e.selector === newEl.selector)) return prev;
@@ -114,9 +115,6 @@ export default function App() {
     const next = !isPickerActive;
     setIsPickerActive(next);
     await sendToActiveTab(next ? { type: "START_PICKER" } : { type: "STOP_PICKER" });
-    // ピッカー開始時はポップアップを閉じてページ上の要素を選択可能にする
-    // 要素選択後はバックグラウンドが自動でポップアップを再表示する
-    if (next) window.close();
   }, [isPickerActive]);
 
   // 表示/非表示をトグル（リストには残す）

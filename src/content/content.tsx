@@ -316,7 +316,7 @@ function PickerApp() {
     const thumbnail = await captureThumbnail(rect);
     hideElement(target);
     await addHiddenElement({ selector, preview, timestamp: Date.now(), isHidden: true, thumbnail });
-    chrome.runtime.sendMessage({ type: "ELEMENT_HIDDEN", selector, preview });
+    chrome.runtime.sendMessage({ type: "ELEMENT_HIDDEN", selector, preview, thumbnail });
 
     setIsPickerActive(false);
   }, []);
