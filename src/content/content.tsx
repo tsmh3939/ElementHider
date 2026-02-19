@@ -128,6 +128,9 @@ function showElementBySelector(selector: string) {
   try {
     document.querySelectorAll(selector).forEach((el) => {
       (el as HTMLElement).style.removeProperty("display");
+      (el as HTMLElement).scrollIntoView({ behavior: "smooth", block: "center" });
+      el.classList.add("eh-highlight");
+      setTimeout(() => el.classList.remove("eh-highlight"), 2500);
     });
   } catch {
     // invalid selector
