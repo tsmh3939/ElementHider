@@ -296,15 +296,32 @@ function PickerApp() {
     const preview = buildPreview(target);
     const rect = target.getBoundingClientRect();
 
-    // ハイライト枠線が映り込まないよう、撮影前にクラスを除去して再描画を待つ
+    // ハイライト枠線が映り込まないよう、撮影前にクラスを除去する
     target.classList.remove("eh-highlight");
     highlightedRef.current = null;
+
+    // :hover 状態を解除するため、対象要素の上に透明なオーバーレイを置く。
+    // ブラウザのヒットテストがオーバーレイに当たることで target の :hover が外れ、
+    // ホバー時のスタイル変化が元に戻る。
+    const overlay = document.createElement("div");
+    overlay.style.cssText = `position:fixed;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;height:${rect.height}px;z-index:2147483646;pointer-events:all;background:transparent;`;
+    document.documentElement.appendChild(overlay);
+
+    // :hover 解除によって発生する CSS トランジションの完了を待つ
+    const computed = window.getComputedStyle(target);
+    const durations = computed.transitionDuration.split(",").map(parseFloat);
+    const delays    = computed.transitionDelay.split(",").map(parseFloat);
+    const maxMs = Math.max(0, ...durations.map((d, i) => (d + (delays[i] ?? 0)) * 1000));
+    await new Promise<void>((resolve) => setTimeout(resolve, maxMs + 50));
+
+    // トランジション後の描画を確実に待つ
     await new Promise<void>((resolve) =>
       requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
     );
 
     // サムネイルを撮影してから要素を隠す
     const thumbnail = await captureThumbnail(rect);
+    overlay.remove();
     hideElement(target);
     await addHiddenElement({ selector, preview, timestamp: Date.now(), isHidden: true, thumbnail });
     chrome.runtime.sendMessage({ type: "ELEMENT_HIDDEN", selector, preview, thumbnail });
