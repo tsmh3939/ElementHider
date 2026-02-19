@@ -1,10 +1,54 @@
 /* ElementHider - Picker highlight styles */
+
+/*
+ * グラデーション枠線のアニメーションに使用するカスタムプロパティ。
+ * @property で型を宣言することで、ブラウザが補間(アニメーション)できるようになる。
+ */
+@property --eh-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes eh-border-rotate {
+  to { --eh-angle: 360deg; }
+}
+
 .eh-highlight {
-  outline: 2px solid #3b82f6 !important;
-  outline-offset: 1px !important;
-  background-color: rgba(59, 130, 246, 0.08) !important;
+  /*
+   * border-image でグラデーション枠線を描画する。
+   * outline はグラデーション非対応のため使わない。
+   * border-width: 3px で枠線の太さを確保し、
+   * border-image: conic-gradient(...) 1 で全辺をグラデーションで塗る。
+   *
+   * 注意: border-image は border-radius と併用できないため
+   *       角丸のある要素では角が直角になる。
+   */
+  outline: none !important;
+  border-width: 3px !important;
+  border-style: solid !important;
+  border-image: conic-gradient(
+    from var(--eh-angle),
+    #3b82f6,
+    #6366f1,
+    #a855f7,
+    #38bdf8,
+    #3b82f6
+  ) 1 !important;
+
+  /* 選択領域を視認しやすくする薄い背景 */
+  background-color: rgba(59, 130, 246, 0.1) !important;
+
   cursor: crosshair !important;
-  transition: outline 0.05s ease !important;
+
+  /*
+   * --eh-angle を animate することで border-image 内の conic-gradient が
+   * 連続的に回転して見える。
+   * !important は animation プロパティ自体に付与し、ページの animation 指定を上書きする。
+   * keyframes 内では !important は使えないが、--eh-angle は独立したプロパティなので問題ない。
+   */
+  animation: eh-border-rotate 2s linear infinite !important;
+  transition: none !important;
 }
 
 #eh-tooltip {
