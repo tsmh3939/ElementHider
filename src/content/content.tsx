@@ -192,26 +192,10 @@ function Tooltip({ x, y, element }: TooltipProps) {
   const ty = y + GAP + estH > vh ? y - estH - GAP : y + GAP;
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        left: tx,
-        top: ty,
-        zIndex: 2147483647,
-        background: "#0f172a",
-        color: "#e2e8f0",
-        font: '11px/1.4 "Consolas", "Monaco", monospace',
-        padding: "5px 9px",
-        borderRadius: "5px",
-        border: "1px solid #334155",
-        pointerEvents: "none",
-        whiteSpace: "nowrap",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
-      }}
-    >
-      <span style={{ color: "#38bdf8", fontWeight: "bold" }}>{tag}</span>
-      <span style={{ color: "#a78bfa" }}>{id}</span>
-      <span style={{ color: "#4ade80" }}>{classes}</span>
+    <div id="eh-tooltip" style={{ left: tx, top: ty }}>
+      <span className="eh-tag">{tag}</span>
+      <span className="eh-id">{id}</span>
+      <span className="eh-class">{classes}</span>
     </div>
   );
 }
