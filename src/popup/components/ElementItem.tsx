@@ -1,4 +1,4 @@
-import { IconEyeOff, IconEye, IconTrash } from "../icons";
+import { IconTrash } from "../icons";
 import type { ManagedElement } from "../types";
 
 interface Props {
@@ -10,24 +10,28 @@ interface Props {
 export function ElementItem({ element, onToggle, onDelete }: Props) {
   return (
     <li>
-      <div className="flex items-center gap-1 rounded-lg bg-base-200 overflow-hidden hover:bg-base-300">
-        <div className="flex-1 min-w-0 px-2 py-3" title={element.selector}>
-          <p className="text-xs text-base-content/70 truncate">{element.label}</p>
-        </div>
-
-        <button
-          className={`btn btn-xs btn-ghost shrink-0 ${
-            element.isHidden ? "text-base-content/30" : "text-success"
-          }`}
+      <div
+        className={`flex items-center gap-1 rounded-lg overflow-hidden cursor-pointer transition-colors ${
+          element.isHidden
+            ? "bg-base-200 hover:bg-base-300 opacity-40"
+            : "bg-base-200 hover:bg-base-300"
+        }`}
+      >
+        <div
+          className="flex-1 min-w-0 px-2 py-3"
+          title={element.selector}
           onClick={() => onToggle(element.selector)}
-          title={element.isHidden ? "表示する" : "非表示にする"}
         >
-          {element.isHidden ? (
-            <IconEyeOff className="h-3.5 w-3.5" />
-          ) : (
-            <IconEye className="h-3.5 w-3.5" />
-          )}
-        </button>
+          <p
+            className={`text-xs truncate ${
+              element.isHidden
+                ? "text-base-content/50 line-through"
+                : "text-base-content/70"
+            }`}
+          >
+            {element.label}
+          </p>
+        </div>
 
         <button
           className="btn btn-xs btn-ghost text-error shrink-0"
