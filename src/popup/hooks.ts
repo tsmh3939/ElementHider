@@ -21,6 +21,20 @@ export function useManagedElements(hostname: string | null) {
     };
   }, [hostname]);
 
+  // バックグラウンド（右クリックメニューなど）によるストレージ変更を検知して同期
+  useEffect(() => {
+    if (!hostname) return;
+    const handler = (changes: { [key: string]: chrome.storage.StorageChange }) => {
+      if (!(hostname in changes)) return;
+      const raw = (changes[hostname].newValue ?? []) as Array<Partial<ManagedElement>>;
+      setManagedElements(
+        raw.map((e) => ({ ...e, isHidden: e.isHidden ?? true } as ManagedElement))
+      );
+    };
+    chrome.storage.local.onChanged.addListener(handler);
+    return () => chrome.storage.local.onChanged.removeListener(handler);
+  }, [hostname]);
+
   const saveToStorage = useCallback(
     async (elements: ManagedElement[]) => {
       if (!hostname) return;
