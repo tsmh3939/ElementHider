@@ -147,10 +147,13 @@ export default function App() {
             <span className="text-primary">Element</span>Hider
           </span>
         </div>
-        <div className="navbar-end gap-1">
+        <div className="navbar-end">
           {hostname && (
-            <span className="badge badge-ghost badge-sm truncate max-w-[120px] overflow-visible pb-0.5">
-              {hostname}
+            <span
+              className="badge badge-ghost badge-sm truncate overflow-visible pb-0.5"
+              title={hostname}
+            >
+              {hostname.replace(/^www\./, "")}
             </span>
           )}
           <button
