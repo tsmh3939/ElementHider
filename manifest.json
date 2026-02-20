@@ -3,7 +3,7 @@
   "name": "ElementHider",
   "version": "1.0.0",
   "description": "Hide page elements with a DevTools-like picker",
-  "permissions": ["activeTab", "scripting", "storage", "tabs", "sidePanel", "contextMenus"],
+  "permissions": ["storage", "tabs", "sidePanel", "contextMenus"],
   "side_panel": {
     "default_path": "src/popup/index.html"
   },
