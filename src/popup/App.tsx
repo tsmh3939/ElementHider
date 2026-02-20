@@ -12,33 +12,50 @@ export default function App() {
   const { managedElements, addElement, toggleElement, deleteElement } =
     useManagedElements(hostname);
 
-  // 初期化: hostname 取得 + ピッカー状態確認
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      const host = await getActiveTabHostname();
-      if (!mounted) return;
-      setHostname(host);
+  // hostname 取得 + ピッカー状態確認（初期化・タブ切り替え時に呼ぶ）
+  const refreshTab = useCallback(async () => {
+    const host = await getActiveTabHostname();
+    setHostname(host);
+    setIsPickerActive(false);
 
-      try {
-        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-        if (tab?.id != null) {
-          const response = (await chrome.tabs.sendMessage(tab.id, {
-            type: "GET_STATUS",
-          } satisfies Message)) as ContentMessage | undefined;
-          if (!mounted) return;
-          if (response?.type === "STATUS") {
-            setIsPickerActive(response.isPickerActive);
-          }
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (tab?.id != null) {
+        const response = (await chrome.tabs.sendMessage(tab.id, {
+          type: "GET_STATUS",
+        } satisfies Message)) as ContentMessage | undefined;
+        if (response?.type === "STATUS") {
+          setIsPickerActive(response.isPickerActive);
         }
-      } catch {
-        // コンテンツスクリプト未準備の場合は無視
       }
-    })();
-    return () => {
-      mounted = false;
-    };
+    } catch {
+      // コンテンツスクリプト未準備の場合は無視
+    }
   }, []);
+
+  // 初期化
+  useEffect(() => {
+    refreshTab();
+  }, [refreshTab]);
+
+  // タブ切り替え・ナビゲーション完了を検知してサイドパネルを更新
+  useEffect(() => {
+    const onActivated = () => refreshTab();
+    const onUpdated = (
+      _tabId: number,
+      changeInfo: chrome.tabs.TabChangeInfo,
+      tab: chrome.tabs.Tab
+    ) => {
+      if (tab.active && changeInfo.status === "complete") refreshTab();
+    };
+
+    chrome.tabs.onActivated.addListener(onActivated);
+    chrome.tabs.onUpdated.addListener(onUpdated);
+    return () => {
+      chrome.tabs.onActivated.removeListener(onActivated);
+      chrome.tabs.onUpdated.removeListener(onUpdated);
+    };
+  }, [refreshTab]);
 
   // コンテンツスクリプトからのメッセージを受信
   useEffect(() => {
