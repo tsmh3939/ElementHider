@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 
 import { IconStop, IconPicker, IconEyeOff, IconEye, IconRefresh, IconSettings } from "./icons";
 import type { ContentMessage, Message } from "./types";
@@ -13,8 +13,30 @@ export default function App() {
   const [isPickerActive, setIsPickerActive] = useState(false);
   const [hostname, setHostname] = useState<string | null>(null);
   const [needsReload, setNeedsReload] = useState(false);
-  const { managedElements, addElement, toggleElement, deleteElement, toggleAll, renameElement } =
+  const { managedElements, addElement, toggleElement, deleteElement, toggleAll, renameElement, reorderElements } =
     useManagedElements(hostname);
+
+  const dragIndexRef = useRef(-1);
+  const [dragOverIndex, setDragOverIndex] = useState(-1);
+
+  const handleDragStart = useCallback((index: number) => {
+    dragIndexRef.current = index;
+  }, []);
+
+  const handleDragEnter = useCallback((index: number) => {
+    setDragOverIndex(index);
+  }, []);
+
+  const handleDrop = useCallback(() => {
+    reorderElements(dragIndexRef.current, dragOverIndex);
+    dragIndexRef.current = -1;
+    setDragOverIndex(-1);
+  }, [dragOverIndex, reorderElements]);
+
+  const handleDragEnd = useCallback(() => {
+    dragIndexRef.current = -1;
+    setDragOverIndex(-1);
+  }, []);
 
   // 起動時にテーマを復元 + 設定ページからの変更をリアルタイムで反映
   useEffect(() => {
@@ -217,13 +239,19 @@ export default function App() {
           </div>
         ) : (
           <ul className="p-2 flex flex-col gap-1 list-none">
-            {managedElements.map((el) => (
+            {managedElements.map((el, i) => (
               <ElementItem
                 key={el.selector}
                 element={el}
+                index={i}
+                isDragOver={dragOverIndex === i}
                 onToggle={toggleElement}
                 onDelete={deleteElement}
                 onRename={renameElement}
+                onDragStart={handleDragStart}
+                onDragEnter={handleDragEnter}
+                onDrop={handleDrop}
+                onDragEnd={handleDragEnd}
               />
             ))}
           </ul>

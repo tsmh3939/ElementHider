@@ -1,15 +1,25 @@
 import { useState, useEffect, useRef } from "react";
-import { IconTrash, IconPencil } from "../icons";
+import { IconTrash, IconPencil, IconGrip } from "../icons";
 import type { ManagedElement } from "../types";
 
 interface Props {
   element: ManagedElement;
+  index: number;
+  isDragOver: boolean;
   onToggle: (selector: string) => void;
   onDelete: (selector: string) => void;
   onRename: (selector: string, newLabel: string) => void;
+  onDragStart: (index: number) => void;
+  onDragEnter: (index: number) => void;
+  onDrop: () => void;
+  onDragEnd: () => void;
 }
 
-export function ElementItem({ element, onToggle, onDelete, onRename }: Props) {
+export function ElementItem({
+  element, index, isDragOver,
+  onToggle, onDelete, onRename,
+  onDragStart, onDragEnter, onDrop, onDragEnd,
+}: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(element.label);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -43,7 +53,15 @@ export function ElementItem({ element, onToggle, onDelete, onRename }: Props) {
   };
 
   return (
-    <li>
+    <li
+      draggable
+      onDragStart={() => onDragStart(index)}
+      onDragEnter={(e) => { e.preventDefault(); onDragEnter(index); }}
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={(e) => { e.preventDefault(); onDrop(); }}
+      onDragEnd={onDragEnd}
+      className={`border-t-2 transition-colors ${isDragOver ? "border-primary" : "border-transparent"}`}
+    >
       <div
         className={`flex items-center gap-1 rounded-lg overflow-hidden transition-colors ${
           element.isHidden
@@ -51,6 +69,13 @@ export function ElementItem({ element, onToggle, onDelete, onRename }: Props) {
             : "bg-base-200 hover:bg-base-300"
         }`}
       >
+        <span
+          className="btn btn-xs btn-ghost shrink-0 cursor-grab text-base-content/20 hover:text-base-content/50 px-1"
+          title="ドラッグして並べ替え"
+        >
+          <IconGrip className="h-3.5 w-3.5" />
+        </span>
+
         {isEditing ? (
           <input
             ref={inputRef}

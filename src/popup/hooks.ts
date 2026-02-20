@@ -124,5 +124,19 @@ export function useManagedElements(hostname: string | null) {
     });
   }, [saveToStorage]);
 
-  return { managedElements, addElement, toggleElement, deleteElement, toggleAll, renameElement };
+  const reorderElements = useCallback(
+    (fromIndex: number, toIndex: number) => {
+      if (fromIndex === toIndex) return;
+      setManagedElements((prev) => {
+        const updated = [...prev];
+        const [moved] = updated.splice(fromIndex, 1);
+        updated.splice(toIndex, 0, moved);
+        saveToStorage(updated);
+        return updated;
+      });
+    },
+    [saveToStorage]
+  );
+
+  return { managedElements, addElement, toggleElement, deleteElement, toggleAll, renameElement, reorderElements };
 }
