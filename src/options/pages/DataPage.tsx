@@ -8,11 +8,20 @@ interface SiteData {
   elements: ManagedElement[];
 }
 
+const QUOTA_BYTES = chrome.storage.local.QUOTA_BYTES ?? 10_485_760;
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+}
+
 export function DataPage() {
   const [sites, setSites] = useState<SiteData[]>([]);
   const [clearAllStatus, setClearAllStatus] = useState<"idle" | "done">("idle");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [bytesInUse, setBytesInUse] = useState<number | null>(null);
 
   const loadData = useCallback(() => {
     chrome.storage.local.get(null).then((all) => {
@@ -27,6 +36,7 @@ export function DataPage() {
       result.sort((a, b) => a.hostname.localeCompare(b.hostname));
       setSites(result);
     });
+    chrome.storage.local.getBytesInUse(null).then(setBytesInUse);
   }, []);
 
   useEffect(() => {
@@ -86,6 +96,30 @@ export function DataPage() {
           </div>
         </div>
       )}
+
+      {/* ストレージ使用量 */}
+      {bytesInUse !== null && (() => {
+        const pct = bytesInUse / QUOTA_BYTES;
+        const barColor = pct >= 0.9 ? "progress-error" : pct >= 0.7 ? "progress-warning" : "progress-success";
+        return (
+          <div className="bg-base-200 rounded-xl px-4 py-3 mb-6">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs text-base-content/60">ストレージ使用量</span>
+              <span className="text-xs font-mono text-base-content/70">
+                {formatBytes(bytesInUse)} / {formatBytes(QUOTA_BYTES)}
+              </span>
+            </div>
+            <progress
+              className={`progress w-full h-2 ${barColor}`}
+              value={bytesInUse}
+              max={QUOTA_BYTES}
+            />
+            <p className="text-xs text-base-content/40 mt-1 text-right">
+              {(pct * 100).toFixed(2)}% 使用中
+            </p>
+          </div>
+        );
+      })()}
 
       {/* サイト一覧 */}
       {sites.length === 0 ? (
