@@ -109,7 +109,14 @@ export function DataPage() {
                   onClick={() => setExpanded(isOpen ? null : site.hostname)}
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">{site.hostname}</p>
+                    <a
+                      className="font-medium text-sm truncate hover:underline hover:text-primary"
+                      href={`https://${site.hostname}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      title={`https://${site.hostname} を開く`}
+                    >{site.hostname}</a>
                     <p className="text-xs text-base-content/50 mt-0.5">
                       {site.elements.length} 要素
                       {hiddenCount > 0 && (
