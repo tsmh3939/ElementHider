@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 
 import { IconStop, IconPicker, IconEyeOff, IconEye, IconRefresh, IconSettings } from "./icons";
 import type { ContentMessage, Message } from "./types";
-import { getActiveTabHostname, sendToActiveTab } from "./api";
+import { getActiveTabInfo, sendToActiveTab } from "./api";
 import { useManagedElements } from "./hooks";
 import { ElementItem } from "./components/ElementItem";
 import { EH_SETTINGS_KEY, type EhSettings } from "./components/SettingsView";
@@ -13,6 +13,7 @@ export default function App() {
   const [isPickerActive, setIsPickerActive] = useState(false);
   const [hostname, setHostname] = useState<string | null>(null);
   const [needsReload, setNeedsReload] = useState(false);
+  const [isExtensionPage, setIsExtensionPage] = useState(false);
   const { managedElements, addElement, toggleElement, deleteElement, toggleAll, renameElement, reorderElements } =
     useManagedElements(hostname);
 
@@ -56,12 +57,12 @@ export default function App() {
 
   // hostname 取得 + ピッカー状態確認（初期化・タブ切り替え時に呼ぶ）
   const refreshTab = useCallback(async () => {
-    const host = await getActiveTabHostname();
+    const { hostname: host, isExtensionPage: extPage } = await getActiveTabInfo();
     setHostname(host);
+    setIsExtensionPage(extPage);
     setIsPickerActive(false);
 
     if (!host) {
-      // chrome:// ページなど対象外
       setNeedsReload(false);
       return;
     }
@@ -178,85 +179,107 @@ export default function App() {
         </div>
       )}
 
-      {/* ピッカーボタン */}
-      <div className="px-3 py-3 border-b border-base-300">
-        <div className="flex items-center gap-3">
-          <button
-            className={`btn flex-1 gap-2 ${isPickerActive ? "btn-warning" : "btn-primary"}`}
-            onClick={togglePicker}
-            disabled={needsReload}
-          >
-            {isPickerActive ? (
-              <>
-                <IconStop className="h-4 w-4" />
-                ピッカーを停止
-              </>
-            ) : (
-              <>
-                <IconPicker className="h-4 w-4" />
-                要素を選択して非表示
-              </>
-            )}
-          </button>
-          {managedElements.length > 0 && (
-            <div className="badge badge-primary badge-lg font-mono">
-              {managedElements.length}
-            </div>
-          )}
+      {/* 設定ページ専用表示 */}
+      {isExtensionPage && (
+        <div className="flex-1 flex flex-col items-center justify-center gap-3 text-base-content/40 px-6 text-center">
+          <IconSettings className="h-10 w-10" />
+          <p className="text-sm font-medium">ElementHider 設定ページ</p>
+          <p className="text-xs">このページでは要素の選択はできません</p>
         </div>
-        {isPickerActive && (
-          <p className="text-xs text-base-content/60 mt-2 text-center">
-            非表示にしたい要素をクリック / Esc でキャンセル
-          </p>
-        )}
-        {managedElements.length > 0 && (
-          <button
-            className="btn btn-ghost btn-sm w-full mt-2 gap-2"
-            onClick={toggleAll}
-            disabled={needsReload}
-          >
-            {managedElements.every((e) => e.isHidden) ? (
-              <>
-                <IconEye className="h-4 w-4" />
-                全て表示
-              </>
-            ) : (
-              <>
-                <IconEyeOff className="h-4 w-4" />
-                全て非表示
-              </>
-            )}
-          </button>
-        )}
-      </div>
+      )}
 
-      {/* 管理要素リスト */}
-      <div className="flex-1 overflow-y-auto">
-        {managedElements.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-10 text-base-content/40">
-            <IconEyeOff className="h-10 w-10 mb-2" />
-            <p className="text-sm">管理中の要素はありません</p>
+      {/* 非対応ページ表示 */}
+      {!hostname && !isExtensionPage && (
+        <div className="flex-1 flex flex-col items-center justify-center gap-3 text-base-content/40 px-6 text-center">
+          <IconStop className="h-10 w-10" />
+          <p className="text-sm font-medium">対応していないページです</p>
+          <p className="text-xs">http / https のページで使用できます</p>
+        </div>
+      )}
+
+      {hostname && !isExtensionPage && (
+        <>
+          {/* ピッカーボタン */}
+          <div className="px-3 py-3 border-b border-base-300">
+            <div className="flex items-center gap-3">
+              <button
+                className={`btn flex-1 gap-2 ${isPickerActive ? "btn-warning" : "btn-primary"}`}
+                onClick={togglePicker}
+                disabled={needsReload}
+              >
+                {isPickerActive ? (
+                  <>
+                    <IconStop className="h-4 w-4" />
+                    ピッカーを停止
+                  </>
+                ) : (
+                  <>
+                    <IconPicker className="h-4 w-4" />
+                    要素を選択して非表示
+                  </>
+                )}
+              </button>
+              {managedElements.length > 0 && (
+                <div className="badge badge-primary badge-lg font-mono">
+                  {managedElements.length}
+                </div>
+              )}
+            </div>
+            {isPickerActive && (
+              <p className="text-xs text-base-content/60 mt-2 text-center">
+                非表示にしたい要素をクリック / Esc でキャンセル
+              </p>
+            )}
+            {managedElements.length > 0 && (
+              <button
+                className="btn btn-ghost btn-sm w-full mt-2 gap-2"
+                onClick={toggleAll}
+                disabled={needsReload}
+              >
+                {managedElements.every((e) => e.isHidden) ? (
+                  <>
+                    <IconEye className="h-4 w-4" />
+                    全て表示
+                  </>
+                ) : (
+                  <>
+                    <IconEyeOff className="h-4 w-4" />
+                    全て非表示
+                  </>
+                )}
+              </button>
+            )}
           </div>
-        ) : (
-          <ul className="p-2 flex flex-col gap-1 list-none">
-            {managedElements.map((el, i) => (
-              <ElementItem
-                key={el.selector}
-                element={el}
-                index={i}
-                isDragOver={dragOverIndex === i}
-                onToggle={toggleElement}
-                onDelete={deleteElement}
-                onRename={renameElement}
-                onDragStart={handleDragStart}
-                onDragEnter={handleDragEnter}
-                onDrop={handleDrop}
-                onDragEnd={handleDragEnd}
-              />
-            ))}
-          </ul>
-        )}
-      </div>
+
+          {/* 管理要素リスト */}
+          <div className="flex-1 overflow-y-auto">
+            {managedElements.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-10 text-base-content/40">
+                <IconEyeOff className="h-10 w-10 mb-2" />
+                <p className="text-sm">管理中の要素はありません</p>
+              </div>
+            ) : (
+              <ul className="p-2 flex flex-col gap-1 list-none">
+                {managedElements.map((el, i) => (
+                  <ElementItem
+                    key={el.selector}
+                    element={el}
+                    index={i}
+                    isDragOver={dragOverIndex === i}
+                    onToggle={toggleElement}
+                    onDelete={deleteElement}
+                    onRename={renameElement}
+                    onDragStart={handleDragStart}
+                    onDragEnter={handleDragEnter}
+                    onDrop={handleDrop}
+                    onDragEnd={handleDragEnd}
+                  />
+                ))}
+              </ul>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }
