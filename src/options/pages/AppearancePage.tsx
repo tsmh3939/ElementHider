@@ -3,14 +3,13 @@ import { EH_SETTINGS_KEY, type EhSettings } from "../../popup/components/Setting
 
 const DEFAULT_THEME = "luxury";
 
-const THEMES: { id: string; label: string; desc: string; dark: boolean }[] = [
-  { id: "luxury",    label: "Luxury",    desc: "ダーク・ゴールド",   dark: true  },
-  { id: "dark",      label: "Dark",      desc: "ダーク",             dark: true  },
-  { id: "night",     label: "Night",     desc: "ダーク・ブルー",     dark: true  },
-  { id: "light",     label: "Light",     desc: "ライト",             dark: false },
-  { id: "corporate", label: "Corporate", desc: "ライト・ビジネス",   dark: false },
-  { id: "cupcake",   label: "Cupcake",   desc: "ライト・パステル",   dark: false },
-];
+const THEMES = [
+  "light", "dark", "cupcake", "bumblebee", "emerald", "corporate",
+  "synthwave", "retro", "cyberpunk", "valentine", "halloween", "garden",
+  "forest", "aqua", "lofi", "pastel", "fantasy", "wireframe", "black",
+  "luxury", "dracula", "cmyk", "autumn", "business", "acid", "lemonade",
+  "night", "coffee", "winter", "dim", "nord", "sunset",
+].map((id) => ({ id, label: id.charAt(0).toUpperCase() + id.slice(1) }));
 
 export function AppearancePage() {
   const [theme, setTheme] = useState(DEFAULT_THEME);
@@ -64,7 +63,6 @@ export function AppearancePage() {
 
               <div>
                 <p className="text-sm font-semibold leading-tight">{t.label}</p>
-                <p className="text-xs opacity-50 mt-0.5">{t.desc}</p>
               </div>
 
               {theme === t.id && (
