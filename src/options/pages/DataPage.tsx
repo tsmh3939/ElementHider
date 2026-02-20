@@ -11,6 +11,7 @@ interface SiteData {
 export function DataPage() {
   const [sites, setSites] = useState<SiteData[]>([]);
   const [clearAllStatus, setClearAllStatus] = useState<"idle" | "done">("idle");
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
 
   const loadData = useCallback(() => {
@@ -63,7 +64,7 @@ export function DataPage() {
             className={`btn btn-sm gap-2 ${
               clearAllStatus === "done" ? "btn-success" : "btn-error btn-outline"
             }`}
-            onClick={clearAll}
+            onClick={() => setConfirmOpen(true)}
             disabled={clearAllStatus === "done"}
           >
             <IconTrash className="h-3.5 w-3.5" />
@@ -161,6 +162,30 @@ export function DataPage() {
               </div>
             );
           })}
+        </div>
+      )}
+      {/* 全削除確認モーダル */}
+      {confirmOpen && (
+        <div className="modal modal-open">
+          <div className="modal-box max-w-sm">
+            <h3 className="font-semibold text-lg">全データを削除しますか？</h3>
+            <p className="text-sm text-base-content/60 mt-2">
+              全 {sites.length} サイト・{totalElements} 要素のデータが削除されます。この操作は元に戻せません。
+            </p>
+            <div className="modal-action">
+              <button className="btn btn-sm" onClick={() => setConfirmOpen(false)}>
+                キャンセル
+              </button>
+              <button
+                className="btn btn-sm btn-error"
+                onClick={() => { setConfirmOpen(false); clearAll(); }}
+              >
+                <IconTrash className="h-3.5 w-3.5" />
+                削除する
+              </button>
+            </div>
+          </div>
+          <div className="modal-backdrop" onClick={() => setConfirmOpen(false)} />
         </div>
       )}
     </div>
