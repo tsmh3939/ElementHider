@@ -1,10 +1,13 @@
 import { useEffect, useState, useCallback } from "react";
 
-import { IconStop, IconPicker, IconEyeOff, IconEye, IconRefresh } from "./icons";
+import { IconStop, IconPicker, IconEyeOff, IconEye, IconRefresh, IconSettings } from "./icons";
 import type { ContentMessage, Message } from "./types";
 import { getActiveTabHostname, sendToActiveTab } from "./api";
 import { useManagedElements } from "./hooks";
 import { ElementItem } from "./components/ElementItem";
+import { EH_SETTINGS_KEY, type EhSettings } from "./components/SettingsView";
+
+const DEFAULT_THEME = "luxury";
 
 export default function App() {
   const [isPickerActive, setIsPickerActive] = useState(false);
@@ -12,6 +15,22 @@ export default function App() {
   const [needsReload, setNeedsReload] = useState(false);
   const { managedElements, addElement, toggleElement, deleteElement, toggleAll, renameElement } =
     useManagedElements(hostname);
+
+  // 起動時にテーマを復元 + 設定ページからの変更をリアルタイムで反映
+  useEffect(() => {
+    chrome.storage.local.get(EH_SETTINGS_KEY).then((result) => {
+      const saved = result[EH_SETTINGS_KEY] as EhSettings | undefined;
+      document.documentElement.setAttribute("data-theme", saved?.theme ?? DEFAULT_THEME);
+    });
+
+    const handler = (changes: { [key: string]: chrome.storage.StorageChange }) => {
+      if (!(EH_SETTINGS_KEY in changes)) return;
+      const saved = changes[EH_SETTINGS_KEY].newValue as EhSettings | undefined;
+      document.documentElement.setAttribute("data-theme", saved?.theme ?? DEFAULT_THEME);
+    };
+    chrome.storage.local.onChanged.addListener(handler);
+    return () => chrome.storage.local.onChanged.removeListener(handler);
+  }, []);
 
   // hostname 取得 + ピッカー状態確認（初期化・タブ切り替え時に呼ぶ）
   const refreshTab = useCallback(async () => {
@@ -105,12 +124,19 @@ export default function App() {
             <span className="text-primary">Element</span>Hider
           </span>
         </div>
-        <div className="navbar-end">
+        <div className="navbar-end gap-1">
           {hostname && (
-            <span className="badge badge-ghost badge-sm truncate max-w-[140px]">
+            <span className="badge badge-ghost badge-sm truncate max-w-[120px]">
               {hostname}
             </span>
           )}
+          <button
+            className="btn btn-xs btn-ghost text-base-content/50"
+            onClick={() => chrome.runtime.openOptionsPage()}
+            title="設定"
+          >
+            <IconSettings className="h-4 w-4" />
+          </button>
         </div>
       </div>
 
