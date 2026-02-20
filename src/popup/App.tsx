@@ -149,7 +149,7 @@ export default function App() {
         </div>
         <div className="navbar-end gap-1">
           {hostname && (
-            <span className="badge badge-ghost badge-sm truncate max-w-[120px]">
+            <span className="badge badge-ghost badge-sm truncate max-w-[120px] overflow-visible pb-0.5">
               {hostname}
             </span>
           )}
