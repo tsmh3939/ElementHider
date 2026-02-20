@@ -113,19 +113,28 @@ function getUniqueCssSelector(el: Element): string {
 }
 
 function buildLabel(el: Element): string {
-  const raw = el instanceof HTMLElement ? el.innerText : el.textContent;
-  const normalized = raw?.trim().replace(/\s+/g, " ") ?? "";
+  // 可視テキスト（innerText は子要素の表示テキストを含む）
+  const inner = el instanceof HTMLElement ? el.innerText?.trim() : "";
+  // フォールバック: SVG の <title> や非表示テキストも含む textContent
+  const raw = inner || (el.textContent?.trim() ?? "");
+  const normalized = raw.replace(/\s+/g, " ");
   const text = normalized.length > 60
     ? normalized.slice(0, normalized.lastIndexOf(" ", 60) || 60) + "…"
     : normalized;
   if (text) return text;
-  const tooltip =
-    el.getAttribute("title") ||
-    el.getAttribute("aria-label") ||
-    el.getAttribute("alt") ||
-    (el as HTMLInputElement).placeholder ||
-    "";
-  if (tooltip) return tooltip.slice(0, 60);
+
+  // 属性チェック: 要素本体 + すべての子孫要素（aria-label / title / alt / placeholder）
+  const candidates = [el, ...Array.from(el.querySelectorAll("*"))];
+  for (const node of candidates) {
+    const attr =
+      node.getAttribute("aria-label") ||
+      node.getAttribute("title") ||
+      node.getAttribute("alt") ||
+      (node as HTMLInputElement).placeholder ||
+      "";
+    if (attr.trim()) return attr.trim().slice(0, 60);
+  }
+
   const tag = el.tagName.toLowerCase();
   const id = el.id ? `#${el.id}` : "";
   const cls = el.classList[0] ? `.${el.classList[0]}` : "";
