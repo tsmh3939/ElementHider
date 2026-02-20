@@ -77,5 +77,24 @@ export function useManagedElements(hostname: string | null) {
     [saveToStorage]
   );
 
-  return { managedElements, addElement, toggleElement, deleteElement };
+  // 全要素の一括表示/非表示トグル
+  // 全て非表示なら全て表示、それ以外（一部でも表示中）なら全て非表示にする
+  const toggleAll = useCallback(() => {
+    setManagedElements((prev) => {
+      if (prev.length === 0) return prev;
+      const nextHidden = !prev.every((e) => e.isHidden);
+      prev.forEach((e) => {
+        sendToActiveTab(
+          nextHidden
+            ? { type: "HIDE_ELEMENT", selector: e.selector }
+            : { type: "SHOW_ELEMENT", selector: e.selector }
+        );
+      });
+      const updated = prev.map((e) => ({ ...e, isHidden: nextHidden }));
+      saveToStorage(updated);
+      return updated;
+    });
+  }, [saveToStorage]);
+
+  return { managedElements, addElement, toggleElement, deleteElement, toggleAll };
 }

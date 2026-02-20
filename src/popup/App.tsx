@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 
-import { IconStop, IconPicker, IconEyeOff } from "./icons";
+import { IconStop, IconPicker, IconEyeOff, IconEye } from "./icons";
 import type { ContentMessage, Message } from "./types";
 import { getActiveTabHostname, sendToActiveTab } from "./api";
 import { useManagedElements } from "./hooks";
@@ -9,7 +9,7 @@ import { ElementItem } from "./components/ElementItem";
 export default function App() {
   const [isPickerActive, setIsPickerActive] = useState(false);
   const [hostname, setHostname] = useState<string | null>(null);
-  const { managedElements, addElement, toggleElement, deleteElement } =
+  const { managedElements, addElement, toggleElement, deleteElement, toggleAll } =
     useManagedElements(hostname);
 
   // hostname 取得 + ピッカー状態確認（初期化・タブ切り替え時に呼ぶ）
@@ -127,6 +127,24 @@ export default function App() {
           <p className="text-xs text-base-content/60 mt-2 text-center">
             非表示にしたい要素をクリック / Esc でキャンセル
           </p>
+        )}
+        {managedElements.length > 0 && (
+          <button
+            className="btn btn-ghost btn-sm w-full mt-2 gap-2"
+            onClick={toggleAll}
+          >
+            {managedElements.every((e) => e.isHidden) ? (
+              <>
+                <IconEye className="h-4 w-4" />
+                全て表示
+              </>
+            ) : (
+              <>
+                <IconEyeOff className="h-4 w-4" />
+                全て非表示
+              </>
+            )}
+          </button>
         )}
       </div>
 
