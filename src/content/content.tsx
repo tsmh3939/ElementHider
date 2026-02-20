@@ -10,8 +10,106 @@ import type { ManagedElement, Message } from "../shared/messages";
 
 // ─── CSS Selector Generation ──────────────────────────────────────────────────
 
+/** 単一要素の最適なセレクタ部品を返す（祖先は含まない）。
+ *  優先順位: #id（ユニーク確認済み）→ tag.class → a[href] → tag
+ */
+function buildSelectorForElement(el: Element): string {
+  const tag = el.tagName.toLowerCase();
+
+  // 優先1: id（ページ内でユニークな場合のみ）
+  if (el.id) {
+    const idSel = `#${CSS.escape(el.id)}`;
+    try {
+      if (document.querySelectorAll(idSel).length === 1) return idSel;
+    } catch { /* 無効なセレクタは無視 */ }
+  }
+
+  // 優先2: クラス（拡張機能独自クラスは除外）
+  const classes = Array.from(el.classList)
+    .filter((c) => !c.startsWith("eh-"))
+    .map((c) => `.${CSS.escape(c)}`)
+    .join("");
+
+  // 優先3: <a> タグの href（id・class の次に有力）
+  if (tag === "a") {
+    const href = el.getAttribute("href");
+    if (href) {
+      const escapedHref = href.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+      return `${tag}${classes}[href="${escapedHref}"]`;
+    }
+  }
+
+  return classes ? `${tag}${classes}` : tag;
+}
+
+/** セレクタがページ内でちょうど 1 件にマッチするか確認する。 */
+function isUniqueSelector(sel: string): boolean {
+  try {
+    return document.querySelectorAll(sel).length === 1;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * parent の子孫を BFS で探索し、ページ内でユニークなセレクタを持つ
+ * 最初の子孫要素のセレクタを返す。見つからなければ null。
+ */
+function findUniqueDescendantSelector(parent: Element): string | null {
+  const queue: Element[] = Array.from(parent.children);
+  while (queue.length > 0) {
+    const child = queue.shift()!;
+    const sel = buildSelectorForElement(child);
+    if (isUniqueSelector(sel)) return sel;
+    queue.push(...Array.from(child.children));
+  }
+  return null;
+}
+
+/**
+ * el をページ内でユニークに特定できる CSS セレクタを返す。
+ * 1. el 自身のセレクタで試す。
+ * 2. ユニークでなければ子孫にユニークな要素を探し :has() で特定する。
+ * 3. それでも非ユニークなら、祖先チェーンを辿りながら
+ *    「祖先パス el_selector」と「祖先パス el_selector:has(descSel)」を試す。
+ * 4. いずれの方法でもユニークにできなければ最終パスを返す。
+ */
 function getUniqueCssSelector(el: Element): string {
-  return el.id ? `#${CSS.escape(el.id)}` : "";
+  const ownSel = buildSelectorForElement(el);
+
+  // Step 1: 自身のセレクタがユニークか確認
+  if (isUniqueSelector(ownSel)) return ownSel;
+
+  // Step 2: 子孫にユニークな要素を探し :has() で特定
+  const descSel = findUniqueDescendantSelector(el);
+  if (descSel && isUniqueSelector(`${ownSel}:has(${descSel})`)) {
+    return `${ownSel}:has(${descSel})`;
+  }
+
+  // Step 3: 祖先チェーンを辿り、セレクタパスを構築
+  const parts: string[] = [ownSel];
+  let current: Element | null = el.parentElement;
+  while (current && current !== document.documentElement && current !== document.body) {
+    const parentSel = buildSelectorForElement(current);
+    parts.unshift(parentSel);
+
+    // 祖先パスのみで試す
+    if (isUniqueSelector(parts.join(" "))) return parts.join(" ");
+
+    // 祖先パス + :has() で試す
+    if (descSel) {
+      const hasSel = [...parts.slice(0, -1), `${ownSel}:has(${descSel})`].join(" ");
+      if (isUniqueSelector(hasSel)) return hasSel;
+    }
+
+    // ユニークな id に到達したらそれ以上辿っても意味がない
+    if (parentSel.startsWith("#")) break;
+    current = current.parentElement;
+  }
+
+  // Step 4: フォールバック（:has() があれば優先）
+  if (descSel) return `${ownSel}:has(${descSel})`;
+  return parts.join(" ");
 }
 
 function buildLabel(el: Element): string {
@@ -34,9 +132,9 @@ function buildLabel(el: Element): string {
   return `<${tag}${id}${cls}>`;
 }
 
-/** id を持つ要素のみ選択可能とする。 */
+/** 拡張機能自身のルート以外はすべて選択可能とする。 */
 function isSelectableTarget(el: Element): boolean {
-  return !!el.id;
+  return !el.closest("#eh-root");
 }
 
 // ─── Storage helpers ──────────────────────────────────────────────────────────
