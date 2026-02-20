@@ -10,7 +10,7 @@ export default function App() {
   const [isPickerActive, setIsPickerActive] = useState(false);
   const [hostname, setHostname] = useState<string | null>(null);
   const [needsReload, setNeedsReload] = useState(false);
-  const { managedElements, addElement, toggleElement, deleteElement, toggleAll } =
+  const { managedElements, addElement, toggleElement, deleteElement, toggleAll, renameElement } =
     useManagedElements(hostname);
 
   // hostname 取得 + ピッカー状態確認（初期化・タブ切り替え時に呼ぶ）
@@ -197,6 +197,7 @@ export default function App() {
                 element={el}
                 onToggle={toggleElement}
                 onDelete={deleteElement}
+                onRename={renameElement}
               />
             ))}
           </ul>
