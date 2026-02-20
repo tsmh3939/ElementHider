@@ -180,25 +180,54 @@ function clearHighlight(el: Element) {
   el.classList.remove("eh-highlight");
 }
 
-function hideElementBySelector(selector: string) {
-  try {
-    document.querySelectorAll(selector).forEach((el) => {
-      clearHighlight(el);
-      hideElement(el);
-    });
-  } catch {
-    // invalid selector
+// ─── CSS-based hide management ────────────────────────────────────────────────
+// <style id="eh-hide"> で非表示セレクタを一元管理する。
+// CSS はページに常に適用されるため、遅延ロードされた要素にも自動で効く。
+
+const hiddenSelectors = new Set<string>();
+
+/** early-inject.ts が用意した #eh-initial-hide を引き継ぐか、新規作成する。 */
+function getHideStyle(): HTMLStyleElement {
+  const existing =
+    (document.getElementById("eh-hide") ??
+      document.getElementById("eh-initial-hide")) as HTMLStyleElement | null;
+  if (existing) {
+    existing.id = "eh-hide";
+    return existing;
   }
+  const style = document.createElement("style");
+  style.id = "eh-hide";
+  document.documentElement.appendChild(style);
+  return style;
 }
 
-function hideElement(el: Element) {
-  (el as HTMLElement).style.setProperty("display", "none", "important");
+function refreshHideStyle() {
+  const style = getHideStyle();
+  style.textContent =
+    hiddenSelectors.size > 0
+      ? [...hiddenSelectors].join(",\n") + " { display: none !important; }"
+      : "";
+}
+
+function hideElementBySelector(selector: string) {
+  try {
+    document.querySelectorAll(selector); // セレクタの有効性を検証
+  } catch {
+    return; // invalid selector
+  }
+  // 現在表示されているマッチ要素のハイライトを解除
+  try {
+    document.querySelectorAll(selector).forEach(clearHighlight);
+  } catch { /* ignore */ }
+  hiddenSelectors.add(selector);
+  refreshHideStyle();
 }
 
 function showElementBySelector(selector: string) {
+  hiddenSelectors.delete(selector);
+  refreshHideStyle();
   try {
     document.querySelectorAll(selector).forEach((el) => {
-      (el as HTMLElement).style.removeProperty("display");
       (el as HTMLElement).scrollIntoView({ behavior: "smooth", block: "center" });
       clearHighlight(el);
       el.classList.add("eh-highlight");
@@ -353,7 +382,7 @@ function PickerApp() {
     target.classList.remove("eh-highlight");
     highlightedRef.current = null;
 
-    hideElement(target);
+    hideElementBySelector(selector);
     await addManagedElement({ selector, label, timestamp: Date.now(), isHidden: true });
     chrome.runtime.sendMessage({ type: "ELEMENT_HIDDEN", selector, label });
 
@@ -420,18 +449,18 @@ function mountPickerApp() {
 (async () => {
   mountPickerApp();
 
-  // Restore hidden elements from previous session (inline style で管理を引き継ぐ)
+  // ストレージから非表示要素を復元し、hiddenSelectors に登録して CSS を更新。
+  // #eh-initial-hide（early-inject.ts 製）を #eh-hide として引き継ぐ。
   const elements = await loadManagedElements();
   elements.forEach((el) => {
-    try {
-      document.querySelectorAll(el.selector).forEach(hideElement);
-    } catch {
-      // invalid selector
+    if (el.isHidden !== false) {
+      try {
+        document.querySelectorAll(el.selector); // セレクタ検証
+        hiddenSelectors.add(el.selector);
+      } catch {
+        // invalid selector
+      }
     }
   });
-
-  // early-inject.ts が注入したちらつき防止用スタイルタグを削除。
-  // インラインスタイルで管理を引き継いだ後に削除することで
-  // 表示/非表示の切り替えが正常に機能する。
-  document.getElementById("eh-initial-hide")?.remove();
+  refreshHideStyle();
 })();
