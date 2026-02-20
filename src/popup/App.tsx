@@ -118,7 +118,8 @@ export default function App() {
           timestamp: Date.now(),
           isHidden: true,
         });
-        setIsPickerActive(false);
+      } else if (message.type === "STATUS") {
+        setIsPickerActive(message.isPickerActive);
       }
     };
     chrome.runtime.onMessage.addListener(handler);
@@ -230,7 +231,7 @@ export default function App() {
             </div>
             {isPickerActive && (
               <p className="text-xs text-base-content/60 mt-2 text-center">
-                非表示にしたい要素をクリック / Esc でキャンセル
+                非表示にしたい要素をクリック（連続選択可） / Esc で終了
               </p>
             )}
             {managedElements.length > 0 && (

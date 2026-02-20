@@ -385,8 +385,6 @@ function PickerApp() {
     hideElementBySelector(selector);
     await addManagedElement({ selector, label, timestamp: Date.now(), isHidden: true });
     chrome.runtime.sendMessage({ type: "ELEMENT_HIDDEN", selector, label });
-
-    setIsPickerActive(false);
   }, []);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
