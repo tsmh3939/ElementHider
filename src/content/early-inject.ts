@@ -1,0 +1,32 @@
+/**
+ * ElementHider Early Inject
+ * document_start で実行され、前回セッションで非表示にした要素を
+ * ストレージから読み込み、コンテンツスクリプトより先に CSS で隠す。
+ * → ページロード時のちらつきを防ぐ。
+ *
+ * メインのコンテンツスクリプト (content.tsx) がインラインスタイルで
+ * 管理を引き継いだ後、このスタイルタグ (#eh-initial-hide) を削除する。
+ */
+
+(async () => {
+  const hostname = window.location.hostname;
+  if (!hostname) return;
+
+  const result = await chrome.storage.local.get(hostname);
+  const elements = (result[hostname] ?? []) as Array<{
+    selector: string;
+    isHidden?: boolean;
+  }>;
+
+  const hiddenSelectors = elements
+    .filter((e) => e.isHidden !== false)
+    .map((e) => e.selector)
+    .filter(Boolean);
+
+  if (hiddenSelectors.length === 0) return;
+
+  const style = document.createElement("style");
+  style.id = "eh-initial-hide";
+  style.textContent = `${hiddenSelectors.join(",\n")} { display: none !important; }`;
+  document.documentElement.appendChild(style);
+})();

@@ -420,7 +420,7 @@ function mountPickerApp() {
 (async () => {
   mountPickerApp();
 
-  // Restore hidden elements from previous session
+  // Restore hidden elements from previous session (inline style で管理を引き継ぐ)
   const elements = await loadManagedElements();
   elements.forEach((el) => {
     try {
@@ -429,4 +429,9 @@ function mountPickerApp() {
       // invalid selector
     }
   });
+
+  // early-inject.ts が注入したちらつき防止用スタイルタグを削除。
+  // インラインスタイルで管理を引き継いだ後に削除することで
+  // 表示/非表示の切り替えが正常に機能する。
+  document.getElementById("eh-initial-hide")?.remove();
 })();
