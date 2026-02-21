@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { EH_SETTINGS_KEY, type EhSettings } from "../../popup/components/SettingsView";
 
-const DEFAULT_THEME = "luxury";
+const DEFAULT_THEME = "dark";
 
 const THEMES = [
   "light", "dark", "cupcake", "bumblebee", "emerald", "corporate",
