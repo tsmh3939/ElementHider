@@ -1,7 +1,9 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { IconTrash } from "../../popup/icons";
 import { EH_SETTINGS_KEY } from "../../shared/config";
 import type { ManagedElement, SiteStorage } from "../../shared/messages";
+
+type SortKey = "hostname" | "lastVisited" | "elementCount";
 
 interface SiteData {
   hostname: string;
@@ -19,6 +21,10 @@ function formatLastVisited(ts: number): string {
 
 const QUOTA_BYTES = chrome.storage.local.QUOTA_BYTES ?? 10_485_760;
 
+function stripWww(hostname: string): string {
+  return hostname.replace(/^www\./, "");
+}
+
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -31,6 +37,7 @@ export function DataPage() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [bytesInUse, setBytesInUse] = useState<number | null>(null);
+  const [sortKey, setSortKey] = useState<SortKey>("hostname");
 
   const loadData = useCallback(() => {
     chrome.storage.local.get(null).then((all) => {
@@ -44,11 +51,22 @@ export function DataPage() {
           lastVisited: stored.lastVisited,
         });
       }
-      result.sort((a, b) => a.hostname.localeCompare(b.hostname));
       setSites(result);
     });
     chrome.storage.local.getBytesInUse(null).then(setBytesInUse);
   }, []);
+
+  const sortedSites = useMemo(() => {
+    const arr = [...sites];
+    switch (sortKey) {
+      case "hostname":
+        return arr.sort((a, b) => stripWww(a.hostname).localeCompare(stripWww(b.hostname)));
+      case "lastVisited":
+        return arr.sort((a, b) => b.lastVisited - a.lastVisited);
+      case "elementCount":
+        return arr.sort((a, b) => b.elements.length - a.elements.length);
+    }
+  }, [sites, sortKey]);
 
   useEffect(() => {
     loadData();
@@ -142,7 +160,19 @@ export function DataPage() {
         </div>
       ) : (
         <div className="flex flex-col gap-2">
-          {sites.map((site) => {
+          {/* ソート */}
+          <div className="flex items-center justify-end mb-1">
+            <select
+              className="select select-xs select-bordered"
+              value={sortKey}
+              onChange={(e) => setSortKey(e.target.value as SortKey)}
+            >
+              <option value="hostname">ホスト名順</option>
+              <option value="lastVisited">最終訪問順</option>
+              <option value="elementCount">要素数順</option>
+            </select>
+          </div>
+          {sortedSites.map((site) => {
             const isOpen = expanded === site.hostname;
             const hiddenCount = site.elements.filter((e) => e.isHidden).length;
 
@@ -161,7 +191,7 @@ export function DataPage() {
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
                       title={`https://${site.hostname} を開く`}
-                    >{site.hostname}</a>
+                    >{stripWww(site.hostname)}</a>
                     <p className="text-xs text-base-content/50 mt-0.5">
                       {site.elements.length} 要素
                       {hiddenCount > 0 && (
