@@ -2,7 +2,7 @@
  * ElementHider Background Service Worker
  */
 
-import type { ManagedElement } from "../shared/messages";
+import type { SiteStorage } from "../shared/messages";
 import { CONTEXT_MENU_ID, EH_SETTINGS_KEY, type EhSettings } from "../shared/config";
 
 // ─── Context menu ─────────────────────────────────────────────────────────────
@@ -44,10 +44,10 @@ chrome.contextMenus?.onClicked?.addListener(async (info, tab) => {
   }
 
   const result = await chrome.storage.local.get(hostname);
-  const raw = (result[hostname] ?? []) as Array<Partial<ManagedElement>>;
-  if (raw.length === 0) return;
+  const stored = result[hostname] as SiteStorage | undefined;
+  const elements = stored?.elements ?? [];
+  if (elements.length === 0) return;
 
-  const elements = raw.map((e) => ({ ...e, isHidden: e.isHidden ?? true })) as ManagedElement[];
   const nextHidden = !elements.every((e) => e.isHidden);
 
   for (const el of elements) {
@@ -60,7 +60,7 @@ chrome.contextMenus?.onClicked?.addListener(async (info, tab) => {
   }
 
   await chrome.storage.local.set({
-    [hostname]: elements.map((e) => ({ ...e, isHidden: nextHidden })),
+    [hostname]: { ...stored, elements: elements.map((e) => ({ ...e, isHidden: nextHidden })) },
   });
 });
 
