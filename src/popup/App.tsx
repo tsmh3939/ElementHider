@@ -206,7 +206,7 @@ export default function App() {
           <div className="px-3 py-3 border-b border-base-300">
             <div className="flex items-center gap-3">
               <button
-                className={`btn flex-1 gap-2 ${isPickerActive ? "btn-warning" : "btn-primary"}`}
+                className={`btn flex-1 gap-2 ${isPickerActive ? "btn-warning" : "btn-neutral"}`}
                 onClick={togglePicker}
                 disabled={needsReload}
               >
