@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { IconPalette, IconKeyboard, IconDatabase } from "../popup/icons";
+import { IconPalette, IconKeyboard, IconDatabase } from "./icons";
 import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME, APP_NAME_PRIMARY, APP_NAME_SECONDARY } from "../shared/config";
 import { AppearancePage } from "./pages/AppearancePage";
 import { ShortcutsPage } from "./pages/ShortcutsPage";

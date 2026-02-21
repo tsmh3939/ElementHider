@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { IconTrash } from "../../popup/icons";
+import { IconTrash, IconSortAsc, IconSortDesc, IconEmpty } from "../icons";
 import { EH_SETTINGS_KEY } from "../../shared/config";
 import type { ManagedElement, SiteStorage } from "../../shared/messages";
 
@@ -158,9 +158,7 @@ export function DataPage() {
       {/* サイト一覧 */}
       {sites.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-base-content/30 gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-          </svg>
+          <IconEmpty className="h-12 w-12" />
           <p className="text-sm">管理中のデータはありません</p>
         </div>
       ) : (
@@ -181,17 +179,7 @@ export function DataPage() {
               onClick={() => setSortAsc((v) => !v)}
               title={sortAsc ? "昇順" : "降順"}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                {sortAsc ? (
-                  <>
-                    <path d="M12 5v14M5 12l7-7 7 7" />
-                  </>
-                ) : (
-                  <>
-                    <path d="M12 19V5M5 12l7 7 7-7" />
-                  </>
-                )}
-              </svg>
+              {sortAsc ? <IconSortAsc className="h-3.5 w-3.5" /> : <IconSortDesc className="h-3.5 w-3.5" />}
             </button>
           </div>
           {sortedSites.map((site) => {
