@@ -10,12 +10,10 @@ interface SiteData {
 }
 
 function formatLastVisited(ts: number): string {
-  return new Date(ts).toLocaleString("ja-JP", {
+  return new Date(ts).toLocaleDateString(chrome.i18n.getUILanguage(), {
     year: "numeric",
     month: "numeric",
     day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
   });
 }
 
