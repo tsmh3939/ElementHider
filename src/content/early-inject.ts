@@ -15,10 +15,8 @@ import { EH_INITIAL_HIDE_STYLE_ID } from "../shared/config";
   if (!hostname) return;
 
   const result = await chrome.storage.local.get(hostname);
-  const elements = (result[hostname] ?? []) as Array<{
-    selector: string;
-    isHidden?: boolean;
-  }>;
+  const stored = result[hostname] as { elements?: Array<{ selector: string; isHidden?: boolean }> } | undefined;
+  const elements = stored?.elements ?? [];
 
   const hiddenSelectors = elements
     .filter((e) => e.isHidden !== false)
