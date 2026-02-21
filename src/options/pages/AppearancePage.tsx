@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME, DEFAULT_CONTEXT_MENU, ALL_THEMES } from "../../shared/config";
+import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME, DEFAULT_CONTEXT_MENU, DEFAULT_MULTI_SELECT, ALL_THEMES } from "../../shared/config";
 
 export function AppearancePage() {
-  const [settings, setSettings] = useState<EhSettings>({ theme: DEFAULT_THEME, contextMenu: DEFAULT_CONTEXT_MENU });
+  const [settings, setSettings] = useState<EhSettings>({ theme: DEFAULT_THEME, contextMenu: DEFAULT_CONTEXT_MENU, multiSelect: DEFAULT_MULTI_SELECT });
 
   useEffect(() => {
     chrome.storage.sync.get(EH_SETTINGS_KEY).then((result) => {
