@@ -467,6 +467,8 @@ function mountPickerApp() {
 }
 
 (async () => {
+  // 二重注入防止（マニフェスト自動注入 + executeScript 手動注入の衝突回避）
+  if (document.getElementById(EH_ROOT_ID)) return;
   mountPickerApp();
 
   // ストレージから非表示要素を復元し、hiddenSelectors に登録して CSS を更新。
