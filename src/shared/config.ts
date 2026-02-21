@@ -25,12 +25,8 @@ export const EH_SETTINGS_KEY = "__eh_settings__";
 /** 拡張機能の永続化設定 */
 export interface EhSettings {
   theme: string;
-  contextMenu: boolean;
   multiSelect: boolean;
 }
-
-/** コンテキストメニューのデフォルト有効状態 */
-export const DEFAULT_CONTEXT_MENU = true;
 
 /** 複数選択のデフォルト有効状態 */
 export const DEFAULT_MULTI_SELECT = false;
@@ -68,11 +64,6 @@ export const EH_TOOLTIP_ID = "eh-tooltip";
 
 /** 拡張機能独自クラスのプレフィックス（セレクタ生成時に除外） */
 export const EH_CLASS_PREFIX = "eh-";
-
-// ── コンテキストメニュー ─────────────────────────────────────────────────────
-
-/** 全要素の表示/非表示トグル用コンテキストメニュー ID */
-export const CONTEXT_MENU_ID = "eh-toggle-all";
 
 // ── UI パラメータ ────────────────────────────────────────────────────────────
 
