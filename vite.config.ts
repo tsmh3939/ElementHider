@@ -19,7 +19,7 @@ function pageTitlePlugin(): Plugin {
       order: "pre",
       handler(html, ctx) {
         const rel = relative(process.cwd(), ctx.filename).replace(/\\/g, "/");
-        const title = PAGE_TITLES[rel] ?? "ElementHider";
+        const title = PAGE_TITLES[rel] ?? APP_NAME;
         return html.replace("%PAGE_TITLE%", title);
       },
     },
@@ -31,7 +31,18 @@ export default defineConfig({
     pageTitlePlugin(),
     react(),
     webExtension({
-      manifest: () => ({ ...baseManifest, name: APP_NAME, version: APP_VERSION }),
+      manifest: () => ({
+        ...baseManifest,
+        name: APP_NAME,
+        version: APP_VERSION,
+        commands: {
+          ...baseManifest.commands,
+          _execute_action: {
+            ...baseManifest.commands._execute_action,
+            description: `${APP_NAME}を開く`,
+          },
+        },
+      }),
       additionalInputs: ["src/content/picker.css"],
     }),
   ],

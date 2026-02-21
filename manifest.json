@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "ElementHider",
-  "version": "1.0.0",
+  "name": "",
+  "version": "",
   "description": "Hide page elements with a DevTools-like picker",
   "permissions": ["storage", "tabs", "sidePanel", "contextMenus"],
   "side_panel": {
@@ -23,7 +23,7 @@
       "suggested_key": {
         "default": "Alt+Shift+H"
       },
-      "description": "ElementHiderを開く"
+      "description": ""
     }
   },
   "icons": {
