@@ -7,7 +7,7 @@
  * - optional_host_permissions: サイトごとに永続権限を個別に取得
  */
 
-import type { BackgroundMessage } from "../shared/messages";
+import { BG_MSG, MSG, type BackgroundMessage } from "../shared/messages";
 import { buildOriginPattern, CONTENT_SCRIPT_PATHS, EH_SETTINGS_KEY } from "../shared/config";
 
 // ─── Dynamic content script registration ──────────────────────────────────────
@@ -85,7 +85,7 @@ chrome.action.onClicked.addListener(async (tab) => {
 
   // コンテンツスクリプトが既に注入済みか確認
   try {
-    await chrome.tabs.sendMessage(tab.id, { type: "GET_STATUS" });
+    await chrome.tabs.sendMessage(tab.id, { type: MSG.GET_STATUS });
     // 応答があれば既に注入済み
   } catch {
     // 未注入 → activeTab 権限を使ってプログラム的に注入
@@ -108,11 +108,11 @@ chrome.action.onClicked.addListener(async (tab) => {
 
 chrome.runtime.onMessage.addListener(
   (message: BackgroundMessage, _sender, sendResponse: (response?: unknown) => void) => {
-    if (message.type === "HOST_PERMISSION_GRANTED") {
+    if (message.type === BG_MSG.PERMISSION_GRANTED) {
       registerScriptsForHost(message.hostname).then(() => sendResponse());
       return true; // async response
     }
-    if (message.type === "HOST_PERMISSION_REVOKED") {
+    if (message.type === BG_MSG.PERMISSION_REVOKED) {
       unregisterScriptsForHost(message.hostname).then(() => sendResponse());
       return true;
     }

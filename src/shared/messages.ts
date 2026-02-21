@@ -13,18 +13,38 @@ export interface SiteStorage {
   lastVisited: number;
 }
 
-export type Message =
-  | { type: "START_PICKER"; multiSelect: boolean }
-  | { type: "STOP_PICKER" }
-  | { type: "SHOW_ELEMENT"; selector: string }
-  | { type: "HIDE_ELEMENT"; selector: string }
-  | { type: "GET_STATUS" };
+/** popup → content スクリプトへ送るメッセージ定数 */
+export const MSG = {
+  START_PICKER: "START_PICKER",
+  STOP_PICKER: "STOP_PICKER",
+  SHOW_ELEMENT: "SHOW_ELEMENT",
+  HIDE_ELEMENT: "HIDE_ELEMENT",
+  GET_STATUS: "GET_STATUS",
+} as const;
 
-/** background スクリプトへ送るメッセージ */
+export type Message =
+  | { type: typeof MSG.START_PICKER; multiSelect: boolean }
+  | { type: typeof MSG.STOP_PICKER }
+  | { type: typeof MSG.SHOW_ELEMENT; selector: string }
+  | { type: typeof MSG.HIDE_ELEMENT; selector: string }
+  | { type: typeof MSG.GET_STATUS };
+
+/** background スクリプトへ送るメッセージ定数 */
+export const BG_MSG = {
+  PERMISSION_GRANTED: "HOST_PERMISSION_GRANTED",
+  PERMISSION_REVOKED: "HOST_PERMISSION_REVOKED",
+} as const;
+
 export type BackgroundMessage =
-  | { type: "HOST_PERMISSION_GRANTED"; hostname: string }
-  | { type: "HOST_PERMISSION_REVOKED"; hostname: string };
+  | { type: typeof BG_MSG.PERMISSION_GRANTED; hostname: string }
+  | { type: typeof BG_MSG.PERMISSION_REVOKED; hostname: string };
+
+/** content → popup/background へ送るメッセージ定数 */
+export const CONTENT_MSG = {
+  ELEMENT_HIDDEN: "ELEMENT_HIDDEN",
+  STATUS: "STATUS",
+} as const;
 
 export type ContentMessage =
-  | { type: "ELEMENT_HIDDEN"; selector: string; label: string }
-  | { type: "STATUS"; isPickerActive: boolean; hostname: string };
+  | { type: typeof CONTENT_MSG.ELEMENT_HIDDEN; selector: string; label: string }
+  | { type: typeof CONTENT_MSG.STATUS; isPickerActive: boolean; hostname: string };

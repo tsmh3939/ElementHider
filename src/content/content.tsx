@@ -6,7 +6,7 @@
 
 import { createRoot } from "react-dom/client";
 import { useState, useEffect, useRef, useCallback } from "react";
-import type { ManagedElement, Message, SiteStorage } from "../shared/messages";
+import { MSG, CONTENT_MSG, type ManagedElement, type Message, type SiteStorage } from "../shared/messages";
 import {
   EH_ROOT_ID,
   EH_HIDE_STYLE_ID,
@@ -321,31 +321,31 @@ function PickerApp() {
       sendResponse: (response?: unknown) => void
     ): void => {
       switch (message.type) {
-        case "START_PICKER":
+        case MSG.START_PICKER:
           setIsPickerActive(true);
           multiSelectRef.current = message.multiSelect;
           sendResponse();
           break;
 
-        case "STOP_PICKER":
+        case MSG.STOP_PICKER:
           setIsPickerActive(false);
           sendResponse();
           break;
 
-        case "GET_STATUS":
+        case MSG.GET_STATUS:
           sendResponse({
-            type: "STATUS",
+            type: CONTENT_MSG.STATUS,
             isPickerActive: isPickerActiveRef.current,
             hostname: window.location.hostname,
           });
           break;
 
-        case "SHOW_ELEMENT":
+        case MSG.SHOW_ELEMENT:
           showElementBySelector(message.selector);
           sendResponse();
           break;
 
-        case "HIDE_ELEMENT":
+        case MSG.HIDE_ELEMENT:
           hideElementBySelector(message.selector);
           sendResponse();
           break;
@@ -402,18 +402,18 @@ function PickerApp() {
 
     hideElementBySelector(selector);
     await addManagedElement({ selector, label, timestamp: Date.now(), isHidden: true });
-    chrome.runtime.sendMessage({ type: "ELEMENT_HIDDEN", selector, label });
+    chrome.runtime.sendMessage({ type: CONTENT_MSG.ELEMENT_HIDDEN, selector, label });
 
     if (!multiSelectRef.current) {
       setIsPickerActive(false);
-      chrome.runtime.sendMessage({ type: "STATUS", isPickerActive: false });
+      chrome.runtime.sendMessage({ type: CONTENT_MSG.STATUS, isPickerActive: false });
     }
   }, []);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.key === "Escape") {
       setIsPickerActive(false);
-      chrome.runtime.sendMessage({ type: "STATUS", isPickerActive: false });
+      chrome.runtime.sendMessage({ type: CONTENT_MSG.STATUS, isPickerActive: false });
     }
   }, []);
 

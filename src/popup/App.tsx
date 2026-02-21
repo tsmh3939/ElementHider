@@ -1,12 +1,12 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 
 import { IconStop, IconPicker, IconEyeOff, IconEye, IconSettings } from "./icons";
-import type { ContentMessage, Message } from "./types";
+import { MSG, CONTENT_MSG, type ContentMessage, type Message } from "./types";
 import { sendToActiveTab } from "./api";
 import { useManagedElements } from "./hooks";
 import { ElementItem } from "./components/ElementItem";
 import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME, DEFAULT_MULTI_SELECT, APP_NAME_PRIMARY, APP_NAME_SECONDARY, buildOriginPattern } from "../shared/config";
-import type { BackgroundMessage } from "../shared/messages";
+import { BG_MSG, type BackgroundMessage } from "../shared/messages";
 
 export default function App() {
   const [isPickerActive, setIsPickerActive] = useState(false);
@@ -70,9 +70,9 @@ export default function App() {
 
     try {
       const response = (await chrome.tabs.sendMessage(tab.id, {
-        type: "GET_STATUS",
+        type: MSG.GET_STATUS,
       } satisfies Message)) as ContentMessage | undefined;
-      if (response?.type === "STATUS") {
+      if (response?.type === CONTENT_MSG.STATUS) {
         setHostname(response.hostname);
         setIsPickerActive(response.isPickerActive);
 
@@ -116,14 +116,14 @@ export default function App() {
   // コンテンツスクリプトからのメッセージを受信
   useEffect(() => {
     const handler = (message: ContentMessage) => {
-      if (message.type === "ELEMENT_HIDDEN") {
+      if (message.type === CONTENT_MSG.ELEMENT_HIDDEN) {
         addElement({
           selector: message.selector,
           label: message.label,
           timestamp: Date.now(),
           isHidden: true,
         });
-      } else if (message.type === "STATUS") {
+      } else if (message.type === CONTENT_MSG.STATUS) {
         setIsPickerActive(message.isPickerActive);
       }
     };
@@ -134,7 +134,7 @@ export default function App() {
   const togglePicker = useCallback(async () => {
     const next = !isPickerActive;
     setIsPickerActive(next);
-    await sendToActiveTab(next ? { type: "START_PICKER", multiSelect } : { type: "STOP_PICKER" });
+    await sendToActiveTab(next ? { type: MSG.START_PICKER, multiSelect } : { type: MSG.STOP_PICKER });
   }, [isPickerActive, multiSelect]);
 
   const handleMultiSelectChange = useCallback(async (value: boolean) => {
@@ -152,7 +152,7 @@ export default function App() {
     if (granted) {
       setHasHostPermission(true);
       await chrome.runtime.sendMessage({
-        type: "HOST_PERMISSION_GRANTED",
+        type: BG_MSG.PERMISSION_GRANTED,
         hostname,
       } satisfies BackgroundMessage);
     }

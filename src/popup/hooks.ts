@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import type { ManagedElement, SiteStorage } from "../shared/messages";
+import { MSG, type ManagedElement, type SiteStorage } from "../shared/messages";
 import { sendToActiveTab } from "./api";
 
 export function useManagedElements(hostname: string | null) {
@@ -69,7 +69,7 @@ export function useManagedElements(hostname: string | null) {
         if (!el) return prev;
         const nextHidden = !el.isHidden;
         sendToActiveTab(
-          nextHidden ? { type: "HIDE_ELEMENT", selector } : { type: "SHOW_ELEMENT", selector }
+          nextHidden ? { type: MSG.HIDE_ELEMENT, selector } : { type: MSG.SHOW_ELEMENT, selector }
         );
         const updated = prev.map((e) =>
           e.selector === selector ? { ...e, isHidden: nextHidden } : e
@@ -87,7 +87,7 @@ export function useManagedElements(hostname: string | null) {
       setManagedElements((prev) => {
         const el = prev.find((e) => e.selector === selector);
         if (el?.isHidden) {
-          sendToActiveTab({ type: "SHOW_ELEMENT", selector });
+          sendToActiveTab({ type: MSG.SHOW_ELEMENT, selector });
         }
         const updated = prev.filter((e) => e.selector !== selector);
         saveToStorage(updated);
@@ -120,8 +120,8 @@ export function useManagedElements(hostname: string | null) {
       prev.forEach((e) => {
         sendToActiveTab(
           nextHidden
-            ? { type: "HIDE_ELEMENT", selector: e.selector }
-            : { type: "SHOW_ELEMENT", selector: e.selector }
+            ? { type: MSG.HIDE_ELEMENT, selector: e.selector }
+            : { type: MSG.SHOW_ELEMENT, selector: e.selector }
         );
       });
       const updated = prev.map((e) => ({ ...e, isHidden: nextHidden }));
