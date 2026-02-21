@@ -65,6 +65,15 @@ export const EH_TOOLTIP_ID = "eh-tooltip";
 /** 拡張機能独自クラスのプレフィックス（セレクタ生成時に除外） */
 export const EH_CLASS_PREFIX = "eh-";
 
+// ── コンテンツスクリプトのビルド後パス ──────────────────────────────────────
+
+/** chrome.scripting API で参照するビルド後のファイルパス */
+export const CONTENT_SCRIPT_PATHS = {
+  earlyInject: "src/content/early-inject.js",
+  content: "src/content/content.js",
+  pickerCss: "src/content/picker.css",
+} as const;
+
 // ── UI パラメータ ────────────────────────────────────────────────────────────
 
 /** 要素ラベルの最大文字数 */

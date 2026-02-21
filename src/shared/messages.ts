@@ -20,6 +20,11 @@ export type Message =
   | { type: "HIDE_ELEMENT"; selector: string }
   | { type: "GET_STATUS" };
 
+/** background スクリプトへ送るメッセージ */
+export type BackgroundMessage =
+  | { type: "HOST_PERMISSION_GRANTED"; hostname: string }
+  | { type: "HOST_PERMISSION_REVOKED"; hostname: string };
+
 export type ContentMessage =
   | { type: "ELEMENT_HIDDEN"; selector: string; label: string }
   | { type: "STATUS"; isPickerActive: boolean; hostname: string };

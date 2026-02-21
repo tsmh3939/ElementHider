@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 
-import { IconStop, IconPicker, IconEyeOff, IconEye, IconRefresh, IconSettings } from "./icons";
+import { IconStop, IconPicker, IconEyeOff, IconEye, IconSettings } from "./icons";
 import type { ContentMessage, Message } from "./types";
 import { sendToActiveTab } from "./api";
 import { useManagedElements } from "./hooks";
@@ -10,7 +10,7 @@ import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME, DEFAULT_MULTI_SELECT, 
 export default function App() {
   const [isPickerActive, setIsPickerActive] = useState(false);
   const [hostname, setHostname] = useState<string | null>(null);
-  const [needsReload, setNeedsReload] = useState(false);
+  const [hasHostPermission, setHasHostPermission] = useState(false);
   const [multiSelect, setMultiSelect] = useState(DEFAULT_MULTI_SELECT);
   const { managedElements, addElement, toggleElement, deleteElement, toggleAll, renameElement, reorderElements } =
     useManagedElements(hostname);
@@ -63,8 +63,7 @@ export default function App() {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (tab?.id == null) {
       setHostname(null);
-
-      setNeedsReload(false);
+      setHasHostPermission(false);
       return;
     }
 
@@ -75,14 +74,17 @@ export default function App() {
       if (response?.type === "STATUS") {
         setHostname(response.hostname);
         setIsPickerActive(response.isPickerActive);
-  
-        setNeedsReload(false);
+
+        // ホスト権限の確認
+        const granted = await chrome.permissions.contains({
+          origins: [`*://${response.hostname}/*`],
+        });
+        setHasHostPermission(granted);
       }
     } catch {
-      // コンテンツスクリプト未準備（非対応ページ or リロードが必要）
+      // コンテンツスクリプト未注入
       setHostname(null);
-
-      setNeedsReload(true);
+      setHasHostPermission(false);
     }
   }, []);
 
@@ -141,12 +143,19 @@ export default function App() {
     await chrome.storage.sync.set({ [EH_SETTINGS_KEY]: { ...saved, multiSelect: value } });
   }, []);
 
-  const reloadTab = useCallback(async () => {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (tab?.id != null) {
-      await chrome.tabs.reload(tab.id);
+  const requestHostPermission = useCallback(async () => {
+    if (!hostname) return;
+    const granted = await chrome.permissions.request({
+      origins: [`*://${hostname}/*`],
+    });
+    if (granted) {
+      setHasHostPermission(true);
+      await chrome.runtime.sendMessage({
+        type: "HOST_PERMISSION_GRANTED",
+        hostname,
+      });
     }
-  }, []);
+  }, [hostname]);
 
   return (
     <div className="flex flex-col h-full bg-base-100 text-base-content">
@@ -176,40 +185,42 @@ export default function App() {
         </div>
       </div>
 
-      {/* リロードバナー */}
-      {needsReload && (
-        <div className="flex items-center gap-2 px-3 py-2 bg-warning/20 border-b border-warning/40">
-          <p className="text-xs text-warning-content flex-1">
-            ページをリロードすると使用できます
-          </p>
-          <button
-            className="btn btn-xs btn-warning gap-1 shrink-0"
-            onClick={reloadTab}
-          >
-            <IconRefresh className="h-3 w-3" />
-            リロード
-          </button>
-        </div>
-      )}
-
-      {/* 非対応ページ表示 */}
+      {/* コンテンツスクリプト未注入 */}
       {!hostname && (
         <div className="flex-1 flex flex-col items-center justify-center gap-3 text-base-content/40 px-6 text-center">
-          <IconStop className="h-10 w-10" />
-          <p className="text-sm font-medium">対応していないページです</p>
-          <p className="text-xs">http / https のページで使用できます</p>
+          <IconPicker className="h-10 w-10" />
+          <p className="text-sm font-medium">
+            拡張機能のアイコンをクリックして
+            <br />
+            このサイトで有効にしてください
+          </p>
+          <p className="text-xs">chrome:// 等の特殊なページでは使用できません</p>
         </div>
       )}
 
       {hostname && (
         <>
+          {/* 権限リクエストバナー */}
+          {!hasHostPermission && managedElements.length > 0 && (
+            <div className="flex flex-col gap-1.5 px-3 py-2 bg-info/20 border-b border-info/40">
+              <p className="text-xs text-info-content">
+                次回訪問時にも非表示を維持するにはアクセスを許可してください
+              </p>
+              <button
+                className="btn btn-xs btn-info w-full"
+                onClick={requestHostPermission}
+              >
+                アクセスを許可
+              </button>
+            </div>
+          )}
+
           {/* ピッカーボタン */}
           <div className="px-3 py-3 border-b border-base-300">
             <div className="flex items-center gap-3">
               <button
                 className={`btn flex-1 gap-2 ${isPickerActive ? "btn-warning" : "btn-neutral"}`}
                 onClick={togglePicker}
-                disabled={needsReload}
               >
                 {isPickerActive ? (
                   <>
@@ -249,7 +260,6 @@ export default function App() {
               <button
                 className="btn btn-ghost btn-sm w-full mt-2 gap-2"
                 onClick={toggleAll}
-                disabled={needsReload}
               >
                 {managedElements.every((e) => e.isHidden) ? (
                   <>

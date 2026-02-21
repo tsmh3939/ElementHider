@@ -3,7 +3,8 @@
   "name": "",
   "version": "",
   "description": "Hide page elements with a DevTools-like picker",
-  "permissions": ["storage", "sidePanel"],
+  "permissions": ["storage", "sidePanel", "activeTab", "scripting"],
+  "optional_host_permissions": ["*://*/*"],
   "side_panel": {
     "default_path": "src/popup/index.html"
   },
@@ -25,19 +26,6 @@
     "48": "icons/icon-48.png",
     "128": "icons/icon-128.png"
   },
-  "content_scripts": [
-    {
-      "matches": ["*://*/*"],
-      "js": ["src/content/early-inject.ts"],
-      "run_at": "document_start"
-    },
-    {
-      "matches": ["*://*/*"],
-      "js": ["src/content/content.tsx"],
-      "css": ["src/content/picker.css"],
-      "run_at": "document_idle"
-    }
-  ],
   "background": {
     "service_worker": "src/background/background.ts",
     "type": "module"

@@ -86,12 +86,21 @@ export function DataPage() {
 
   const deleteSite = async (hostname: string) => {
     await chrome.storage.local.remove(hostname);
+    // 動的スクリプト登録解除 + ホスト権限取り消し
+    await chrome.runtime.sendMessage({ type: "HOST_PERMISSION_REVOKED", hostname });
+    await chrome.permissions.remove({ origins: [`*://${hostname}/*`] }).catch(() => {});
     loadData();
   };
 
   const clearAll = async () => {
     const all = await chrome.storage.local.get(null);
     const keys = Object.keys(all).filter((k) => k !== EH_SETTINGS_KEY);
+    // 全ホストのスクリプト登録解除 + 権限取り消し
+    for (const hostname of keys) {
+      if (hostname.startsWith("__")) continue;
+      await chrome.runtime.sendMessage({ type: "HOST_PERMISSION_REVOKED", hostname });
+      await chrome.permissions.remove({ origins: [`*://${hostname}/*`] }).catch(() => {});
+    }
     if (keys.length > 0) await chrome.storage.local.remove(keys);
     setSites([]);
     setClearAllStatus("done");
