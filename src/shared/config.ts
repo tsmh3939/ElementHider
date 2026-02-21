@@ -65,6 +65,13 @@ export const EH_TOOLTIP_ID = "eh-tooltip";
 /** 拡張機能独自クラスのプレフィックス（セレクタ生成時に除外） */
 export const EH_CLASS_PREFIX = "eh-";
 
+// ── ホスト権限ヘルパー ──────────────────────────────────────────────────────
+
+/** hostname から chrome.permissions 用のオリジンパターンを生成する */
+export function buildOriginPattern(hostname: string): string {
+  return `*://${hostname}/*`;
+}
+
 // ── コンテンツスクリプトのビルド後パス ──────────────────────────────────────
 
 /** chrome.scripting API で参照するビルド後のファイルパス */

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { IconTrash, IconSortAsc, IconSortDesc, IconEmpty, IconSearch } from "../icons";
-import { EH_SETTINGS_KEY } from "../../shared/config";
-import type { ManagedElement, SiteStorage } from "../../shared/messages";
+import { EH_SETTINGS_KEY, buildOriginPattern } from "../../shared/config";
+import type { ManagedElement, SiteStorage, BackgroundMessage } from "../../shared/messages";
 
 type SortKey = "hostname" | "lastVisited" | "elementCount";
 
@@ -87,8 +87,8 @@ export function DataPage() {
   const deleteSite = async (hostname: string) => {
     await chrome.storage.local.remove(hostname);
     // 動的スクリプト登録解除 + ホスト権限取り消し
-    await chrome.runtime.sendMessage({ type: "HOST_PERMISSION_REVOKED", hostname });
-    await chrome.permissions.remove({ origins: [`*://${hostname}/*`] }).catch(() => {});
+    await chrome.runtime.sendMessage({ type: "HOST_PERMISSION_REVOKED", hostname } satisfies BackgroundMessage);
+    await chrome.permissions.remove({ origins: [buildOriginPattern(hostname)] }).catch(() => {});
     loadData();
   };
 
@@ -98,8 +98,8 @@ export function DataPage() {
     // 全ホストのスクリプト登録解除 + 権限取り消し
     for (const hostname of keys) {
       if (hostname.startsWith("__")) continue;
-      await chrome.runtime.sendMessage({ type: "HOST_PERMISSION_REVOKED", hostname });
-      await chrome.permissions.remove({ origins: [`*://${hostname}/*`] }).catch(() => {});
+      await chrome.runtime.sendMessage({ type: "HOST_PERMISSION_REVOKED", hostname } satisfies BackgroundMessage);
+      await chrome.permissions.remove({ origins: [buildOriginPattern(hostname)] }).catch(() => {});
     }
     if (keys.length > 0) await chrome.storage.local.remove(keys);
     setSites([]);

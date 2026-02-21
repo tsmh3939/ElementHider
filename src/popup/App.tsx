@@ -5,7 +5,8 @@ import type { ContentMessage, Message } from "./types";
 import { sendToActiveTab } from "./api";
 import { useManagedElements } from "./hooks";
 import { ElementItem } from "./components/ElementItem";
-import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME, DEFAULT_MULTI_SELECT, APP_NAME_PRIMARY, APP_NAME_SECONDARY } from "../shared/config";
+import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME, DEFAULT_MULTI_SELECT, APP_NAME_PRIMARY, APP_NAME_SECONDARY, buildOriginPattern } from "../shared/config";
+import type { BackgroundMessage } from "../shared/messages";
 
 export default function App() {
   const [isPickerActive, setIsPickerActive] = useState(false);
@@ -77,7 +78,7 @@ export default function App() {
 
         // ホスト権限の確認
         const granted = await chrome.permissions.contains({
-          origins: [`*://${response.hostname}/*`],
+          origins: [buildOriginPattern(response.hostname)],
         });
         setHasHostPermission(granted);
       }
@@ -146,14 +147,14 @@ export default function App() {
   const requestHostPermission = useCallback(async () => {
     if (!hostname) return;
     const granted = await chrome.permissions.request({
-      origins: [`*://${hostname}/*`],
+      origins: [buildOriginPattern(hostname)],
     });
     if (granted) {
       setHasHostPermission(true);
       await chrome.runtime.sendMessage({
         type: "HOST_PERMISSION_GRANTED",
         hostname,
-      });
+      } satisfies BackgroundMessage);
     }
   }, [hostname]);
 

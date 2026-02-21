@@ -8,13 +8,13 @@
  */
 
 import type { BackgroundMessage } from "../shared/messages";
-import { CONTENT_SCRIPT_PATHS, EH_SETTINGS_KEY } from "../shared/config";
+import { buildOriginPattern, CONTENT_SCRIPT_PATHS, EH_SETTINGS_KEY } from "../shared/config";
 
 // ─── Dynamic content script registration ──────────────────────────────────────
 
 /** 指定ホストの早期注入 + メインコンテンツスクリプトを動的登録する */
 async function registerScriptsForHost(hostname: string): Promise<void> {
-  const pattern = `*://${hostname}/*`;
+  const pattern = buildOriginPattern(hostname);
   try {
     await chrome.scripting.registerContentScripts([
       {
@@ -62,7 +62,7 @@ async function syncRegisteredScripts(): Promise<void> {
 
   for (const hostname of Object.keys(allData)) {
     if (hostname.startsWith("__")) continue; // 設定キーを除外
-    const pattern = `*://${hostname}/*`;
+    const pattern = buildOriginPattern(hostname);
     if (!origins.some((o) => o === pattern || o === "<all_urls>")) continue;
 
     const earlyId = `eh-early-${hostname}`;
