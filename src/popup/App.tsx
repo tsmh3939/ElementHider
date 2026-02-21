@@ -5,9 +5,7 @@ import type { ContentMessage, Message } from "./types";
 import { getActiveTabInfo, sendToActiveTab } from "./api";
 import { useManagedElements } from "./hooks";
 import { ElementItem } from "./components/ElementItem";
-import { EH_SETTINGS_KEY, type EhSettings } from "./components/SettingsView";
-
-const DEFAULT_THEME = "luxury";
+import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME } from "../shared/config";
 
 export default function App() {
   const [isPickerActive, setIsPickerActive] = useState(false);

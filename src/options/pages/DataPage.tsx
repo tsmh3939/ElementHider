@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { IconTrash } from "../../popup/icons";
-import { EH_SETTINGS_KEY } from "../../popup/components/SettingsView";
+import { EH_SETTINGS_KEY } from "../../shared/config";
 import type { ManagedElement } from "../../shared/messages";
 
 interface SiteData {

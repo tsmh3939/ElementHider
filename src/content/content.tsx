@@ -7,6 +7,16 @@
 import { createRoot } from "react-dom/client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { ManagedElement, Message } from "../shared/messages";
+import {
+  EH_ROOT_ID,
+  EH_HIDE_STYLE_ID,
+  EH_INITIAL_HIDE_STYLE_ID,
+  EH_HIGHLIGHT_CLASS,
+  EH_TOOLTIP_ID,
+  EH_CLASS_PREFIX,
+  LABEL_MAX_LENGTH,
+  HIGHLIGHT_DURATION_MS,
+} from "../shared/config";
 
 // ─── CSS Selector Generation ──────────────────────────────────────────────────
 
@@ -26,7 +36,7 @@ function buildSelectorForElement(el: Element): string {
 
   // 優先2: クラス（拡張機能独自クラスは除外）
   const classes = Array.from(el.classList)
-    .filter((c) => !c.startsWith("eh-"))
+    .filter((c) => !c.startsWith(EH_CLASS_PREFIX))
     .map((c) => `.${CSS.escape(c)}`)
     .join("");
 
@@ -118,8 +128,8 @@ function buildLabel(el: Element): string {
   // フォールバック: SVG の <title> や非表示テキストも含む textContent
   const raw = inner || (el.textContent?.trim() ?? "");
   const normalized = raw.replace(/\s+/g, " ");
-  const text = normalized.length > 60
-    ? normalized.slice(0, normalized.lastIndexOf(" ", 60) || 60) + "…"
+  const text = normalized.length > LABEL_MAX_LENGTH
+    ? normalized.slice(0, normalized.lastIndexOf(" ", LABEL_MAX_LENGTH) || LABEL_MAX_LENGTH) + "…"
     : normalized;
   if (text) return text;
 
@@ -132,7 +142,7 @@ function buildLabel(el: Element): string {
       node.getAttribute("alt") ||
       (node as HTMLInputElement).placeholder ||
       "";
-    if (attr.trim()) return attr.trim().slice(0, 60);
+    if (attr.trim()) return attr.trim().slice(0, LABEL_MAX_LENGTH);
   }
 
   const tag = el.tagName.toLowerCase();
@@ -143,7 +153,7 @@ function buildLabel(el: Element): string {
 
 /** 拡張機能自身のルート以外はすべて選択可能とする。 */
 function isSelectableTarget(el: Element): boolean {
-  return !el.closest("#eh-root");
+  return !el.closest(`#${EH_ROOT_ID}`);
 }
 
 // ─── Storage helpers ──────────────────────────────────────────────────────────
@@ -177,7 +187,7 @@ function clearHighlight(el: Element) {
     clearTimeout(timer);
     delete (el as Element & { [EH_TIMER_KEY]?: ReturnType<typeof setTimeout> })[EH_TIMER_KEY];
   }
-  el.classList.remove("eh-highlight");
+  el.classList.remove(EH_HIGHLIGHT_CLASS);
 }
 
 // ─── CSS-based hide management ────────────────────────────────────────────────
@@ -189,14 +199,14 @@ const hiddenSelectors = new Set<string>();
 /** early-inject.ts が用意した #eh-initial-hide を引き継ぐか、新規作成する。 */
 function getHideStyle(): HTMLStyleElement {
   const existing =
-    (document.getElementById("eh-hide") ??
-      document.getElementById("eh-initial-hide")) as HTMLStyleElement | null;
+    (document.getElementById(EH_HIDE_STYLE_ID) ??
+      document.getElementById(EH_INITIAL_HIDE_STYLE_ID)) as HTMLStyleElement | null;
   if (existing) {
-    existing.id = "eh-hide";
+    existing.id = EH_HIDE_STYLE_ID;
     return existing;
   }
   const style = document.createElement("style");
-  style.id = "eh-hide";
+  style.id = EH_HIDE_STYLE_ID;
   document.documentElement.appendChild(style);
   return style;
 }
@@ -230,11 +240,11 @@ function showElementBySelector(selector: string) {
     document.querySelectorAll(selector).forEach((el) => {
       (el as HTMLElement).scrollIntoView({ behavior: "smooth", block: "center" });
       clearHighlight(el);
-      el.classList.add("eh-highlight");
+      el.classList.add(EH_HIGHLIGHT_CLASS);
       const timer = setTimeout(() => {
-        el.classList.remove("eh-highlight");
+        el.classList.remove(EH_HIGHLIGHT_CLASS);
         delete (el as Element & { [EH_TIMER_KEY]?: ReturnType<typeof setTimeout> })[EH_TIMER_KEY];
-      }, 2500);
+      }, HIGHLIGHT_DURATION_MS);
       (el as Element & { [EH_TIMER_KEY]?: ReturnType<typeof setTimeout> })[EH_TIMER_KEY] = timer;
     });
   } catch {
@@ -254,7 +264,7 @@ function Tooltip({ x, y, element }: TooltipProps) {
   const tag = element.tagName.toLowerCase();
   const id = element.id ? `#${element.id}` : "";
   const classes = Array.from(element.classList)
-    .filter((c) => !c.startsWith("eh-"))
+    .filter((c) => !c.startsWith(EH_CLASS_PREFIX))
     .slice(0, 3)
     .map((c) => `.${c}`)
     .join("");
@@ -269,7 +279,7 @@ function Tooltip({ x, y, element }: TooltipProps) {
   const ty = y + GAP + estH > vh ? y - estH - GAP : y + GAP;
 
   return (
-    <div id="eh-tooltip" style={{ left: tx, top: ty }}>
+    <div id={EH_TOOLTIP_ID} style={{ left: tx, top: ty }}>
       <span className="eh-tag">{tag}</span>
       <span className="eh-id">{id}</span>
       <span className="eh-class">{classes}</span>
@@ -437,7 +447,7 @@ function PickerApp() {
 function mountPickerApp() {
   // Host element: fixed, zero-size, pointer-events off — won't interfere with page
   const host = document.createElement("div");
-  host.id = "eh-root";
+  host.id = EH_ROOT_ID;
   host.style.cssText =
     "position:fixed;top:0;left:0;width:0;height:0;overflow:visible;z-index:2147483647;pointer-events:none;";
   document.documentElement.appendChild(host);

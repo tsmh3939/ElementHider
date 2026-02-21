@@ -1,3 +1,5 @@
+import { APP_VERSION } from "../../shared/config";
+
 export function AboutPage() {
   return (
     <div className="max-w-2xl">
@@ -17,7 +19,7 @@ export function AboutPage() {
               <h3 className="text-2xl font-bold tracking-tight">
                 <span className="text-primary">Element</span>Hider
               </h3>
-              <p className="text-sm text-base-content/50">バージョン 1.0.0</p>
+              <p className="text-sm text-base-content/50">バージョン {APP_VERSION}</p>
             </div>
           </div>
 
@@ -35,25 +37,7 @@ export function AboutPage() {
             <tbody>
               <tr>
                 <td className="text-sm text-base-content/60 w-40">バージョン</td>
-                <td className="text-sm font-mono">1.0.0</td>
-              </tr>
-              <tr>
-                <td className="text-sm text-base-content/60">Manifest</td>
-                <td className="text-sm font-mono">v3</td>
-              </tr>
-              <tr>
-                <td className="text-sm text-base-content/60">ストレージ</td>
-                <td className="text-sm font-mono">chrome.storage.local</td>
-              </tr>
-              <tr>
-                <td className="text-sm text-base-content/60">パーミッション</td>
-                <td>
-                  <div className="flex flex-wrap gap-1">
-                    {["storage", "tabs", "sidePanel", "contextMenus"].map((p) => (
-                      <span key={p} className="badge badge-ghost badge-sm font-mono">{p}</span>
-                    ))}
-                  </div>
-                </td>
+                <td className="text-sm font-mono">{APP_VERSION}</td>
               </tr>
             </tbody>
           </table>

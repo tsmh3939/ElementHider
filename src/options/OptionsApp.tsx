@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react";
 import { IconPalette, IconKeyboard, IconDatabase, IconInfo } from "../popup/icons";
-import { EH_SETTINGS_KEY, type EhSettings } from "../popup/components/SettingsView";
+import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME } from "../shared/config";
 import { AppearancePage } from "./pages/AppearancePage";
 import { ShortcutsPage } from "./pages/ShortcutsPage";
 import { DataPage } from "./pages/DataPage";
 import { AboutPage } from "./pages/AboutPage";
 
 type PageId = "appearance" | "shortcuts" | "data" | "about";
-
-const DEFAULT_THEME = "luxury";
 
 const NAV_ITEMS: {
   id: PageId;

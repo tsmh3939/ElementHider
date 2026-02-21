@@ -3,15 +3,14 @@
  */
 
 import type { ManagedElement } from "../shared/messages";
-
-const MENU_ID = "eh-toggle-all";
+import { CONTEXT_MENU_ID } from "../shared/config";
 
 // ─── Context menu ─────────────────────────────────────────────────────────────
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({
-      id: MENU_ID,
+      id: CONTEXT_MENU_ID,
       title: "ElementHider: 全て表示/非表示を切り替え",
       contexts: ["all"],
     });
@@ -19,7 +18,7 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 chrome.contextMenus?.onClicked?.addListener(async (info, tab) => {
-  if (info.menuItemId !== MENU_ID || !tab?.id || !tab.url) return;
+  if (info.menuItemId !== CONTEXT_MENU_ID || !tab?.id || !tab.url) return;
 
   let hostname: string;
   try {

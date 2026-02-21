@@ -1,15 +1,5 @@
 import { useState, useEffect } from "react";
-import { EH_SETTINGS_KEY, type EhSettings } from "../../popup/components/SettingsView";
-
-const DEFAULT_THEME = "dark";
-
-const THEMES = [
-  "light", "dark", "cupcake", "bumblebee", "emerald", "corporate",
-  "synthwave", "retro", "cyberpunk", "valentine", "halloween", "garden",
-  "forest", "aqua", "lofi", "pastel", "fantasy", "wireframe", "black",
-  "luxury", "dracula", "cmyk", "autumn", "business", "acid", "lemonade",
-  "night", "coffee", "winter", "dim", "nord", "sunset",
-].map((id) => ({ id, label: id.charAt(0).toUpperCase() + id.slice(1) }));
+import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME, ALL_THEMES } from "../../shared/config";
 
 export function AppearancePage() {
   const [theme, setTheme] = useState(DEFAULT_THEME);
@@ -33,7 +23,7 @@ export function AppearancePage() {
       <p className="text-sm text-base-content/50 mb-6">パネルと設定ページのテーマを選択します</p>
 
       <div className="grid grid-cols-3 gap-3">
-        {THEMES.map((t) => (
+        {ALL_THEMES.map((t) => (
           <button
             key={t.id}
             className={`card cursor-pointer border-2 transition-all text-left ${

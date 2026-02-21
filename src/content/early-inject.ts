@@ -8,6 +8,8 @@
  * 管理を引き継いだ後、このスタイルタグ (#eh-initial-hide) を削除する。
  */
 
+import { EH_INITIAL_HIDE_STYLE_ID } from "../shared/config";
+
 (async () => {
   const hostname = window.location.hostname;
   if (!hostname) return;
@@ -26,7 +28,7 @@
   if (hiddenSelectors.length === 0) return;
 
   const style = document.createElement("style");
-  style.id = "eh-initial-hide";
+  style.id = EH_INITIAL_HIDE_STYLE_ID;
   style.textContent = `${hiddenSelectors.join(",\n")} { display: none !important; }`;
   document.documentElement.appendChild(style);
 })();
