@@ -3,7 +3,7 @@
   "name": "",
   "version": "",
   "description": "Hide page elements with a DevTools-like picker",
-  "permissions": ["storage", "tabs", "sidePanel", "contextMenus"],
+  "permissions": ["storage", "sidePanel", "contextMenus"],
   "side_panel": {
     "default_path": "src/popup/index.html"
   },

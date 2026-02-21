@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 
 import { IconStop, IconPicker, IconEyeOff, IconEye, IconRefresh, IconSettings } from "./icons";
 import type { ContentMessage, Message } from "./types";
-import { getActiveTabInfo, sendToActiveTab } from "./api";
+import { sendToActiveTab } from "./api";
 import { useManagedElements } from "./hooks";
 import { ElementItem } from "./components/ElementItem";
 import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME, DEFAULT_MULTI_SELECT, APP_NAME_PRIMARY, APP_NAME_SECONDARY } from "../shared/config";
@@ -11,7 +11,6 @@ export default function App() {
   const [isPickerActive, setIsPickerActive] = useState(false);
   const [hostname, setHostname] = useState<string | null>(null);
   const [needsReload, setNeedsReload] = useState(false);
-  const [isExtensionPage, setIsExtensionPage] = useState(false);
   const [multiSelect, setMultiSelect] = useState(DEFAULT_MULTI_SELECT);
   const { managedElements, addElement, toggleElement, deleteElement, toggleAll, renameElement, reorderElements } =
     useManagedElements(hostname);
@@ -59,29 +58,30 @@ export default function App() {
 
   // hostname 取得 + ピッカー状態確認（初期化・タブ切り替え時に呼ぶ）
   const refreshTab = useCallback(async () => {
-    const { hostname: host, isExtensionPage: extPage } = await getActiveTabInfo();
-    setHostname(host);
-    setIsExtensionPage(extPage);
     setIsPickerActive(false);
 
-    if (!host) {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (tab?.id == null) {
+      setHostname(null);
+
       setNeedsReload(false);
       return;
     }
 
     try {
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (tab?.id != null) {
-        const response = (await chrome.tabs.sendMessage(tab.id, {
-          type: "GET_STATUS",
-        } satisfies Message)) as ContentMessage | undefined;
-        if (response?.type === "STATUS") {
-          setIsPickerActive(response.isPickerActive);
-        }
+      const response = (await chrome.tabs.sendMessage(tab.id, {
+        type: "GET_STATUS",
+      } satisfies Message)) as ContentMessage | undefined;
+      if (response?.type === "STATUS") {
+        setHostname(response.hostname);
+        setIsPickerActive(response.isPickerActive);
+  
+        setNeedsReload(false);
       }
-      setNeedsReload(false);
     } catch {
-      // コンテンツスクリプト未準備 → リロードが必要
+      // コンテンツスクリプト未準備（非対応ページ or リロードが必要）
+      setHostname(null);
+
       setNeedsReload(true);
     }
   }, []);
@@ -192,17 +192,8 @@ export default function App() {
         </div>
       )}
 
-      {/* 設定ページ専用表示 */}
-      {isExtensionPage && (
-        <div className="flex-1 flex flex-col items-center justify-center gap-3 text-base-content/40 px-6 text-center">
-          <IconSettings className="h-10 w-10" />
-          <p className="text-sm font-medium">{chrome.runtime.getManifest().name} 設定ページ</p>
-          <p className="text-xs">このページでは要素の選択はできません</p>
-        </div>
-      )}
-
       {/* 非対応ページ表示 */}
-      {!hostname && !isExtensionPage && (
+      {!hostname && (
         <div className="flex-1 flex flex-col items-center justify-center gap-3 text-base-content/40 px-6 text-center">
           <IconStop className="h-10 w-10" />
           <p className="text-sm font-medium">対応していないページです</p>
@@ -210,7 +201,7 @@ export default function App() {
         </div>
       )}
 
-      {hostname && !isExtensionPage && (
+      {hostname && (
         <>
           {/* ピッカーボタン */}
           <div className="px-3 py-3 border-b border-base-300">

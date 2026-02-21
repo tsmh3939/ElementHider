@@ -336,6 +336,7 @@ function PickerApp() {
           sendResponse({
             type: "STATUS",
             isPickerActive: isPickerActiveRef.current,
+            hostname: window.location.hostname,
           });
           break;
 

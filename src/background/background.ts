@@ -34,11 +34,13 @@ chrome.storage.sync.onChanged.addListener((changes) => {
 });
 
 chrome.contextMenus?.onClicked?.addListener(async (info, tab) => {
-  if (info.menuItemId !== CONTEXT_MENU_ID || !tab?.id || !tab.url) return;
+  if (info.menuItemId !== CONTEXT_MENU_ID || !tab?.id) return;
 
   let hostname: string;
   try {
-    hostname = new URL(tab.url).hostname;
+    const response = await chrome.tabs.sendMessage(tab.id, { type: "GET_STATUS" });
+    hostname = response?.hostname;
+    if (!hostname) return;
   } catch {
     return;
   }

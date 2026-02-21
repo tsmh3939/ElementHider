@@ -22,4 +22,4 @@ export type Message =
 
 export type ContentMessage =
   | { type: "ELEMENT_HIDDEN"; selector: string; label: string }
-  | { type: "STATUS"; isPickerActive: boolean };
+  | { type: "STATUS"; isPickerActive: boolean; hostname: string };
