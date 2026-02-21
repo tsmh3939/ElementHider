@@ -44,10 +44,10 @@ export function OptionsApp() {
         <aside className="w-52 bg-base-200 border-r border-base-300 shrink-0 flex flex-col overflow-y-auto">
           {/* タイトル */}
           <div className="px-4 py-3 border-b border-base-300">
-            <p className="text-sm font-bold tracking-tight">
+            <p className="text-lg font-bold tracking-tight">
               <span className="text-primary">{APP_NAME_PRIMARY}</span>{APP_NAME_SECONDARY}
             </p>
-            <p className="text-xs text-base-content/30">v{chrome.runtime.getManifest().version}</p>
+            <p className="text-sm text-base-content/30">v{chrome.runtime.getManifest().version}</p>
           </div>
           <nav className="p-3 flex-1">
             <ul className="flex flex-col gap-0.5">
