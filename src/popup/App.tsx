@@ -39,7 +39,7 @@ export default function App() {
 
   // 起動時にテーマを復元・言語を Chrome i18n から設定 + 設定ページからの変更をリアルタイムで反映
   useEffect(() => {
-    chrome.storage.local.get(EH_SETTINGS_KEY).then((result) => {
+    chrome.storage.sync.get(EH_SETTINGS_KEY).then((result) => {
       const saved = result[EH_SETTINGS_KEY] as EhSettings | undefined;
       document.documentElement.setAttribute("data-theme", saved?.theme ?? DEFAULT_THEME);
     });
@@ -50,8 +50,8 @@ export default function App() {
       const saved = changes[EH_SETTINGS_KEY].newValue as EhSettings | undefined;
       document.documentElement.setAttribute("data-theme", saved?.theme ?? DEFAULT_THEME);
     };
-    chrome.storage.local.onChanged.addListener(handler);
-    return () => chrome.storage.local.onChanged.removeListener(handler);
+    chrome.storage.sync.onChanged.addListener(handler);
+    return () => chrome.storage.sync.onChanged.removeListener(handler);
   }, []);
 
   // hostname 取得 + ピッカー状態確認（初期化・タブ切り替え時に呼ぶ）

@@ -1,6 +1,6 @@
-import { APP_VERSION } from "../../shared/config";
-
 export function AboutPage() {
+  const { version } = chrome.runtime.getManifest();
+
   return (
     <div className="max-w-2xl">
       <h2 className="text-xl font-semibold mb-1">バージョン情報</h2>
@@ -19,7 +19,7 @@ export function AboutPage() {
               <h3 className="text-2xl font-bold tracking-tight">
                 <span className="text-primary">Element</span>Hider
               </h3>
-              <p className="text-sm text-base-content/50">バージョン {APP_VERSION}</p>
+              <p className="text-sm text-base-content/50">バージョン {version}</p>
             </div>
           </div>
 
@@ -37,7 +37,7 @@ export function AboutPage() {
             <tbody>
               <tr>
                 <td className="text-sm text-base-content/60 w-40">バージョン</td>
-                <td className="text-sm font-mono">{APP_VERSION}</td>
+                <td className="text-sm font-mono">{version}</td>
               </tr>
             </tbody>
           </table>

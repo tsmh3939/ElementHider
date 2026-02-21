@@ -5,7 +5,7 @@ export function AppearancePage() {
   const [theme, setTheme] = useState(DEFAULT_THEME);
 
   useEffect(() => {
-    chrome.storage.local.get(EH_SETTINGS_KEY).then((result) => {
+    chrome.storage.sync.get(EH_SETTINGS_KEY).then((result) => {
       const saved = result[EH_SETTINGS_KEY] as EhSettings | undefined;
       if (saved?.theme) setTheme(saved.theme);
     });
@@ -14,7 +14,7 @@ export function AppearancePage() {
   const changeTheme = (newTheme: string) => {
     setTheme(newTheme);
     document.documentElement.setAttribute("data-theme", newTheme);
-    chrome.storage.local.set({ [EH_SETTINGS_KEY]: { theme: newTheme } satisfies EhSettings });
+    chrome.storage.sync.set({ [EH_SETTINGS_KEY]: { theme: newTheme } satisfies EhSettings });
   };
 
   return (

@@ -24,7 +24,7 @@ export function OptionsApp() {
 
   // 起動時にテーマを復元・言語を Chrome i18n から設定
   useEffect(() => {
-    chrome.storage.local.get(EH_SETTINGS_KEY).then((result) => {
+    chrome.storage.sync.get(EH_SETTINGS_KEY).then((result) => {
       const saved = result[EH_SETTINGS_KEY] as EhSettings | undefined;
       document.documentElement.setAttribute("data-theme", saved?.theme ?? DEFAULT_THEME);
     });
@@ -76,7 +76,7 @@ export function OptionsApp() {
 
           {/* サイドバーフッター */}
           <div className="p-3 border-t border-base-300">
-            <p className="text-xs text-base-content/30 text-center">v1.0.0</p>
+            <p className="text-xs text-base-content/30 text-center">v{chrome.runtime.getManifest().version}</p>
           </div>
         </aside>
 
