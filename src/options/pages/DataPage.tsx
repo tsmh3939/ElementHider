@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { IconTrash, IconSortAsc, IconSortDesc, IconEmpty } from "../icons";
+import { IconTrash, IconSortAsc, IconSortDesc, IconEmpty, IconSearch } from "../icons";
 import { EH_SETTINGS_KEY } from "../../shared/config";
 import type { ManagedElement, SiteStorage } from "../../shared/messages";
 
@@ -39,6 +39,7 @@ export function DataPage() {
   const [bytesInUse, setBytesInUse] = useState<number | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("hostname");
   const [sortAsc, setSortAsc] = useState(true);
+  const [query, setQuery] = useState("");
 
   const loadData = useCallback(() => {
     chrome.storage.local.get(null).then((all) => {
@@ -72,6 +73,12 @@ export function DataPage() {
     });
     return arr;
   }, [sites, sortKey, sortAsc]);
+
+  const filteredSites = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return sortedSites;
+    return sortedSites.filter((s) => s.hostname.toLowerCase().includes(q));
+  }, [sortedSites, query]);
 
   useEffect(() => {
     loadData();
@@ -163,8 +170,23 @@ export function DataPage() {
         </div>
       ) : (
         <div className="flex flex-col gap-2">
-          {/* ソート */}
-          <div className="flex items-center justify-end gap-1 mb-1">
+          {/* 検索・ソート */}
+          <div className="flex items-center gap-2 mb-1">
+            <label className="input input-xs input-bordered flex items-center gap-1.5 flex-1">
+              <IconSearch className="h-3.5 w-3.5 text-base-content/40 shrink-0" />
+              <input
+                type="text"
+                className="grow"
+                placeholder="サイトを検索..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+              {query && (
+                <button className="text-base-content/40 hover:text-base-content" onClick={() => setQuery("")}>
+                  ✕
+                </button>
+              )}
+            </label>
             <select
               className="select select-xs select-bordered"
               value={sortKey}
@@ -182,7 +204,12 @@ export function DataPage() {
               {sortAsc ? <IconSortAsc className="h-3.5 w-3.5" /> : <IconSortDesc className="h-3.5 w-3.5" />}
             </button>
           </div>
-          {sortedSites.map((site) => {
+          {filteredSites.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-base-content/30 gap-2">
+              <IconSearch className="h-10 w-10" />
+              <p className="text-sm">「{query}」に一致するサイトはありません</p>
+            </div>
+          ) : filteredSites.map((site) => {
             const isOpen = expanded === site.hostname;
             const hiddenCount = site.elements.filter((e) => e.isHidden).length;
 
