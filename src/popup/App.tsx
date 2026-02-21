@@ -69,20 +69,34 @@ export default function App() {
       return;
     }
 
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (tab?.id == null) return;
+    const tabId = tab.id;
+
     try {
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (tab?.id != null) {
-        const response = (await chrome.tabs.sendMessage(tab.id, {
-          type: "GET_STATUS",
-        } satisfies Message)) as ContentMessage | undefined;
-        if (response?.type === "STATUS") {
-          setIsPickerActive(response.isPickerActive);
-        }
+      const response = (await chrome.tabs.sendMessage(tabId, {
+        type: "GET_STATUS",
+      } satisfies Message)) as ContentMessage | undefined;
+      if (response?.type === "STATUS") {
+        setIsPickerActive(response.isPickerActive);
       }
       setNeedsReload(false);
     } catch {
-      // コンテンツスクリプト未準備 → リロードが必要
-      setNeedsReload(true);
+      // コンテンツスクリプト未準備 → プログラム的に注入を試みる
+      try {
+        await chrome.scripting.executeScript({
+          target: { tabId },
+          files: ["src/content/content.js"],
+        });
+        await chrome.scripting.insertCSS({
+          target: { tabId },
+          files: ["src/content/picker.css"],
+        });
+        setNeedsReload(false);
+      } catch {
+        // 注入も失敗した場合のみリロードを促す
+        setNeedsReload(true);
+      }
     }
   }, []);
 

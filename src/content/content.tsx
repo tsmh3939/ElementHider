@@ -166,8 +166,10 @@ const _currentLastVisited = Date.now();
 async function loadManagedElements(): Promise<ManagedElement[]> {
   const host = getHostname();
   const result = await chrome.storage.local.get(host);
-  const stored = result[host] as SiteStorage | undefined;
-  return (stored?.elements ?? []).map((e) => ({ ...e, isHidden: e.isHidden ?? true }));
+  const stored = result[host] as { elements?: unknown } | undefined;
+  const rawElements = stored?.elements;
+  const elements: ManagedElement[] = Array.isArray(rawElements) ? rawElements : [];
+  return elements.map((e) => ({ ...e, isHidden: e.isHidden ?? true }));
 }
 
 async function saveManagedElements(elements: ManagedElement[]): Promise<void> {
