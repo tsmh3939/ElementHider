@@ -6,7 +6,7 @@
 
 import { createRoot } from "react-dom/client";
 import { useState, useEffect, useRef, useCallback } from "react";
-import type { ManagedElement, Message } from "../shared/messages";
+import type { ManagedElement, Message, SiteStorage } from "../shared/messages";
 import {
   EH_ROOT_ID,
   EH_HIDE_STYLE_ID,
@@ -160,16 +160,19 @@ function isSelectableTarget(el: Element): boolean {
 
 const getHostname = () => window.location.hostname;
 
+/** ページ訪問時刻（コンテンツスクリプト初期化時に確定） */
+const _currentLastVisited = Date.now();
+
 async function loadManagedElements(): Promise<ManagedElement[]> {
   const host = getHostname();
   const result = await chrome.storage.local.get(host);
-  const raw = (result[host] ?? []) as Array<Partial<ManagedElement>>;
-  // Backward-compat: old entries without isHidden are treated as hidden
-  return raw.map((e) => ({ ...e, isHidden: e.isHidden ?? true } as ManagedElement));
+  const stored = result[host] as SiteStorage | undefined;
+  return (stored?.elements ?? []).map((e) => ({ ...e, isHidden: e.isHidden ?? true }));
 }
 
 async function saveManagedElements(elements: ManagedElement[]): Promise<void> {
-  await chrome.storage.local.set({ [getHostname()]: elements });
+  const storage: SiteStorage = { elements, lastVisited: _currentLastVisited };
+  await chrome.storage.local.set({ [getHostname()]: storage });
 }
 
 async function addManagedElement(el: ManagedElement): Promise<void> {
@@ -460,6 +463,10 @@ function mountPickerApp() {
   // ストレージから非表示要素を復元し、hiddenSelectors に登録して CSS を更新。
   // #eh-initial-hide（early-inject.ts 製）を #eh-hide として引き継ぐ。
   const elements = await loadManagedElements();
+  // lastVisited を現在時刻に更新して保存
+  if (elements.length > 0) {
+    await saveManagedElements(elements);
+  }
   elements.forEach((el) => {
     if (el.isHidden !== false) {
       try {

@@ -7,6 +7,12 @@ export interface ManagedElement {
   isHidden: boolean;
 }
 
+/** chrome.storage.local に保存されるホスト名単位のデータ */
+export interface SiteStorage {
+  elements: ManagedElement[];
+  lastVisited: number;
+}
+
 export type Message =
   | { type: "START_PICKER" }
   | { type: "STOP_PICKER" }

@@ -1,11 +1,22 @@
 import { useState, useEffect, useCallback } from "react";
 import { IconTrash } from "../../popup/icons";
 import { EH_SETTINGS_KEY } from "../../shared/config";
-import type { ManagedElement } from "../../shared/messages";
+import type { ManagedElement, SiteStorage } from "../../shared/messages";
 
 interface SiteData {
   hostname: string;
   elements: ManagedElement[];
+  lastVisited: number;
+}
+
+function formatLastVisited(ts: number): string {
+  return new Date(ts).toLocaleString("ja-JP", {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 const QUOTA_BYTES = chrome.storage.local.QUOTA_BYTES ?? 10_485_760;
@@ -28,9 +39,11 @@ export function DataPage() {
       const result: SiteData[] = [];
       for (const [key, value] of Object.entries(all)) {
         if (key === EH_SETTINGS_KEY) continue;
+        const stored = value as SiteStorage;
         result.push({
           hostname: key,
-          elements: (value as ManagedElement[]) ?? [],
+          elements: stored.elements ?? [],
+          lastVisited: stored.lastVisited,
         });
       }
       result.sort((a, b) => a.hostname.localeCompare(b.hostname));
@@ -158,6 +171,9 @@ export function DataPage() {
                           (<span className="text-error">{hiddenCount} 非表示</span>)
                         </span>
                       )}
+                    </p>
+                    <p className="text-xs text-base-content/40 mt-0.5">
+                      最終訪問: {formatLastVisited(site.lastVisited)}
                     </p>
                   </div>
                   <svg

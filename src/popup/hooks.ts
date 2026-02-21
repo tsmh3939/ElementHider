@@ -1,19 +1,20 @@
-import { useState, useEffect, useCallback } from "react";
-import type { ManagedElement } from "./types";
+import { useState, useEffect, useCallback, useRef } from "react";
+import type { ManagedElement, SiteStorage } from "../shared/messages";
 import { sendToActiveTab } from "./api";
 
 export function useManagedElements(hostname: string | null) {
   const [managedElements, setManagedElements] = useState<ManagedElement[]>([]);
+  const lastVisitedRef = useRef<number>(0);
 
   useEffect(() => {
     if (!hostname) return;
     let mounted = true;
     chrome.storage.local.get(hostname).then((result) => {
       if (!mounted) return;
-      const raw = (result[hostname] ?? []) as Array<Partial<ManagedElement>>;
-      // 後方互換: isHidden フィールドがない古いデータは非表示扱い
+      const stored = result[hostname] as SiteStorage | undefined;
+      lastVisitedRef.current = stored?.lastVisited ?? 0;
       setManagedElements(
-        raw.map((e) => ({ ...e, isHidden: e.isHidden ?? true } as ManagedElement))
+        (stored?.elements ?? []).map((e) => ({ ...e, isHidden: e.isHidden ?? true }))
       );
     });
     return () => {
@@ -26,9 +27,10 @@ export function useManagedElements(hostname: string | null) {
     if (!hostname) return;
     const handler = (changes: { [key: string]: chrome.storage.StorageChange }) => {
       if (!(hostname in changes)) return;
-      const raw = (changes[hostname].newValue ?? []) as Array<Partial<ManagedElement>>;
+      const stored = changes[hostname].newValue as SiteStorage | undefined;
+      lastVisitedRef.current = stored?.lastVisited ?? 0;
       setManagedElements(
-        raw.map((e) => ({ ...e, isHidden: e.isHidden ?? true } as ManagedElement))
+        (stored?.elements ?? []).map((e) => ({ ...e, isHidden: e.isHidden ?? true }))
       );
     };
     chrome.storage.local.onChanged.addListener(handler);
@@ -39,7 +41,11 @@ export function useManagedElements(hostname: string | null) {
     async (elements: ManagedElement[]) => {
       if (!hostname) return;
       if (elements.length > 0) {
-        await chrome.storage.local.set({ [hostname]: elements });
+        const storage: SiteStorage = {
+          elements,
+          lastVisited: lastVisitedRef.current,
+        };
+        await chrome.storage.local.set({ [hostname]: storage });
       } else {
         await chrome.storage.local.remove(hostname);
       }
