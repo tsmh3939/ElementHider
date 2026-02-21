@@ -38,6 +38,7 @@ export function DataPage() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [bytesInUse, setBytesInUse] = useState<number | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("hostname");
+  const [sortAsc, setSortAsc] = useState(true);
 
   const loadData = useCallback(() => {
     chrome.storage.local.get(null).then((all) => {
@@ -58,15 +59,19 @@ export function DataPage() {
 
   const sortedSites = useMemo(() => {
     const arr = [...sites];
-    switch (sortKey) {
-      case "hostname":
-        return arr.sort((a, b) => stripWww(a.hostname).localeCompare(stripWww(b.hostname)));
-      case "lastVisited":
-        return arr.sort((a, b) => b.lastVisited - a.lastVisited);
-      case "elementCount":
-        return arr.sort((a, b) => b.elements.length - a.elements.length);
-    }
-  }, [sites, sortKey]);
+    const dir = sortAsc ? 1 : -1;
+    arr.sort((a, b) => {
+      switch (sortKey) {
+        case "hostname":
+          return dir * stripWww(a.hostname).localeCompare(stripWww(b.hostname));
+        case "lastVisited":
+          return dir * (a.lastVisited - b.lastVisited);
+        case "elementCount":
+          return dir * (a.elements.length - b.elements.length);
+      }
+    });
+    return arr;
+  }, [sites, sortKey, sortAsc]);
 
   useEffect(() => {
     loadData();
@@ -161,7 +166,7 @@ export function DataPage() {
       ) : (
         <div className="flex flex-col gap-2">
           {/* ソート */}
-          <div className="flex items-center justify-end mb-1">
+          <div className="flex items-center justify-end gap-1 mb-1">
             <select
               className="select select-xs select-bordered"
               value={sortKey}
@@ -171,6 +176,23 @@ export function DataPage() {
               <option value="lastVisited">最終訪問順</option>
               <option value="elementCount">要素数順</option>
             </select>
+            <button
+              className="btn btn-xs btn-ghost"
+              onClick={() => setSortAsc((v) => !v)}
+              title={sortAsc ? "昇順" : "降順"}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                {sortAsc ? (
+                  <>
+                    <path d="M12 5v14M5 12l7-7 7 7" />
+                  </>
+                ) : (
+                  <>
+                    <path d="M12 19V5M5 12l7 7 7-7" />
+                  </>
+                )}
+              </svg>
+            </button>
           </div>
           {sortedSites.map((site) => {
             const isOpen = expanded === site.hostname;
