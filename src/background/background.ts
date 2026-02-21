@@ -3,18 +3,34 @@
  */
 
 import type { ManagedElement } from "../shared/messages";
-import { CONTEXT_MENU_ID } from "../shared/config";
+import { CONTEXT_MENU_ID, EH_SETTINGS_KEY, type EhSettings } from "../shared/config";
 
 // ─── Context menu ─────────────────────────────────────────────────────────────
 
-chrome.runtime.onInstalled.addListener(() => {
+async function applyContextMenuSetting() {
+  const result = await chrome.storage.sync.get(EH_SETTINGS_KEY);
+  const settings = result[EH_SETTINGS_KEY] as EhSettings | undefined;
+  const enabled = settings?.contextMenu ?? true;
+
   chrome.contextMenus.removeAll(() => {
-    chrome.contextMenus.create({
-      id: CONTEXT_MENU_ID,
-      title: `${chrome.runtime.getManifest().name}: 全て表示/非表示を切り替え`,
-      contexts: ["all"],
-    });
+    if (enabled) {
+      chrome.contextMenus.create({
+        id: CONTEXT_MENU_ID,
+        title: `${chrome.runtime.getManifest().name}: 全て表示/非表示を切り替え`,
+        contexts: ["all"],
+      });
+    }
   });
+}
+
+chrome.runtime.onInstalled.addListener(() => {
+  applyContextMenuSetting();
+});
+
+chrome.storage.sync.onChanged.addListener((changes) => {
+  if (EH_SETTINGS_KEY in changes) {
+    applyContextMenuSetting();
+  }
 });
 
 chrome.contextMenus?.onClicked?.addListener(async (info, tab) => {

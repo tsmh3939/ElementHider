@@ -1,20 +1,21 @@
 import { useState, useEffect } from "react";
-import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME, ALL_THEMES } from "../../shared/config";
+import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME, DEFAULT_CONTEXT_MENU, ALL_THEMES } from "../../shared/config";
 
 export function AppearancePage() {
-  const [theme, setTheme] = useState(DEFAULT_THEME);
+  const [settings, setSettings] = useState<EhSettings>({ theme: DEFAULT_THEME, contextMenu: DEFAULT_CONTEXT_MENU });
 
   useEffect(() => {
     chrome.storage.sync.get(EH_SETTINGS_KEY).then((result) => {
       const saved = result[EH_SETTINGS_KEY] as EhSettings | undefined;
-      if (saved?.theme) setTheme(saved.theme);
+      if (saved) setSettings((s) => ({ ...s, ...saved }));
     });
   }, []);
 
   const changeTheme = (newTheme: string) => {
-    setTheme(newTheme);
+    const next = { ...settings, theme: newTheme };
+    setSettings(next);
     document.documentElement.setAttribute("data-theme", newTheme);
-    chrome.storage.sync.set({ [EH_SETTINGS_KEY]: { theme: newTheme } satisfies EhSettings });
+    chrome.storage.sync.set({ [EH_SETTINGS_KEY]: next });
   };
 
   return (
@@ -27,7 +28,7 @@ export function AppearancePage() {
           <button
             key={t.id}
             className={`card cursor-pointer border-2 transition-all text-left ${
-              theme === t.id
+              settings.theme === t.id
                 ? "border-primary"
                 : "border-base-300 hover:border-primary/40"
             }`}
@@ -55,7 +56,7 @@ export function AppearancePage() {
                 <p className="text-sm font-semibold leading-tight">{t.label}</p>
               </div>
 
-              {theme === t.id && (
+              {settings.theme === t.id && (
                 <span className="badge badge-primary badge-sm self-start">使用中</span>
               )}
             </div>

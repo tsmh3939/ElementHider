@@ -25,7 +25,11 @@ export const EH_SETTINGS_KEY = "__eh_settings__";
 /** 拡張機能の永続化設定 */
 export interface EhSettings {
   theme: string;
+  contextMenu: boolean;
 }
+
+/** コンテキストメニューのデフォルト有効状態 */
+export const DEFAULT_CONTEXT_MENU = true;
 
 // ── テーマ ──────────────────────────────────────────────────────────────────
 
