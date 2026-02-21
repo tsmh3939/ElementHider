@@ -31,7 +31,7 @@ export default defineConfig({
     pageTitlePlugin(),
     react(),
     webExtension({
-      manifest: () => ({ ...baseManifest, version: APP_VERSION }),
+      manifest: () => ({ ...baseManifest, name: APP_NAME, version: APP_VERSION }),
       additionalInputs: ["src/content/picker.css"],
     }),
   ],
