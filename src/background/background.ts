@@ -11,7 +11,7 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({
       id: CONTEXT_MENU_ID,
-      title: "ElementHider: 全て表示/非表示を切り替え",
+      title: `${chrome.runtime.getManifest().name}: 全て表示/非表示を切り替え`,
       contexts: ["all"],
     });
   });

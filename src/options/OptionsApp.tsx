@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { IconPalette, IconKeyboard, IconDatabase, IconInfo } from "../popup/icons";
-import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME } from "../shared/config";
+import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME, APP_NAME_PRIMARY, APP_NAME_SECONDARY } from "../shared/config";
 import { AppearancePage } from "./pages/AppearancePage";
 import { ShortcutsPage } from "./pages/ShortcutsPage";
 import { DataPage } from "./pages/DataPage";
@@ -45,7 +45,7 @@ export function OptionsApp() {
       {/* ヘッダー */}
       <header className="flex items-center gap-3 px-6 h-14 bg-base-200 border-b border-base-300 shrink-0">
         <span className="text-lg font-bold tracking-tight">
-          <span className="text-primary">Element</span>Hider
+          <span className="text-primary">{APP_NAME_PRIMARY}</span>{APP_NAME_SECONDARY}
         </span>
         <span className="text-base-content/30">|</span>
         <span className="text-sm text-base-content/50">設定</span>

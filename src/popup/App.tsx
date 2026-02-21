@@ -5,7 +5,7 @@ import type { ContentMessage, Message } from "./types";
 import { getActiveTabInfo, sendToActiveTab } from "./api";
 import { useManagedElements } from "./hooks";
 import { ElementItem } from "./components/ElementItem";
-import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME } from "../shared/config";
+import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME, APP_NAME_PRIMARY, APP_NAME_SECONDARY } from "../shared/config";
 
 export default function App() {
   const [isPickerActive, setIsPickerActive] = useState(false);
@@ -144,7 +144,7 @@ export default function App() {
       <div className="navbar bg-base-200 px-3 py-2 min-h-0">
         <div className="navbar-start">
           <span className="text-lg font-bold tracking-tight">
-            <span className="text-primary">Element</span>Hider
+            <span className="text-primary">{APP_NAME_PRIMARY}</span>{APP_NAME_SECONDARY}
           </span>
         </div>
         <div className="navbar-end">
@@ -186,7 +186,7 @@ export default function App() {
       {isExtensionPage && (
         <div className="flex-1 flex flex-col items-center justify-center gap-3 text-base-content/40 px-6 text-center">
           <IconSettings className="h-10 w-10" />
-          <p className="text-sm font-medium">ElementHider 設定ページ</p>
+          <p className="text-sm font-medium">{chrome.runtime.getManifest().name} 設定ページ</p>
           <p className="text-xs">このページでは要素の選択はできません</p>
         </div>
       )}

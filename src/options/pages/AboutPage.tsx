@@ -1,10 +1,12 @@
+import { APP_NAME_PRIMARY, APP_NAME_SECONDARY } from "../../shared/config";
+
 export function AboutPage() {
-  const { version } = chrome.runtime.getManifest();
+  const { name, version } = chrome.runtime.getManifest();
 
   return (
     <div className="max-w-2xl">
       <h2 className="text-xl font-semibold mb-1">バージョン情報</h2>
-      <p className="text-sm text-base-content/50 mb-6">ElementHider について</p>
+      <p className="text-sm text-base-content/50 mb-6">{name} について</p>
 
       {/* メインカード */}
       <div className="card bg-base-200 mb-4">
@@ -17,7 +19,7 @@ export function AboutPage() {
             </div>
             <div>
               <h3 className="text-2xl font-bold tracking-tight">
-                <span className="text-primary">Element</span>Hider
+                <span className="text-primary">{APP_NAME_PRIMARY}</span>{APP_NAME_SECONDARY}
               </h3>
               <p className="text-sm text-base-content/50">バージョン {version}</p>
             </div>
