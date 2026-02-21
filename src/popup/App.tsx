@@ -5,13 +5,14 @@ import type { ContentMessage, Message } from "./types";
 import { getActiveTabInfo, sendToActiveTab } from "./api";
 import { useManagedElements } from "./hooks";
 import { ElementItem } from "./components/ElementItem";
-import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME, APP_NAME_PRIMARY, APP_NAME_SECONDARY } from "../shared/config";
+import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME, DEFAULT_MULTI_SELECT, APP_NAME_PRIMARY, APP_NAME_SECONDARY } from "../shared/config";
 
 export default function App() {
   const [isPickerActive, setIsPickerActive] = useState(false);
   const [hostname, setHostname] = useState<string | null>(null);
   const [needsReload, setNeedsReload] = useState(false);
   const [isExtensionPage, setIsExtensionPage] = useState(false);
+  const [multiSelect, setMultiSelect] = useState(DEFAULT_MULTI_SELECT);
   const { managedElements, addElement, toggleElement, deleteElement, toggleAll, renameElement, reorderElements } =
     useManagedElements(hostname);
 
@@ -42,6 +43,7 @@ export default function App() {
     chrome.storage.sync.get(EH_SETTINGS_KEY).then((result) => {
       const saved = result[EH_SETTINGS_KEY] as EhSettings | undefined;
       document.documentElement.setAttribute("data-theme", saved?.theme ?? DEFAULT_THEME);
+      if (saved?.multiSelect !== undefined) setMultiSelect(saved.multiSelect);
     });
     document.documentElement.lang = chrome.i18n.getUILanguage();
 
@@ -49,6 +51,7 @@ export default function App() {
       if (!(EH_SETTINGS_KEY in changes)) return;
       const saved = changes[EH_SETTINGS_KEY].newValue as EhSettings | undefined;
       document.documentElement.setAttribute("data-theme", saved?.theme ?? DEFAULT_THEME);
+      if (saved?.multiSelect !== undefined) setMultiSelect(saved.multiSelect);
     };
     chrome.storage.sync.onChanged.addListener(handler);
     return () => chrome.storage.sync.onChanged.removeListener(handler);
@@ -128,8 +131,15 @@ export default function App() {
   const togglePicker = useCallback(async () => {
     const next = !isPickerActive;
     setIsPickerActive(next);
-    await sendToActiveTab(next ? { type: "START_PICKER" } : { type: "STOP_PICKER" });
-  }, [isPickerActive]);
+    await sendToActiveTab(next ? { type: "START_PICKER", multiSelect } : { type: "STOP_PICKER" });
+  }, [isPickerActive, multiSelect]);
+
+  const handleMultiSelectChange = useCallback(async (value: boolean) => {
+    setMultiSelect(value);
+    const result = await chrome.storage.sync.get(EH_SETTINGS_KEY);
+    const saved = result[EH_SETTINGS_KEY] as EhSettings | undefined;
+    await chrome.storage.sync.set({ [EH_SETTINGS_KEY]: { ...saved, multiSelect: value } });
+  }, []);
 
   const reloadTab = useCallback(async () => {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -228,9 +238,20 @@ export default function App() {
                 </div>
               )}
             </div>
+            <label className="flex items-center gap-1.5 cursor-pointer w-fit mt-2">
+              <input
+                type="checkbox"
+                className="checkbox checkbox-xs checkbox-primary"
+                checked={multiSelect}
+                onChange={(e) => handleMultiSelectChange(e.target.checked)}
+              />
+              <span className="text-xs text-base-content/60 select-none">複数選択</span>
+            </label>
             {isPickerActive && (
-              <p className="text-xs text-base-content/60 mt-2 text-center">
-                非表示にしたい要素をクリック（連続選択可） / Esc で終了
+              <p className="text-xs text-base-content/60 mt-1 text-center">
+                {multiSelect
+                  ? "非表示にしたい要素をクリック（連続選択可） / Esc で終了"
+                  : "非表示にしたい要素をクリック / Esc で終了"}
               </p>
             )}
             {managedElements.length > 0 && (

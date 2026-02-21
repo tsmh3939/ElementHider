@@ -26,10 +26,14 @@ export const EH_SETTINGS_KEY = "__eh_settings__";
 export interface EhSettings {
   theme: string;
   contextMenu: boolean;
+  multiSelect: boolean;
 }
 
 /** コンテキストメニューのデフォルト有効状態 */
 export const DEFAULT_CONTEXT_MENU = true;
+
+/** 複数選択のデフォルト有効状態 */
+export const DEFAULT_MULTI_SELECT = false;
 
 // ── テーマ ──────────────────────────────────────────────────────────────────
 

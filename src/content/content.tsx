@@ -304,6 +304,7 @@ function PickerApp() {
   const highlightedRef = useRef<Element | null>(null);
   // Ref to expose current picker state to the message handler synchronously
   const isPickerActiveRef = useRef(false);
+  const multiSelectRef = useRef(false);
 
   // Keep ref in sync with state
   useEffect(() => {
@@ -320,6 +321,7 @@ function PickerApp() {
       switch (message.type) {
         case "START_PICKER":
           setIsPickerActive(true);
+          multiSelectRef.current = message.multiSelect;
           sendResponse();
           break;
 
@@ -398,6 +400,11 @@ function PickerApp() {
     hideElementBySelector(selector);
     await addManagedElement({ selector, label, timestamp: Date.now(), isHidden: true });
     chrome.runtime.sendMessage({ type: "ELEMENT_HIDDEN", selector, label });
+
+    if (!multiSelectRef.current) {
+      setIsPickerActive(false);
+      chrome.runtime.sendMessage({ type: "STATUS", isPickerActive: false });
+    }
   }, []);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {

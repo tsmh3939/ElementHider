@@ -14,7 +14,7 @@ export interface SiteStorage {
 }
 
 export type Message =
-  | { type: "START_PICKER" }
+  | { type: "START_PICKER"; multiSelect: boolean }
   | { type: "STOP_PICKER" }
   | { type: "SHOW_ELEMENT"; selector: string }
   | { type: "HIDE_ELEMENT"; selector: string }
