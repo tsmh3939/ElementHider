@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
-import { IconPalette, IconKeyboard, IconDatabase, IconInfo } from "../popup/icons";
+import { IconPalette, IconKeyboard, IconDatabase } from "../popup/icons";
 import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME, APP_NAME_PRIMARY, APP_NAME_SECONDARY } from "../shared/config";
 import { AppearancePage } from "./pages/AppearancePage";
 import { ShortcutsPage } from "./pages/ShortcutsPage";
 import { DataPage } from "./pages/DataPage";
-import { AboutPage } from "./pages/AboutPage";
 
-type PageId = "appearance" | "shortcuts" | "data" | "about";
+type PageId = "appearance" | "shortcuts" | "data";
 
 const NAV_ITEMS: {
   id: PageId;
@@ -16,7 +15,6 @@ const NAV_ITEMS: {
   { id: "appearance", label: "外観",             icon: IconPalette  },
   { id: "shortcuts",  label: "ショートカット",    icon: IconKeyboard },
   { id: "data",       label: "データ管理",        icon: IconDatabase },
-  { id: "about",      label: "バージョン情報",    icon: IconInfo     },
 ];
 
 export function OptionsApp() {
@@ -36,24 +34,21 @@ export function OptionsApp() {
       case "appearance": return <AppearancePage />;
       case "shortcuts":  return <ShortcutsPage />;
       case "data":       return <DataPage />;
-      case "about":      return <AboutPage />;
     }
   };
 
   return (
-    <div className="flex flex-col h-screen bg-base-100 text-base-content overflow-hidden">
-      {/* ヘッダー */}
-      <header className="flex items-center gap-3 px-6 h-14 bg-base-200 border-b border-base-300 shrink-0">
-        <span className="text-lg font-bold tracking-tight">
-          <span className="text-primary">{APP_NAME_PRIMARY}</span>{APP_NAME_SECONDARY}
-        </span>
-        <span className="text-base-content/30">|</span>
-        <span className="text-sm text-base-content/50">設定</span>
-      </header>
-
+    <div className="flex h-screen bg-base-100 text-base-content overflow-hidden">
       <div className="flex flex-1 overflow-hidden">
         {/* サイドバー */}
         <aside className="w-52 bg-base-200 border-r border-base-300 shrink-0 flex flex-col overflow-y-auto">
+          {/* タイトル */}
+          <div className="px-4 py-3 border-b border-base-300">
+            <p className="text-sm font-bold tracking-tight">
+              <span className="text-primary">{APP_NAME_PRIMARY}</span>{APP_NAME_SECONDARY}
+            </p>
+            <p className="text-xs text-base-content/30">v{chrome.runtime.getManifest().version}</p>
+          </div>
           <nav className="p-3 flex-1">
             <ul className="flex flex-col gap-0.5">
               {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
@@ -73,11 +68,6 @@ export function OptionsApp() {
               ))}
             </ul>
           </nav>
-
-          {/* サイドバーフッター */}
-          <div className="p-3 border-t border-base-300">
-            <p className="text-xs text-base-content/30 text-center">v{chrome.runtime.getManifest().version}</p>
-          </div>
         </aside>
 
         {/* メインコンテンツ */}
