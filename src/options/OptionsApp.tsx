@@ -22,13 +22,13 @@ const NAV_ITEMS: {
 export function OptionsApp() {
   const [activePage, setActivePage] = useState<PageId>("appearance");
 
-  // 起動時にテーマを復元
+  // 起動時にテーマを復元・言語を Chrome i18n から設定
   useEffect(() => {
     chrome.storage.local.get(EH_SETTINGS_KEY).then((result) => {
       const saved = result[EH_SETTINGS_KEY] as EhSettings | undefined;
-      const t = saved?.theme ?? DEFAULT_THEME;
-      document.documentElement.setAttribute("data-theme", t);
+      document.documentElement.setAttribute("data-theme", saved?.theme ?? DEFAULT_THEME);
     });
+    document.documentElement.lang = chrome.i18n.getUILanguage();
   }, []);
 
   const renderPage = () => {

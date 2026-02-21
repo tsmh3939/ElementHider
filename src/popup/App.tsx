@@ -37,12 +37,13 @@ export default function App() {
     setDragOverIndex(-1);
   }, []);
 
-  // 起動時にテーマを復元 + 設定ページからの変更をリアルタイムで反映
+  // 起動時にテーマを復元・言語を Chrome i18n から設定 + 設定ページからの変更をリアルタイムで反映
   useEffect(() => {
     chrome.storage.local.get(EH_SETTINGS_KEY).then((result) => {
       const saved = result[EH_SETTINGS_KEY] as EhSettings | undefined;
       document.documentElement.setAttribute("data-theme", saved?.theme ?? DEFAULT_THEME);
     });
+    document.documentElement.lang = chrome.i18n.getUILanguage();
 
     const handler = (changes: { [key: string]: chrome.storage.StorageChange }) => {
       if (!(EH_SETTINGS_KEY in changes)) return;
