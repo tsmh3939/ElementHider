@@ -94,7 +94,7 @@ export function DataPage() {
   const totalElements = sites.reduce((sum, s) => sum + s.elements.length, 0);
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-2xl mx-auto">
       {/* ページヘッダー */}
       <div className="flex items-start justify-between mb-6">
         <div>

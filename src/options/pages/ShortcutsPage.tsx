@@ -4,7 +4,7 @@ export function ShortcutsPage() {
   };
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-2xl mx-auto">
       <h2 className="text-xl font-semibold mb-1">キーボードショートカット</h2>
       <p className="text-sm text-base-content/50 mb-6">利用可能なショートカット一覧</p>
 
