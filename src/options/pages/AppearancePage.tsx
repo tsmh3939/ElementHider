@@ -27,7 +27,7 @@ export function AppearancePage() {
         {ALL_THEMES.map((t) => (
           <button
             key={t.id}
-            className={`card cursor-pointer border-2 transition-all text-left ${
+            className={`card overflow-hidden cursor-pointer border-2 transition-all text-left ${
               settings.theme === t.id
                 ? "border-primary"
                 : "border-base-300 hover:border-primary/40"
@@ -35,7 +35,7 @@ export function AppearancePage() {
             onClick={() => changeTheme(t.id)}
             data-theme={t.id}
           >
-            <div className="card-body p-3 gap-2 bg-base-100 rounded-xl">
+            <div className="card-body p-3 gap-2 bg-base-100">
               {/* ミニプレビュー */}
               <div className="w-full h-14 rounded-lg overflow-hidden flex bg-base-200">
                 <div className="w-8 bg-base-300 flex flex-col gap-1 p-1 shrink-0">
