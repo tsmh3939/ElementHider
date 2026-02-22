@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { IconTrash, IconPencil, IconGrip } from "../icons";
+import { IconTrash, IconPencil, IconGrip, IconHidden, IconInvisible } from "../icons";
 import type { ManagedElement, HideMode } from "../../shared/messages";
 import { HIDE_MODE_LABELS } from "../../shared/config";
+
+const HIDE_MODES: HideMode[] = ["hidden", "invisible"];
 
 interface Props {
   element: ManagedElement;
@@ -103,17 +105,20 @@ export function ElementItem({
 
         {!isEditing && (
           <div className="flex items-center shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-            <select
-              className="select select-xs shrink-0 text-xs bg-transparent border-none focus:outline-none min-h-0 h-6 pl-1 pr-5"
-              value={element.hideMode}
-              onChange={(e) => onSetHideMode(element.selector, e.target.value as HideMode)}
-              onClick={(e) => e.stopPropagation()}
-              title="非表示モード"
+            <button
+              className="btn btn-xs btn-ghost shrink-0 text-base-content/30 hover:text-base-content"
+              onClick={(e) => {
+                e.stopPropagation();
+                const nextIndex = (HIDE_MODES.indexOf(element.hideMode) + 1) % HIDE_MODES.length;
+                onSetHideMode(element.selector, HIDE_MODES[nextIndex]);
+              }}
+              title={`${HIDE_MODE_LABELS[element.hideMode]}（クリックで切替）`}
             >
-              {(Object.entries(HIDE_MODE_LABELS) as [HideMode, string][]).map(([mode, label]) => (
-                <option key={mode} value={mode}>{label}</option>
-              ))}
-            </select>
+              {element.hideMode === "hidden"
+                ? <IconHidden className="h-3.5 w-3.5" />
+                : <IconInvisible className="h-3.5 w-3.5" />
+              }
+            </button>
 
             <button
               className="btn btn-xs btn-ghost shrink-0 text-base-content/30 hover:text-base-content"
