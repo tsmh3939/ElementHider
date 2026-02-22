@@ -192,9 +192,9 @@ export default function App() {
         <div className="flex-1 flex flex-col items-center justify-center gap-3 text-base-content/40 px-6 text-center">
           <IconPicker className="h-10 w-10" />
           <p className="text-sm font-medium">
-            拡張機能のアイコンをクリックして
+            ページをリロードしてから
             <br />
-            このサイトで有効にしてください
+            サイドパネルを開き直してください
           </p>
           <p className="text-xs">chrome:// 等の特殊なページでは使用できません</p>
         </div>
