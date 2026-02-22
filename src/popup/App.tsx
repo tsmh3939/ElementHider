@@ -1,11 +1,11 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 
 import { IconStop, IconPicker, IconEyeOff, IconEye, IconSettings } from "./icons";
-import { MSG, CONTENT_MSG, type ContentMessage, type Message } from "./types";
+import { MSG, CONTENT_MSG, type ContentMessage, type Message } from "../shared/messages";
 import { sendToActiveTab } from "./api";
 import { useManagedElements } from "./hooks";
 import { ElementItem } from "./components/ElementItem";
-import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME, DEFAULT_MULTI_SELECT, APP_NAME_PRIMARY, APP_NAME_SECONDARY, buildOriginPattern, CONTENT_SCRIPT_PATHS } from "../shared/config";
+import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME, DEFAULT_MULTI_SELECT, APP_NAME_PRIMARY, APP_NAME_SECONDARY, buildOriginPattern } from "../shared/config";
 import { BG_MSG, type BackgroundMessage } from "../shared/messages";
 
 export default function App() {
@@ -119,7 +119,6 @@ export default function App() {
 
   // タブ切り替え・ナビゲーション完了を検知してサイドパネルを更新
   useEffect(() => {
-    const onActivated = () => refreshTab();
     const onUpdated = (
       _tabId: number,
       changeInfo: chrome.tabs.TabChangeInfo,
@@ -128,10 +127,10 @@ export default function App() {
       if (tab.active && changeInfo.status === "complete") refreshTab();
     };
 
-    chrome.tabs.onActivated.addListener(onActivated);
+    chrome.tabs.onActivated.addListener(refreshTab);
     chrome.tabs.onUpdated.addListener(onUpdated);
     return () => {
-      chrome.tabs.onActivated.removeListener(onActivated);
+      chrome.tabs.onActivated.removeListener(refreshTab);
       chrome.tabs.onUpdated.removeListener(onUpdated);
     };
   }, [refreshTab]);

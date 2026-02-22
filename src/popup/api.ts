@@ -1,4 +1,4 @@
-import type { Message } from "./types";
+import type { Message } from "../shared/messages";
 
 export async function sendToActiveTab(message: Message): Promise<void> {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
