@@ -108,6 +108,7 @@ export function DataPage() {
   };
 
   const totalElements = sites.reduce((sum, s) => sum + s.elements.length, 0);
+  const extensionDetailsUrl = `chrome://extensions/?id=${chrome.runtime.id}`;
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -176,12 +177,13 @@ export function DataPage() {
         <span className="text-xs text-base-content/60">
           サイトごとに付与した権限は Chrome の拡張機能管理ページから確認・削除できます
         </span>
-        <button
-          className="link link-sm link-primary shrink-0 ml-3 no-underline hover:underline"
-          onClick={() => chrome.tabs.create({ url: `chrome://extensions/?id=${chrome.runtime.id}` })}
+        <a
+          className="link link-sm link-primary shrink-0 ml-3 no-underline hover:underline cursor-pointer"
+          title={extensionDetailsUrl}
+          onClick={(e) => { e.preventDefault(); chrome.tabs.create({ url: extensionDetailsUrl }); }}
         >
           権限を管理
-        </button>
+        </a>
       </div>
 
       {/* サイト一覧 */}
