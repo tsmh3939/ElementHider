@@ -12,6 +12,7 @@ export default function App() {
   const [isPickerActive, setIsPickerActive] = useState(false);
   const [hostname, setHostname] = useState<string | null>(null);
   const [hasHostPermission, setHasHostPermission] = useState(false);
+  const [contentScriptReady, setContentScriptReady] = useState(false);
   const [multiSelect, setMultiSelect] = useState(DEFAULT_MULTI_SELECT);
   const { managedElements, addElement, toggleElement, deleteElement, toggleAll, renameElement, setHideMode, reorderElements } =
     useManagedElements(hostname);
@@ -60,6 +61,7 @@ export default function App() {
   // hostname 取得 + ピッカー状態確認（初期化・タブ切り替え時に呼ぶ）
   const refreshTab = useCallback(async () => {
     setIsPickerActive(false);
+    setContentScriptReady(false);
 
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (tab?.id == null) {
@@ -103,6 +105,7 @@ export default function App() {
       } satisfies Message)) as ContentMessage | undefined;
       if (response?.type === CONTENT_MSG.STATUS) {
         setIsPickerActive(response.isPickerActive);
+        setContentScriptReady(true);
       }
     } catch {
       // コンテンツスクリプト未注入
@@ -189,6 +192,7 @@ export default function App() {
             target: { tabId: tab.id },
             files: [CONTENT_SCRIPT_PATHS.pickerCss],
           });
+          setContentScriptReady(true);
         } catch {
           // 注入失敗 — 無視
         }
@@ -256,7 +260,21 @@ export default function App() {
             </div>
           )}
 
-          {hasHostPermission && <>
+          {hasHostPermission && !contentScriptReady && (
+            <div className="flex-1 flex flex-col items-center justify-center gap-3 text-base-content/40 px-6 text-center">
+              <IconPicker className="h-10 w-10" />
+              <p className="text-sm font-medium">
+                ページをリロードしてください
+              </p>
+              <p className="text-xs">
+                コンテンツスクリプトが読み込まれていません。
+                <br />
+                ページをリロードすると自動的に有効になります。
+              </p>
+            </div>
+          )}
+
+          {hasHostPermission && contentScriptReady && <>
           {/* ピッカーボタン */}
           <div className="px-3 py-3 border-b border-base-300">
             <div className="flex items-center gap-3">
