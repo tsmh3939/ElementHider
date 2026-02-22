@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { IconTrash, IconSortAsc, IconSortDesc, IconEmpty, IconSearch } from "../icons";
-import { EH_SETTINGS_KEY, buildOriginPattern } from "../../shared/config";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { IconTrash, IconSortAsc, IconSortDesc, IconEmpty, IconSearch, IconDownload, IconUpload } from "../icons";
+import { EH_SETTINGS_KEY, APP_VERSION, buildOriginPattern } from "../../shared/config";
 import { BG_MSG, type ManagedElement, type SiteStorage, type BackgroundMessage } from "../../shared/messages";
 
 type SortKey = "hostname" | "lastVisited" | "elementCount";
@@ -9,6 +9,27 @@ interface SiteData {
   hostname: string;
   elements: ManagedElement[];
   lastVisited: number;
+}
+
+interface ExportData {
+  version: string;
+  exportedAt: string;
+  sites: Record<string, SiteStorage>;
+}
+
+function isValidExportData(data: unknown): data is ExportData {
+  if (typeof data !== "object" || data === null) return false;
+  const d = data as Record<string, unknown>;
+  if (typeof d.version !== "string") return false;
+  if (typeof d.exportedAt !== "string") return false;
+  if (typeof d.sites !== "object" || d.sites === null) return false;
+  for (const [, val] of Object.entries(d.sites as Record<string, unknown>)) {
+    if (typeof val !== "object" || val === null) return false;
+    const v = val as Record<string, unknown>;
+    if (!Array.isArray(v.elements)) return false;
+    if (typeof v.lastVisited !== "number") return false;
+  }
+  return true;
 }
 
 function formatLastVisited(ts: number): string {
@@ -40,6 +61,16 @@ export function DataPage() {
   const [sortKey, setSortKey] = useState<SortKey>("hostname");
   const [sortAsc, setSortAsc] = useState(true);
   const [query, setQuery] = useState("");
+
+  // エクスポート
+  const [exportStatus, setExportStatus] = useState<"idle" | "done">("idle");
+
+  // インポート
+  const [importModalState, setImportModalState] = useState<"idle" | "preview" | "done" | "error">("idle");
+  const [importData, setImportData] = useState<ExportData | null>(null);
+  const [importMode, setImportMode] = useState<"merge" | "overwrite">("merge");
+  const [importError, setImportError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadData = useCallback(() => {
     chrome.storage.local.get(null).then((all) => {
@@ -107,11 +138,119 @@ export function DataPage() {
     setTimeout(() => setClearAllStatus("idle"), 2000);
   };
 
+  // ── エクスポート ──────────────────────────────────────────────────────────
+
+  const handleExport = async () => {
+    const all = await chrome.storage.local.get(null);
+    const exportSites: Record<string, SiteStorage> = {};
+    for (const [key, value] of Object.entries(all)) {
+      if (key === EH_SETTINGS_KEY) continue;
+      exportSites[key] = value as SiteStorage;
+    }
+    const data: ExportData = {
+      version: APP_VERSION,
+      exportedAt: new Date().toISOString(),
+      sites: exportSites,
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `elementhider-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setExportStatus("done");
+    setTimeout(() => setExportStatus("idle"), 2000);
+  };
+
+  // ── インポート ────────────────────────────────────────────────────────────
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    // ファイル入力をリセット（同じファイルを再選択できるように）
+    e.target.value = "";
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const parsed = JSON.parse(ev.target?.result as string);
+        if (!isValidExportData(parsed)) {
+          setImportError("ファイルの形式が正しくありません。ElementHider のエクスポートファイルを選択してください。");
+          setImportModalState("error");
+          return;
+        }
+        setImportData(parsed);
+        setImportMode("merge");
+        setImportError(null);
+        setImportModalState("preview");
+      } catch {
+        setImportError("JSON の解析に失敗しました。ファイルが破損しているか、形式が正しくありません。");
+        setImportModalState("error");
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const applyImport = async () => {
+    if (!importData) return;
+    const existing = await chrome.storage.local.get(null);
+
+    const updates: Record<string, SiteStorage> = {};
+
+    for (const [hostname, importedSite] of Object.entries(importData.sites)) {
+      if (importMode === "overwrite" || !(hostname in existing)) {
+        updates[hostname] = importedSite;
+      } else {
+        // マージ: セレクタで重複排除（既存を優先、新規のみ追加）
+        const existingSite = existing[hostname] as SiteStorage;
+        const existingSelectors = new Set(existingSite.elements.map((el) => el.selector));
+        const newElements = importedSite.elements.filter((el) => !existingSelectors.has(el.selector));
+        updates[hostname] = {
+          elements: [...existingSite.elements, ...newElements],
+          lastVisited: Math.max(existingSite.lastVisited, importedSite.lastVisited),
+        };
+      }
+    }
+
+    await chrome.storage.local.set(updates);
+    loadData();
+    setImportModalState("done");
+    setTimeout(() => setImportModalState("idle"), 2000);
+  };
+
+  // インポートプレビュー用の統計計算
+  const importStats = useMemo(() => {
+    if (!importData) return null;
+    const existing = new Set(sites.map((s) => s.hostname));
+    let newSites = 0;
+    let updatedSites = 0;
+    let totalElements = 0;
+    for (const [hostname, site] of Object.entries(importData.sites)) {
+      if (existing.has(hostname)) {
+        updatedSites++;
+      } else {
+        newSites++;
+      }
+      totalElements += site.elements.length;
+    }
+    return { newSites, updatedSites, totalElements };
+  }, [importData, sites]);
+
   const totalElements = sites.reduce((sum, s) => sum + s.elements.length, 0);
   const extensionDetailsUrl = `chrome://extensions/?id=${chrome.runtime.id}`;
 
   return (
     <div className="max-w-2xl mx-auto">
+      {/* 隠しファイル入力 */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json"
+        className="hidden"
+        onChange={handleFileSelect}
+      />
+
       {/* ページヘッダー */}
       <div className="flex items-start justify-between mb-6">
         <div>
@@ -120,18 +259,39 @@ export function DataPage() {
             {sites.length} サイト / {totalElements} 要素を管理中
           </p>
         </div>
-        {sites.length > 0 && (
+        <div className="flex items-center gap-2 shrink-0">
           <button
-            className={`btn btn-sm gap-2 ${
-              clearAllStatus === "done" ? "btn-success" : "btn-error btn-outline"
-            }`}
-            onClick={() => setConfirmOpen(true)}
-            disabled={clearAllStatus === "done"}
+            className="btn btn-sm btn-ghost gap-2"
+            onClick={() => fileInputRef.current?.click()}
+            title="JSON ファイルからデータをインポート"
           >
-            <IconTrash className="h-3.5 w-3.5" />
-            {clearAllStatus === "done" ? "削除しました" : "全て削除"}
+            <IconUpload className="h-3.5 w-3.5" />
+            インポート
           </button>
-        )}
+          {sites.length > 0 && (
+            <>
+              <button
+                className={`btn btn-sm gap-2 ${exportStatus === "done" ? "btn-success" : "btn-ghost"}`}
+                onClick={handleExport}
+                disabled={exportStatus === "done"}
+                title="データを JSON ファイルにエクスポート"
+              >
+                <IconDownload className="h-3.5 w-3.5" />
+                {exportStatus === "done" ? "保存しました" : "エクスポート"}
+              </button>
+              <button
+                className={`btn btn-sm gap-2 ${
+                  clearAllStatus === "done" ? "btn-success" : "btn-error btn-outline"
+                }`}
+                onClick={() => setConfirmOpen(true)}
+                disabled={clearAllStatus === "done"}
+              >
+                <IconTrash className="h-3.5 w-3.5" />
+                {clearAllStatus === "done" ? "削除しました" : "全て削除"}
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* サマリーカード */}
@@ -307,6 +467,7 @@ export function DataPage() {
           })}
         </div>
       )}
+
       {/* 全削除確認モーダル */}
       {confirmOpen && (
         <div className="modal modal-open">
@@ -329,6 +490,98 @@ export function DataPage() {
             </div>
           </div>
           <div className="modal-backdrop" onClick={() => setConfirmOpen(false)} />
+        </div>
+      )}
+
+      {/* インポート確認モーダル */}
+      {importModalState === "preview" && importData && importStats && (
+        <div className="modal modal-open">
+          <div className="modal-box max-w-sm">
+            <h3 className="font-semibold text-lg">データをインポートしますか？</h3>
+            <p className="text-xs text-base-content/40 mt-1 mb-4">
+              エクスポート日時: {new Date(importData.exportedAt).toLocaleString(chrome.i18n.getUILanguage())}
+            </p>
+
+            {/* インポート統計 */}
+            <div className="grid grid-cols-3 gap-2 mb-4">
+              <div className="bg-base-200 rounded-lg p-2 text-center">
+                <div className="text-lg font-semibold">{importStats.newSites}</div>
+                <div className="text-xs text-base-content/50">新規サイト</div>
+              </div>
+              <div className="bg-base-200 rounded-lg p-2 text-center">
+                <div className="text-lg font-semibold">{importStats.updatedSites}</div>
+                <div className="text-xs text-base-content/50">既存サイト</div>
+              </div>
+              <div className="bg-base-200 rounded-lg p-2 text-center">
+                <div className="text-lg font-semibold">{importStats.totalElements}</div>
+                <div className="text-xs text-base-content/50">総要素数</div>
+              </div>
+            </div>
+
+            {/* マージ / 上書き 選択 */}
+            {importStats.updatedSites > 0 && (
+              <div className="mb-4">
+                <p className="text-xs text-base-content/60 mb-2">既存サイトの処理方法:</p>
+                <div className="flex flex-col gap-1.5">
+                  <label className="flex items-start gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      className="radio radio-sm radio-primary mt-0.5"
+                      checked={importMode === "merge"}
+                      onChange={() => setImportMode("merge")}
+                    />
+                    <span className="text-sm">
+                      <span className="font-medium">マージ</span>
+                      <span className="text-base-content/50 text-xs block">
+                        既存のデータを保持しつつ、新しい要素のみ追加します
+                      </span>
+                    </span>
+                  </label>
+                  <label className="flex items-start gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      className="radio radio-sm radio-primary mt-0.5"
+                      checked={importMode === "overwrite"}
+                      onChange={() => setImportMode("overwrite")}
+                    />
+                    <span className="text-sm">
+                      <span className="font-medium">上書き</span>
+                      <span className="text-base-content/50 text-xs block">
+                        既存のサイトデータをインポートデータで置き換えます
+                      </span>
+                    </span>
+                  </label>
+                </div>
+              </div>
+            )}
+
+            <div className="modal-action">
+              <button className="btn btn-sm" onClick={() => setImportModalState("idle")}>
+                キャンセル
+              </button>
+              <button className="btn btn-sm btn-primary" onClick={applyImport}>
+                <IconUpload className="h-3.5 w-3.5" />
+                インポートする
+              </button>
+            </div>
+          </div>
+          <div className="modal-backdrop" onClick={() => setImportModalState("idle")} />
+        </div>
+      )}
+
+      {/* インポートエラーモーダル */}
+      {importModalState === "error" && (
+        <div className="modal modal-open">
+          <div className="modal-box max-w-sm">
+            <h3 className="font-semibold text-lg">インポートに失敗しました</h3>
+            <p className="text-sm text-base-content/60 mt-2">{importError}</p>
+            <div className="modal-action">
+              <button className="btn btn-sm" onClick={() => setImportModalState("idle")}>
+                閉じる
+              </button>
+            </div>
+          </div>
+          <div className="modal-backdrop" onClick={() => setImportModalState("idle")} />
         </div>
       )}
     </div>
