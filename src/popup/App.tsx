@@ -179,24 +179,6 @@ export default function App() {
         type: BG_MSG.PERMISSION_GRANTED,
         hostname,
       } satisfies BackgroundMessage);
-
-      // 現在のタブにコンテンツスクリプトを即時注入
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (tab?.id != null) {
-        try {
-          await chrome.scripting.executeScript({
-            target: { tabId: tab.id },
-            files: [CONTENT_SCRIPT_PATHS.content],
-          });
-          await chrome.scripting.insertCSS({
-            target: { tabId: tab.id },
-            files: [CONTENT_SCRIPT_PATHS.pickerCss],
-          });
-          setContentScriptReady(true);
-        } catch {
-          // 注入失敗 — 無視
-        }
-      }
     }
   }, [hostname]);
 
