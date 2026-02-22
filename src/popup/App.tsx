@@ -206,7 +206,7 @@ export default function App() {
           {!hasHostPermission && (
             <div className="flex flex-col gap-1.5 px-3 py-2 bg-info/20 border-b border-info/40">
               <p className="text-xs text-info-content">
-                次回訪問時にも非表示を維持するにはアクセスを許可してください
+                このサイトで要素を非表示にするにはアクセスを許可してください
               </p>
               <button
                 className="btn btn-xs btn-info w-full"
