@@ -200,22 +200,20 @@ export default function App() {
     <div className="flex flex-col h-full bg-base-100 text-base-content">
       {/* Navbar */}
       <div className="navbar bg-base-200 px-3 py-2 min-h-0">
-        <div className="navbar-start">
-          <span className="text-lg font-bold tracking-tight">
-            <span className="text-primary">{APP_NAME_PRIMARY}</span>{APP_NAME_SECONDARY}
-          </span>
-        </div>
-        <div className="navbar-end">
+        <span className="text-lg font-bold tracking-tight shrink-0 mr-3">
+          <span className="text-primary">{APP_NAME_PRIMARY}</span>{APP_NAME_SECONDARY}
+        </span>
+        <div className="flex items-center gap-1 min-w-0 ml-auto">
           {hostname && (
             <span
-              className="badge badge-ghost badge-sm truncate overflow-visible pb-0.5"
+              className="badge badge-ghost badge-sm truncate pb-0.5"
               title={hostname}
             >
               {hostname.replace(/^www\./, "")}
             </span>
           )}
           <button
-            className="btn btn-xs btn-ghost text-base-content/50"
+            className="btn btn-xs btn-ghost text-base-content/50 shrink-0"
             onClick={() => chrome.runtime.openOptionsPage()}
             title="設定"
           >
