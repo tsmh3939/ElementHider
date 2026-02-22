@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { IconTrash, IconSortAsc, IconSortDesc, IconEmpty, IconSearch, IconDownload, IconUpload } from "../icons";
-import { EH_SETTINGS_KEY, APP_VERSION, buildOriginPattern } from "../../shared/config";
+import { EH_SETTINGS_KEY, APP_VERSION, LABEL_MAX_LENGTH, buildOriginPattern } from "../../shared/config";
 import { BG_MSG, type ManagedElement, type SiteStorage, type BackgroundMessage } from "../../shared/messages";
 
 type SortKey = "hostname" | "lastVisited" | "elementCount";
@@ -208,12 +208,24 @@ export function DataPage() {
     for (const [hostname, importedSite] of Object.entries(importData.sites)) {
       // 設定キーを誤って上書きしないよう除外
       if (hostname === EH_SETTINGS_KEY) continue;
-      // 不正なセレクタを除外
-      const safeElements = importedSite.elements.filter((el) => {
-        if (!el.selector) return false;
-        try { document.querySelectorAll(el.selector); return true; } catch { return false; }
-      });
-      const safeSite: SiteStorage = { ...importedSite, elements: safeElements };
+      // 不正なホスト名を除外（ドメイン形式のみ許可）
+      if (!/^([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/.test(hostname)) continue;
+      // 不正な要素データを除外・サニタイズ
+      const safeElements: ManagedElement[] = importedSite.elements
+        .filter((el): el is ManagedElement => {
+          if (!el.selector || typeof el.selector !== "string") return false;
+          if (typeof el.label !== "string") return false;
+          if (typeof el.timestamp !== "number" || el.timestamp < 0) return false;
+          if (typeof el.isHidden !== "boolean") return false;
+          try { document.querySelectorAll(el.selector); return true; } catch { return false; }
+        })
+        .map((el) => ({
+          selector: el.selector,
+          label: el.label.slice(0, LABEL_MAX_LENGTH),
+          timestamp: el.timestamp,
+          isHidden: el.isHidden,
+        }));
+      const safeSite: SiteStorage = { elements: safeElements, lastVisited: importedSite.lastVisited };
       if (importMode === "overwrite" || !(hostname in existing)) {
         updates[hostname] = safeSite;
       } else {
