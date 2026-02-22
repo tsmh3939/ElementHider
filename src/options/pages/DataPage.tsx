@@ -171,6 +171,19 @@ export function DataPage() {
         );
       })()}
 
+      {/* 権限管理リンク */}
+      <div className="bg-base-200 rounded-xl px-4 py-3 mb-6 flex items-center justify-between">
+        <span className="text-xs text-base-content/60">
+          サイトごとに付与した権限は Chrome の拡張機能管理ページから確認・削除できます
+        </span>
+        <button
+          className="link link-sm link-primary shrink-0 ml-3 no-underline hover:underline"
+          onClick={() => chrome.tabs.create({ url: `chrome://extensions/?id=${chrome.runtime.id}` })}
+        >
+          権限を管理
+        </button>
+      </div>
+
       {/* サイト一覧 */}
       {sites.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-base-content/30 gap-2">
