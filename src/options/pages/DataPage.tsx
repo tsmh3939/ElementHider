@@ -171,6 +171,13 @@ export function DataPage() {
     // ファイル入力をリセット（同じファイルを再選択できるように）
     e.target.value = "";
 
+    // 10 MB を超えるファイルは拒否
+    if (file.size > 10 * 1024 * 1024) {
+      setImportError("ファイルサイズが大きすぎます（上限: 10 MB）。");
+      setImportModalState("error");
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (ev) => {
       try {
@@ -199,6 +206,8 @@ export function DataPage() {
     const updates: Record<string, SiteStorage> = {};
 
     for (const [hostname, importedSite] of Object.entries(importData.sites)) {
+      // 設定キーを誤って上書きしないよう除外
+      if (hostname === EH_SETTINGS_KEY) continue;
       if (importMode === "overwrite" || !(hostname in existing)) {
         updates[hostname] = importedSite;
       } else {
