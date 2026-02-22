@@ -159,13 +159,11 @@ function isSelectableTarget(el: Element): boolean {
 
 // ─── Storage helpers ──────────────────────────────────────────────────────────
 
-const getHostname = () => window.location.hostname;
-
 /** ページ訪問時刻（コンテンツスクリプト初期化時に確定） */
 const _currentLastVisited = Date.now();
 
 async function loadManagedElements(): Promise<ManagedElement[]> {
-  const host = getHostname();
+  const host = window.location.hostname;
   const result = await chrome.storage.local.get(host);
   const stored = result[host] as { elements?: unknown } | undefined;
   const rawElements = stored?.elements;
@@ -175,7 +173,7 @@ async function loadManagedElements(): Promise<ManagedElement[]> {
 
 async function saveManagedElements(elements: ManagedElement[]): Promise<void> {
   const storage: SiteStorage = { elements, lastVisited: _currentLastVisited };
-  await chrome.storage.local.set({ [getHostname()]: storage });
+  await chrome.storage.local.set({ [window.location.hostname]: storage });
 }
 
 async function addManagedElement(el: ManagedElement): Promise<void> {
@@ -239,14 +237,10 @@ function refreshHideStyle() {
 
 function hideElementBySelector(selector: string, mode: HideMode = "hidden") {
   try {
-    document.querySelectorAll(selector); // セレクタの有効性を検証
+    document.querySelectorAll(selector).forEach(clearHighlight);
   } catch {
     return; // invalid selector
   }
-  // 現在表示されているマッチ要素のハイライトを解除
-  try {
-    document.querySelectorAll(selector).forEach(clearHighlight);
-  } catch { /* ignore */ }
   hiddenSelectors.set(selector, mode);
   refreshHideStyle();
 }
@@ -272,13 +266,13 @@ function showElementBySelector(selector: string) {
 
 // ─── Tooltip Component ────────────────────────────────────────────────────────
 
-interface TooltipProps {
+interface TooltipState {
   x: number;
   y: number;
   element: Element;
 }
 
-function Tooltip({ x, y, element }: TooltipProps) {
+function Tooltip({ x, y, element }: TooltipState) {
   const tag = element.tagName.toLowerCase();
   const id = element.id ? `#${element.id}` : "";
   const classes = Array.from(element.classList)
@@ -306,12 +300,6 @@ function Tooltip({ x, y, element }: TooltipProps) {
 }
 
 // ─── Main Picker App ──────────────────────────────────────────────────────────
-
-interface TooltipState {
-  x: number;
-  y: number;
-  element: Element;
-}
 
 function PickerApp() {
   const [isPickerActive, setIsPickerActive] = useState(false);
