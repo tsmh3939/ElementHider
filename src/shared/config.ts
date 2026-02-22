@@ -38,6 +38,7 @@ export const DEFAULT_THEME = "dark";
 
 /** 設定ページで選択可能な全テーマ一覧 */
 export const ALL_THEMES: { id: string; label: string }[] = [
+  "nimbus", "glacier",
   "light", "dark", "cupcake", "bumblebee", "emerald", "corporate",
   "synthwave", "retro", "cyberpunk", "valentine", "halloween", "garden",
   "forest", "aqua", "lofi", "pastel", "fantasy", "wireframe", "black",

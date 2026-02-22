@@ -5,3 +5,109 @@
 html, body, #root {
   height: 100%;
 }
+
+/* ── Custom theme: Glacier ─────────────────────────────────────────────────
+   Clean cool-white light theme with vivid blue-violet accent.
+   Inspired by modern productivity tools (Linear, Vercel, Raycast).
+   ────────────────────────────────────────────────────────────────────── */
+[data-theme=glacier] {
+  color-scheme: light;
+
+  /* Primary: vivid blue-violet */
+  --p:  55% 0.220 262;
+  --pc: 98% 0.002   0;
+
+  /* Secondary: soft purple */
+  --s:  65% 0.160 305;
+  --sc: 98% 0.002   0;
+
+  /* Accent: vivid teal */
+  --a:  62% 0.180 195;
+  --ac: 10% 0.010 195;
+
+  /* Neutral: deep slate */
+  --n:  32% 0.018 258;
+  --nc: 94% 0.006 245;
+
+  /* Base: cool off-white */
+  --b1: 97% 0.006 245;
+  --b2: 93% 0.008 245;
+  --b3: 88% 0.010 245;
+  --bc: 22% 0.018 258;
+
+  /* Status */
+  --in:  60% 0.180 232;
+  --inc: 98% 0.002   0;
+  --su:  58% 0.160 160;
+  --suc: 98% 0.002   0;
+  --wa:  72% 0.170  75;
+  --wac: 15% 0.010  75;
+  --er:  58% 0.210  22;
+  --erc: 98% 0.002   0;
+
+  /* Shape */
+  --rounded-box:   0.75rem;
+  --rounded-btn:   0.5rem;
+  --rounded-badge: 1.9rem;
+  --border-btn: 1px;
+  --tab-border: 1px;
+  --tab-radius: 0.5rem;
+
+  /* Animation */
+  --animation-btn:   0.25s;
+  --animation-input: 0.2s;
+  --btn-focus-scale: 0.95;
+}
+
+/* ── Custom theme: Nimbus ──────────────────────────────────────────────────
+   Deep near-black background with vivid magenta/pink accent.
+   Inspired by dark dashboard UIs with gradient-highlighted active items.
+   ────────────────────────────────────────────────────────────────────── */
+[data-theme=nimbus] {
+  color-scheme: dark;
+
+  /* Primary: vivid magenta-pink */
+  --p:  58% 0.230 345;
+  --pc: 98% 0.002   0;
+
+  /* Secondary: deep purple */
+  --s:  50% 0.180 295;
+  --sc: 98% 0.002   0;
+
+  /* Accent: teal */
+  --a:  70% 0.150 194;
+  --ac: 10% 0.010 194;
+
+  /* Neutral */
+  --n:  22% 0.014 264;
+  --nc: 70% 0.012 264;
+
+  /* Base: very dark blue-gray */
+  --b1: 12% 0.012 264;
+  --b2: 16% 0.013 264;
+  --b3: 20% 0.014 264;
+  --bc: 85% 0.010 264;
+
+  /* Status */
+  --in:  65% 0.160 232;
+  --inc:  0% 0.000   0;
+  --su:  62% 0.150 160;
+  --suc:  0% 0.000   0;
+  --wa:  82% 0.180  84;
+  --wac: 20% 0.000   0;
+  --er:  65% 0.220  22;
+  --erc:  0% 0.000   0;
+
+  /* Shape */
+  --rounded-box:   0.75rem;
+  --rounded-btn:   0.5rem;
+  --rounded-badge: 1.9rem;
+  --border-btn: 1px;
+  --tab-border: 1px;
+  --tab-radius: 0.5rem;
+
+  /* Animation */
+  --animation-btn:   0.25s;
+  --animation-input: 0.2s;
+  --btn-focus-scale: 0.95;
+}
