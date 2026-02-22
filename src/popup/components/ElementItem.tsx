@@ -65,11 +65,7 @@ export function ElementItem({
       className={`border-t-2 transition-colors ${isDragOver ? "border-primary" : "border-transparent"}`}
     >
       <div
-        className={`flex items-center gap-1 rounded-lg overflow-hidden transition-colors ${
-          element.isHidden
-            ? "bg-base-200 hover:bg-base-300 opacity-40"
-            : "bg-base-200 hover:bg-base-300"
-        }`}
+        className="group flex items-center gap-1 rounded-lg overflow-hidden transition-colors bg-base-200 hover:bg-base-300"
       >
         <span
           className="btn btn-xs btn-ghost shrink-0 cursor-grab text-base-content/20 hover:text-base-content/50 px-1"
@@ -106,36 +102,36 @@ export function ElementItem({
         )}
 
         {!isEditing && (
-          <select
-            className="select select-xs shrink-0 text-xs bg-transparent border-none focus:outline-none min-h-0 h-6 pl-1 pr-5"
-            value={element.hideMode}
-            onChange={(e) => onSetHideMode(element.selector, e.target.value as HideMode)}
-            onClick={(e) => e.stopPropagation()}
-            title="非表示モード"
-          >
-            {(Object.entries(HIDE_MODE_LABELS) as [HideMode, string][]).map(([mode, label]) => (
-              <option key={mode} value={mode}>{label}</option>
-            ))}
-          </select>
-        )}
+          <div className="flex items-center shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+            <select
+              className="select select-xs shrink-0 text-xs bg-transparent border-none focus:outline-none min-h-0 h-6 pl-1 pr-5"
+              value={element.hideMode}
+              onChange={(e) => onSetHideMode(element.selector, e.target.value as HideMode)}
+              onClick={(e) => e.stopPropagation()}
+              title="非表示モード"
+            >
+              {(Object.entries(HIDE_MODE_LABELS) as [HideMode, string][]).map(([mode, label]) => (
+                <option key={mode} value={mode}>{label}</option>
+              ))}
+            </select>
 
-        {!isEditing && (
-          <button
-            className="btn btn-xs btn-ghost shrink-0 text-base-content/30 hover:text-base-content"
-            onClick={startEdit}
-            title="名前を編集"
-          >
-            <IconPencil className="h-3.5 w-3.5" />
-          </button>
-        )}
+            <button
+              className="btn btn-xs btn-ghost shrink-0 text-base-content/30 hover:text-base-content"
+              onClick={startEdit}
+              title="名前を編集"
+            >
+              <IconPencil className="h-3.5 w-3.5" />
+            </button>
 
-        <button
-          className="btn btn-xs btn-ghost text-error shrink-0"
-          onClick={() => onDelete(element.selector)}
-          title="管理から削除"
-        >
-          <IconTrash className="h-3.5 w-3.5" />
-        </button>
+            <button
+              className="btn btn-xs btn-ghost text-error shrink-0"
+              onClick={() => onDelete(element.selector)}
+              title="管理から削除"
+            >
+              <IconTrash className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
       </div>
     </li>
   );
