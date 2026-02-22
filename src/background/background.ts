@@ -8,7 +8,7 @@
  */
 
 import { BG_MSG, MSG, type BackgroundMessage } from "../shared/messages";
-import { buildOriginPattern, CONTENT_SCRIPT_PATHS, EH_SETTINGS_KEY } from "../shared/config";
+import { buildOriginPattern, CONTENT_SCRIPT_PATHS } from "../shared/config";
 
 // ─── Dynamic content script registration ──────────────────────────────────────
 
@@ -118,15 +118,3 @@ chrome.runtime.onMessage.addListener(
     }
   }
 );
-
-// ─── Storage cleanup: unregister scripts when site data is removed ────────────
-
-chrome.storage.local.onChanged.addListener((changes) => {
-  for (const [key, change] of Object.entries(changes)) {
-    if (key === EH_SETTINGS_KEY || key.startsWith("__")) continue;
-    // データが削除された場合（newValue が undefined）
-    if (change.newValue === undefined) {
-      unregisterScriptsForHost(key);
-    }
-  }
-});
