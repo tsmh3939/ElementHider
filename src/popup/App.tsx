@@ -5,7 +5,7 @@ import { MSG, CONTENT_MSG, type ContentMessage, type Message } from "./types";
 import { sendToActiveTab } from "./api";
 import { useManagedElements } from "./hooks";
 import { ElementItem } from "./components/ElementItem";
-import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME, DEFAULT_MULTI_SELECT, APP_NAME_PRIMARY, APP_NAME_SECONDARY, buildOriginPattern } from "../shared/config";
+import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME, DEFAULT_MULTI_SELECT, APP_NAME_PRIMARY, APP_NAME_SECONDARY, buildOriginPattern, CONTENT_SCRIPT_PATHS } from "../shared/config";
 import { BG_MSG, type BackgroundMessage } from "../shared/messages";
 
 export default function App() {
@@ -83,9 +83,22 @@ export default function App() {
         setHasHostPermission(granted);
       }
     } catch {
-      // コンテンツスクリプト未注入
-      setHostname(null);
-      setHasHostPermission(false);
+      // コンテンツスクリプト未注入 → プログラム的に再注入を試みる
+      try {
+        await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: [CONTENT_SCRIPT_PATHS.content],
+        });
+        await chrome.scripting.insertCSS({
+          target: { tabId: tab.id },
+          files: [CONTENT_SCRIPT_PATHS.pickerCss],
+        });
+        // 注入成功 → CONTENT_READY メッセージで refreshTab() が再呼出しされる
+      } catch {
+        // 権限なし（chrome:// ページなど） → 未注入画面を表示
+        setHostname(null);
+        setHasHostPermission(false);
+      }
     }
   }, []);
 
@@ -126,11 +139,14 @@ export default function App() {
         });
       } else if (message.type === CONTENT_MSG.STATUS) {
         setIsPickerActive(message.isPickerActive);
+      } else if (message.type === CONTENT_MSG.READY) {
+        // コンテンツスクリプト初期化完了 → リロード時のレース条件を解消
+        refreshTab();
       }
     };
     chrome.runtime.onMessage.addListener(handler);
     return () => chrome.runtime.onMessage.removeListener(handler);
-  }, [addElement]);
+  }, [addElement, refreshTab]);
 
   const togglePicker = useCallback(async () => {
     const next = !isPickerActive;

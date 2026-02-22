@@ -374,6 +374,12 @@ function PickerApp() {
     };
 
     chrome.runtime.onMessage.addListener(handler);
+
+    // メッセージハンドラ登録後にサイドパネルへ初期化完了を通知
+    chrome.runtime.sendMessage({ type: CONTENT_MSG.READY }).catch(() => {
+      // サイドパネルが開いていない場合は無視
+    });
+
     return () => chrome.runtime.onMessage.removeListener(handler);
   }, []);
 
