@@ -5,7 +5,7 @@ import { MSG, CONTENT_MSG, type ContentMessage, type Message } from "./types";
 import { sendToActiveTab } from "./api";
 import { useManagedElements } from "./hooks";
 import { ElementItem } from "./components/ElementItem";
-import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME, DEFAULT_MULTI_SELECT, APP_NAME_PRIMARY, APP_NAME_SECONDARY, buildOriginPattern } from "../shared/config";
+import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME, DEFAULT_MULTI_SELECT, APP_NAME_PRIMARY, APP_NAME_SECONDARY, buildOriginPattern, CONTENT_SCRIPT_PATHS } from "../shared/config";
 import { BG_MSG, type BackgroundMessage } from "../shared/messages";
 
 export default function App() {
@@ -68,24 +68,44 @@ export default function App() {
       return;
     }
 
+    // タブ URL からホスト名を取得
+    if (!tab.url) {
+      setHostname(null);
+      setHasHostPermission(false);
+      return;
+    }
+
+    let host: string;
+    try {
+      const url = new URL(tab.url);
+      if (url.protocol !== "http:" && url.protocol !== "https:") {
+        setHostname(null);
+        setHasHostPermission(false);
+        return;
+      }
+      host = url.hostname;
+    } catch {
+      setHostname(null);
+      setHasHostPermission(false);
+      return;
+    }
+
+    setHostname(host);
+    const granted = await chrome.permissions.contains({
+      origins: [buildOriginPattern(host)],
+    });
+    setHasHostPermission(granted);
+
+    // コンテンツスクリプトからピッカー状態を取得
     try {
       const response = (await chrome.tabs.sendMessage(tab.id, {
         type: MSG.GET_STATUS,
       } satisfies Message)) as ContentMessage | undefined;
       if (response?.type === CONTENT_MSG.STATUS) {
-        setHostname(response.hostname);
         setIsPickerActive(response.isPickerActive);
-
-        // ホスト権限の確認
-        const granted = await chrome.permissions.contains({
-          origins: [buildOriginPattern(response.hostname)],
-        });
-        setHasHostPermission(granted);
       }
     } catch {
       // コンテンツスクリプト未注入
-      setHostname(null);
-      setHasHostPermission(false);
     }
   }, []);
 
@@ -156,6 +176,23 @@ export default function App() {
         type: BG_MSG.PERMISSION_GRANTED,
         hostname,
       } satisfies BackgroundMessage);
+
+      // 現在のタブにコンテンツスクリプトを即時注入
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (tab?.id != null) {
+        try {
+          await chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            files: [CONTENT_SCRIPT_PATHS.content],
+          });
+          await chrome.scripting.insertCSS({
+            target: { tabId: tab.id },
+            files: [CONTENT_SCRIPT_PATHS.pickerCss],
+          });
+        } catch {
+          // 注入失敗 — 無視
+        }
+      }
     }
   }, [hostname]);
 

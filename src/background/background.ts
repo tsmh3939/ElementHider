@@ -1,16 +1,5 @@
-/**
- * ElementHider Background Service Worker
- *
- * 動的コンテンツスクリプト登録とプログラム的注入を管理する。
- * - activeTab: ユーザーがアイコンをクリックした時に一時的な注入権限を付与
- * - scripting: executeScript / registerContentScripts を使用
- * - optional_host_permissions: サイトごとに永続権限を個別に取得
- */
-
-import { BG_MSG, MSG, type BackgroundMessage } from "../shared/messages";
+import { BG_MSG, type BackgroundMessage } from "../shared/messages";
 import { buildOriginPattern, CONTENT_SCRIPT_PATHS } from "../shared/config";
-
-// ─── Dynamic content script registration ──────────────────────────────────────
 
 /** 指定ホストの早期注入 + メインコンテンツスクリプトを動的登録する */
 async function registerScriptsForHost(hostname: string): Promise<void> {
@@ -75,36 +64,10 @@ async function syncRegisteredScripts(): Promise<void> {
 // Service Worker 起動時に同期
 syncRegisteredScripts();
 
-// ─── Programmatic injection on action click ───────────────────────────────────
-
 chrome.action.onClicked.addListener(async (tab) => {
   if (tab.id == null) return;
-
-  // サイドパネルを開く
   chrome.sidePanel.open({ tabId: tab.id });
-
-  // コンテンツスクリプトが既に注入済みか確認
-  try {
-    await chrome.tabs.sendMessage(tab.id, { type: MSG.GET_STATUS });
-    // 応答があれば既に注入済み
-  } catch {
-    // 未注入 → activeTab 権限を使ってプログラム的に注入
-    try {
-      await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        files: [CONTENT_SCRIPT_PATHS.content],
-      });
-      await chrome.scripting.insertCSS({
-        target: { tabId: tab.id },
-        files: [CONTENT_SCRIPT_PATHS.pickerCss],
-      });
-    } catch {
-      // chrome:// ページなどでは注入不可 — 無視
-    }
-  }
 });
-
-// ─── Message handler ──────────────────────────────────────────────────────────
 
 chrome.runtime.onMessage.addListener(
   (message: BackgroundMessage, _sender, sendResponse: (response?: unknown) => void) => {
