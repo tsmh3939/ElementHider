@@ -40,6 +40,7 @@ export function DataPage() {
   const [sortKey, setSortKey] = useState<SortKey>("hostname");
   const [sortAsc, setSortAsc] = useState(true);
   const [query, setQuery] = useState("");
+  const [grantedHosts, setGrantedHosts] = useState<Set<string>>(new Set());
 
   const loadData = useCallback(() => {
     chrome.storage.local.get(null).then((all) => {
@@ -56,6 +57,14 @@ export function DataPage() {
       setSites(result);
     });
     chrome.storage.local.getBytesInUse(null).then(setBytesInUse);
+    chrome.permissions.getAll().then((p) => {
+      const hosts = new Set<string>();
+      for (const origin of p.origins ?? []) {
+        const m = origin.match(/^\*:\/\/([^/]+)\/\*$/);
+        if (m) hosts.add(m[1]);
+      }
+      setGrantedHosts(hosts);
+    });
   }, []);
 
   const sortedSites = useMemo(() => {
@@ -83,6 +92,16 @@ export function DataPage() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  const revokePermission = async (hostname: string) => {
+    await chrome.runtime.sendMessage({ type: BG_MSG.PERMISSION_REVOKED, hostname } satisfies BackgroundMessage);
+    await chrome.permissions.remove({ origins: [buildOriginPattern(hostname)] }).catch(() => {});
+    setGrantedHosts((prev) => {
+      const next = new Set(prev);
+      next.delete(hostname);
+      return next;
+    });
+  };
 
   const deleteSite = async (hostname: string) => {
     await chrome.storage.local.remove(hostname);
@@ -263,7 +282,7 @@ export function DataPage() {
                   </button>
                 </div>
 
-                {/* 展開: 要素一覧 */}
+                {/* 展開: 要素一覧 + 権限管理 */}
                 {isOpen && (
                   <div className="border-t border-base-300">
                     <ul className="divide-y divide-base-300">
@@ -285,6 +304,19 @@ export function DataPage() {
                         </li>
                       ))}
                     </ul>
+                    {grantedHosts.has(site.hostname) && (
+                      <div className="flex items-center justify-between px-4 py-2 border-t border-base-300 bg-base-100/50">
+                        <span className="text-xs text-base-content/50">
+                          このサイトへのアクセスを許可済み
+                        </span>
+                        <button
+                          className="link link-xs text-warning no-underline hover:underline"
+                          onClick={() => revokePermission(site.hostname)}
+                        >
+                          権限を取り消す
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
