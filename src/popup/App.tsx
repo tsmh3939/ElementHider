@@ -229,6 +229,8 @@ export default function App() {
         <div className="flex-1 flex flex-col items-center justify-center gap-3 text-base-content/40 px-6 text-center">
           <IconPicker className="h-10 w-10" />
           <p className="text-sm font-medium">
+            利用するには
+            <br />
             ページをリロードしてから
             <br />
             サイドパネルを開き直してください
@@ -243,7 +245,9 @@ export default function App() {
           {!hasHostPermission && (
             <div className="flex flex-col gap-1.5 px-3 py-2 bg-info/20 border-b border-info/40">
               <p className="text-xs text-info-content">
-                このサイトで要素を非表示にするにはアクセスを許可してください
+                サイトへのアクセスが許可されていないため利用できません。
+                <br />
+                利用するにはアクセスを許可してください。
               </p>
               <button
                 className="btn btn-xs btn-info w-full"
