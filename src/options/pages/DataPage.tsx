@@ -226,30 +226,26 @@ export function DataPage() {
               <div key={site.hostname} className="card bg-base-200 overflow-hidden">
                 {/* サイト行 */}
                 <div
-                  className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-base-300 transition-colors"
+                  className="flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-base-300 transition-colors"
                   onClick={() => setExpanded(isOpen ? null : site.hostname)}
                 >
-                  <div className="flex-1 min-w-0">
-                    <a
-                      className="font-medium text-sm truncate hover:underline hover:text-primary"
-                      href={`https://${site.hostname}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      title={`https://${site.hostname} を開く`}
-                    >{stripWww(site.hostname)}</a>
-                    <p className="text-xs text-base-content/50 mt-0.5">
-                      {site.elements.length} 要素
-                      {hiddenCount > 0 && (
-                        <span className="ml-1.5">
-                          (<span className="text-error">{hiddenCount} 非表示</span>)
-                        </span>
-                      )}
-                    </p>
-                    <p className="text-xs text-base-content/40 mt-0.5">
-                      最終訪問: {formatLastVisited(site.lastVisited)}
-                    </p>
-                  </div>
+                  <a
+                    className="font-medium text-sm truncate hover:underline hover:text-primary min-w-0"
+                    href={`https://${site.hostname}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    title={`https://${site.hostname} を開く`}
+                  >{stripWww(site.hostname)}</a>
+                  <span className="text-xs text-base-content/50 shrink-0">
+                    {site.elements.length} 要素
+                    {hiddenCount > 0 && (
+                      <span className="text-error ml-1">({hiddenCount} 非表示)</span>
+                    )}
+                  </span>
+                  <span className="text-xs text-base-content/40 shrink-0">
+                    {formatLastVisited(site.lastVisited)}
+                  </span>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className={`h-4 w-4 text-base-content/40 transition-transform shrink-0 ${isOpen ? "rotate-180" : ""}`}
