@@ -1,10 +1,13 @@
 /** Types shared between the popup (side panel) and the content script. */
 
+export type HideMode = "hidden" | "invisible";
+
 export interface ManagedElement {
   selector: string;
   label: string;
   timestamp: number;
   isHidden: boolean;
+  hideMode: HideMode;
 }
 
 /** chrome.storage.local に保存されるホスト名単位のデータ */
@@ -19,6 +22,7 @@ export const MSG = {
   STOP_PICKER: "STOP_PICKER",
   SHOW_ELEMENT: "SHOW_ELEMENT",
   HIDE_ELEMENT: "HIDE_ELEMENT",
+  SET_HIDE_MODE: "SET_HIDE_MODE",
   GET_STATUS: "GET_STATUS",
 } as const;
 
@@ -26,7 +30,8 @@ export type Message =
   | { type: typeof MSG.START_PICKER; multiSelect: boolean }
   | { type: typeof MSG.STOP_PICKER }
   | { type: typeof MSG.SHOW_ELEMENT; selector: string }
-  | { type: typeof MSG.HIDE_ELEMENT; selector: string }
+  | { type: typeof MSG.HIDE_ELEMENT; selector: string; mode: HideMode }
+  | { type: typeof MSG.SET_HIDE_MODE; selector: string; mode: HideMode }
   | { type: typeof MSG.GET_STATUS };
 
 /** background スクリプトへ送るメッセージ定数 */

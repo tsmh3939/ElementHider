@@ -92,6 +92,22 @@ export const CONTENT_SCRIPT_PATHS = {
   pickerCss: "src/content/picker.css",
 } as const;
 
+// ── 非表示モード ─────────────────────────────────────────────────────────────
+
+import type { HideMode } from "./messages";
+
+/** 非表示モードごとの CSS ルール */
+export const HIDE_MODE_CSS: Record<HideMode, string> = {
+  hidden: "display: none !important",
+  invisible: "visibility: hidden !important",
+};
+
+/** 非表示モードの表示ラベル */
+export const HIDE_MODE_LABELS: Record<HideMode, string> = {
+  hidden: "非表示",
+  invisible: "不可視",
+};
+
 // ── UI パラメータ ────────────────────────────────────────────────────────────
 
 /** 要素ラベルの最大文字数 */

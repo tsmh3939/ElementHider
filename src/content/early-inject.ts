@@ -8,7 +8,8 @@
  * 管理を引き継いだ後、このスタイルタグ (#eh-initial-hide) を削除する。
  */
 
-import { EH_INITIAL_HIDE_STYLE_ID } from "../shared/config";
+import { EH_INITIAL_HIDE_STYLE_ID, HIDE_MODE_CSS } from "../shared/config";
+import type { HideMode } from "../shared/messages";
 
 (async () => {
   const hostname = window.location.hostname;
@@ -17,20 +18,29 @@ import { EH_INITIAL_HIDE_STYLE_ID } from "../shared/config";
   const result = await chrome.storage.local.get(hostname);
   const stored = result[hostname] as { elements?: unknown } | undefined;
   const rawElements = stored?.elements;
-  const elements: Array<{ selector: string; isHidden?: boolean }> = Array.isArray(rawElements) ? rawElements : [];
+  const elements: Array<{ selector: string; isHidden?: boolean; hideMode?: HideMode }> = Array.isArray(rawElements) ? rawElements : [];
 
-  const hiddenSelectors = elements
-    .filter((e) => e.isHidden !== false)
-    .map((e) => e.selector)
-    .filter((s) => {
-      if (!s) return false;
-      try { document.querySelectorAll(s); return true; } catch { return false; }
-    });
+  // モードごとにセレクタをグループ化
+  const groups = new Map<HideMode, string[]>();
+  for (const el of elements) {
+    if (el.isHidden === false) continue;
+    if (!el.selector) continue;
+    try { document.querySelectorAll(el.selector); } catch { continue; }
+    const mode: HideMode = el.hideMode === "invisible" ? "invisible" : "hidden";
+    const arr = groups.get(mode) ?? [];
+    arr.push(el.selector);
+    groups.set(mode, arr);
+  }
 
-  if (hiddenSelectors.length === 0) return;
+  if (groups.size === 0) return;
+
+  const rules: string[] = [];
+  for (const [mode, selectors] of groups) {
+    rules.push(`${selectors.join(",\n")} { ${HIDE_MODE_CSS[mode]} }`);
+  }
 
   const style = document.createElement("style");
   style.id = EH_INITIAL_HIDE_STYLE_ID;
-  style.textContent = `${hiddenSelectors.join(",\n")} { display: none !important; }`;
+  style.textContent = rules.join("\n");
   document.documentElement.appendChild(style);
 })();

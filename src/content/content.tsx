@@ -6,7 +6,7 @@
 
 import { createRoot } from "react-dom/client";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { MSG, CONTENT_MSG, type ManagedElement, type Message, type SiteStorage } from "../shared/messages";
+import { MSG, CONTENT_MSG, type ManagedElement, type HideMode, type Message, type SiteStorage } from "../shared/messages";
 import {
   EH_ROOT_ID,
   EH_HIDE_STYLE_ID,
@@ -16,6 +16,7 @@ import {
   EH_CLASS_PREFIX,
   LABEL_MAX_LENGTH,
   HIGHLIGHT_DURATION_MS,
+  HIDE_MODE_CSS,
 } from "../shared/config";
 
 // ─── CSS Selector Generation ──────────────────────────────────────────────────
@@ -199,7 +200,7 @@ function clearHighlight(el: Element) {
 // <style id="eh-hide"> で非表示セレクタを一元管理する。
 // CSS はページに常に適用されるため、遅延ロードされた要素にも自動で効く。
 
-const hiddenSelectors = new Set<string>();
+const hiddenSelectors = new Map<string, HideMode>();
 
 /** early-inject.ts が用意した #eh-initial-hide を引き継ぐか、新規作成する。 */
 function getHideStyle(): HTMLStyleElement {
@@ -218,13 +219,25 @@ function getHideStyle(): HTMLStyleElement {
 
 function refreshHideStyle() {
   const style = getHideStyle();
-  style.textContent =
-    hiddenSelectors.size > 0
-      ? [...hiddenSelectors].join(",\n") + " { display: none !important; }"
-      : "";
+  if (hiddenSelectors.size === 0) {
+    style.textContent = "";
+    return;
+  }
+  // モードごとにセレクタをグループ化
+  const groups = new Map<HideMode, string[]>();
+  for (const [selector, mode] of hiddenSelectors) {
+    const arr = groups.get(mode) ?? [];
+    arr.push(selector);
+    groups.set(mode, arr);
+  }
+  const rules: string[] = [];
+  for (const [mode, selectors] of groups) {
+    rules.push(`${selectors.join(",\n")} { ${HIDE_MODE_CSS[mode]} }`);
+  }
+  style.textContent = rules.join("\n");
 }
 
-function hideElementBySelector(selector: string) {
+function hideElementBySelector(selector: string, mode: HideMode = "hidden") {
   try {
     document.querySelectorAll(selector); // セレクタの有効性を検証
   } catch {
@@ -234,7 +247,7 @@ function hideElementBySelector(selector: string) {
   try {
     document.querySelectorAll(selector).forEach(clearHighlight);
   } catch { /* ignore */ }
-  hiddenSelectors.add(selector);
+  hiddenSelectors.set(selector, mode);
   refreshHideStyle();
 }
 
@@ -346,7 +359,15 @@ function PickerApp() {
           break;
 
         case MSG.HIDE_ELEMENT:
-          hideElementBySelector(message.selector);
+          hideElementBySelector(message.selector, message.mode);
+          sendResponse();
+          break;
+
+        case MSG.SET_HIDE_MODE:
+          if (hiddenSelectors.has(message.selector)) {
+            hiddenSelectors.set(message.selector, message.mode);
+            refreshHideStyle();
+          }
           sendResponse();
           break;
       }
@@ -400,8 +421,8 @@ function PickerApp() {
     target.classList.remove("eh-highlight");
     highlightedRef.current = null;
 
-    hideElementBySelector(selector);
-    await addManagedElement({ selector, label, timestamp: Date.now(), isHidden: true });
+    hideElementBySelector(selector, "hidden");
+    await addManagedElement({ selector, label, timestamp: Date.now(), isHidden: true, hideMode: "hidden" });
     chrome.runtime.sendMessage({ type: CONTENT_MSG.ELEMENT_HIDDEN, selector, label });
 
     if (!multiSelectRef.current) {
@@ -483,7 +504,7 @@ function mountPickerApp() {
     if (el.isHidden !== false) {
       try {
         document.querySelectorAll(el.selector); // セレクタ検証
-        hiddenSelectors.add(el.selector);
+        hiddenSelectors.set(el.selector, el.hideMode);
       } catch {
         // invalid selector
       }

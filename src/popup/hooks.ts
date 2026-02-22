@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { MSG, type ManagedElement, type SiteStorage } from "../shared/messages";
+import { MSG, type ManagedElement, type HideMode, type SiteStorage } from "../shared/messages";
 import { sendToActiveTab } from "./api";
 
 export function useManagedElements(hostname: string | null) {
@@ -69,7 +69,7 @@ export function useManagedElements(hostname: string | null) {
         if (!el) return prev;
         const nextHidden = !el.isHidden;
         sendToActiveTab(
-          nextHidden ? { type: MSG.HIDE_ELEMENT, selector } : { type: MSG.SHOW_ELEMENT, selector }
+          nextHidden ? { type: MSG.HIDE_ELEMENT, selector, mode: el.hideMode } : { type: MSG.SHOW_ELEMENT, selector }
         );
         const updated = prev.map((e) =>
           e.selector === selector ? { ...e, isHidden: nextHidden } : e
@@ -120,7 +120,7 @@ export function useManagedElements(hostname: string | null) {
       prev.forEach((e) => {
         sendToActiveTab(
           nextHidden
-            ? { type: MSG.HIDE_ELEMENT, selector: e.selector }
+            ? { type: MSG.HIDE_ELEMENT, selector: e.selector, mode: e.hideMode }
             : { type: MSG.SHOW_ELEMENT, selector: e.selector }
         );
       });
@@ -129,6 +129,25 @@ export function useManagedElements(hostname: string | null) {
       return updated;
     });
   }, [saveToStorage]);
+
+  // 非表示モードを変更
+  const setHideMode = useCallback(
+    (selector: string, mode: HideMode) => {
+      setManagedElements((prev) => {
+        const el = prev.find((e) => e.selector === selector);
+        if (!el) return prev;
+        if (el.isHidden) {
+          sendToActiveTab({ type: MSG.SET_HIDE_MODE, selector, mode });
+        }
+        const updated = prev.map((e) =>
+          e.selector === selector ? { ...e, hideMode: mode } : e
+        );
+        saveToStorage(updated);
+        return updated;
+      });
+    },
+    [saveToStorage]
+  );
 
   const reorderElements = useCallback(
     (fromIndex: number, toIndex: number) => {
@@ -144,5 +163,5 @@ export function useManagedElements(hostname: string | null) {
     [saveToStorage]
   );
 
-  return { managedElements, addElement, toggleElement, deleteElement, toggleAll, renameElement, reorderElements };
+  return { managedElements, addElement, toggleElement, deleteElement, toggleAll, renameElement, setHideMode, reorderElements };
 }

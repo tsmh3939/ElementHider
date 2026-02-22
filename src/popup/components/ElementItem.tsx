@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { IconTrash, IconPencil, IconGrip } from "../icons";
-import type { ManagedElement } from "../types";
+import type { ManagedElement, HideMode } from "../../shared/messages";
+import { HIDE_MODE_LABELS } from "../../shared/config";
 
 interface Props {
   element: ManagedElement;
@@ -9,6 +10,7 @@ interface Props {
   onToggle: (selector: string) => void;
   onDelete: (selector: string) => void;
   onRename: (selector: string, newLabel: string) => void;
+  onSetHideMode: (selector: string, mode: HideMode) => void;
   onDragStart: (index: number) => void;
   onDragEnter: (index: number) => void;
   onDrop: () => void;
@@ -17,7 +19,7 @@ interface Props {
 
 export function ElementItem({
   element, index, isDragOver,
-  onToggle, onDelete, onRename,
+  onToggle, onDelete, onRename, onSetHideMode,
   onDragStart, onDragEnter, onDrop, onDragEnd,
 }: Props) {
   const [isEditing, setIsEditing] = useState(false);
@@ -101,6 +103,20 @@ export function ElementItem({
               {element.label}
             </p>
           </div>
+        )}
+
+        {!isEditing && (
+          <select
+            className="select select-xs shrink-0 text-xs bg-transparent border-none focus:outline-none min-h-0 h-6 pl-1 pr-5"
+            value={element.hideMode}
+            onChange={(e) => onSetHideMode(element.selector, e.target.value as HideMode)}
+            onClick={(e) => e.stopPropagation()}
+            title="非表示モード"
+          >
+            {(Object.entries(HIDE_MODE_LABELS) as [HideMode, string][]).map(([mode, label]) => (
+              <option key={mode} value={mode}>{label}</option>
+            ))}
+          </select>
         )}
 
         {!isEditing && (

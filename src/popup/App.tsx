@@ -13,7 +13,7 @@ export default function App() {
   const [hostname, setHostname] = useState<string | null>(null);
   const [hasHostPermission, setHasHostPermission] = useState(false);
   const [multiSelect, setMultiSelect] = useState(DEFAULT_MULTI_SELECT);
-  const { managedElements, addElement, toggleElement, deleteElement, toggleAll, renameElement, reorderElements } =
+  const { managedElements, addElement, toggleElement, deleteElement, toggleAll, renameElement, setHideMode, reorderElements } =
     useManagedElements(hostname);
 
   const dragIndexRef = useRef(-1);
@@ -122,6 +122,7 @@ export default function App() {
           label: message.label,
           timestamp: Date.now(),
           isHidden: true,
+          hideMode: "hidden",
         });
       } else if (message.type === CONTENT_MSG.STATUS) {
         setIsPickerActive(message.isPickerActive);
@@ -295,6 +296,7 @@ export default function App() {
                     onToggle={toggleElement}
                     onDelete={deleteElement}
                     onRename={renameElement}
+                    onSetHideMode={setHideMode}
                     onDragStart={handleDragStart}
                     onDragEnter={handleDragEnter}
                     onDrop={handleDrop}

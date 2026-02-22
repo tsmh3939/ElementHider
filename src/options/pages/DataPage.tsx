@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { IconTrash, IconSortAsc, IconSortDesc, IconEmpty, IconSearch, IconDownload, IconUpload } from "../icons";
 import { EH_SETTINGS_KEY, APP_VERSION, LABEL_MAX_LENGTH, buildOriginPattern } from "../../shared/config";
-import { BG_MSG, type ManagedElement, type SiteStorage, type BackgroundMessage } from "../../shared/messages";
+import { BG_MSG, type HideMode, type ManagedElement, type SiteStorage, type BackgroundMessage } from "../../shared/messages";
 
 type SortKey = "hostname" | "lastVisited" | "elementCount";
 
@@ -217,6 +217,7 @@ export function DataPage() {
           if (typeof el.label !== "string") return false;
           if (typeof el.timestamp !== "number" || el.timestamp < 0) return false;
           if (typeof el.isHidden !== "boolean") return false;
+          if (el.hideMode !== "hidden" && el.hideMode !== "invisible") return false;
           try { document.querySelectorAll(el.selector); return true; } catch { return false; }
         })
         .map((el) => ({
@@ -224,6 +225,7 @@ export function DataPage() {
           label: el.label.slice(0, LABEL_MAX_LENGTH),
           timestamp: el.timestamp,
           isHidden: el.isHidden,
+          hideMode: el.hideMode as HideMode,
         }));
       const safeSite: SiteStorage = { elements: safeElements, lastVisited: importedSite.lastVisited };
       if (importMode === "overwrite" || !(hostname in existing)) {
