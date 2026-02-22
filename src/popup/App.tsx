@@ -203,7 +203,7 @@ export default function App() {
       {hostname && (
         <>
           {/* 権限リクエストバナー */}
-          {!hasHostPermission && managedElements.length > 0 && (
+          {!hasHostPermission && (
             <div className="flex flex-col gap-1.5 px-3 py-2 bg-info/20 border-b border-info/40">
               <p className="text-xs text-info-content">
                 次回訪問時にも非表示を維持するにはアクセスを許可してください
@@ -217,6 +217,7 @@ export default function App() {
             </div>
           )}
 
+          {hasHostPermission && <>
           {/* ピッカーボタン */}
           <div className="px-3 py-3 border-b border-base-300">
             <div className="flex items-center gap-3">
@@ -306,6 +307,7 @@ export default function App() {
               </ul>
             )}
           </div>
+          </>}
         </>
       )}
     </div>
