@@ -13,10 +13,10 @@ const NAV_ITEMS: {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
 }[] = [
+  { id: "data",       label: "データ管理",        icon: IconDatabase },
   { id: "appearance", label: "外観",             icon: IconPalette  },
   { id: "shortcuts",  label: "ショートカット",    icon: IconKeyboard },
   { id: "behavior",   label: "動作設定",          icon: IconSliders  },
-  { id: "data",       label: "データ管理",        icon: IconDatabase },
 ];
 
 export function OptionsApp() {
