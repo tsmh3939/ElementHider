@@ -26,6 +26,7 @@ export function ElementItem({
 }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(element.label);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -128,13 +129,30 @@ export function ElementItem({
               <IconPencil className="h-3.5 w-3.5" />
             </button>
 
-            <button
-              className="btn btn-xs btn-ghost text-error shrink-0"
-              onClick={() => onDelete(element.selector)}
-              title="管理から削除"
-            >
-              <IconTrash className="h-3.5 w-3.5" />
-            </button>
+            {confirmingDelete ? (
+              <>
+                <button
+                  className="btn btn-xs btn-error shrink-0 text-xs"
+                  onClick={() => { onDelete(element.selector); setConfirmingDelete(false); }}
+                >
+                  削除
+                </button>
+                <button
+                  className="btn btn-xs btn-ghost shrink-0 text-xs"
+                  onClick={() => setConfirmingDelete(false)}
+                >
+                  取消
+                </button>
+              </>
+            ) : (
+              <button
+                className="btn btn-xs btn-ghost text-error shrink-0"
+                onClick={() => setConfirmingDelete(true)}
+                title="管理から削除"
+              >
+                <IconTrash className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
         )}
       </div>
