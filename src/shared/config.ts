@@ -36,7 +36,15 @@ export const DEFAULT_MULTI_SELECT = false;
 /** デフォルトテーマ */
 export const DEFAULT_THEME = "dark";
 
-/** 設定ページで選択可能な全テーマ一覧 */
+/**
+ * 設定ページから非表示にするテーマ名の一覧
+ * ここに追加したテーマは ALL_THEMES から除外され、選択肢に表示されなくなる
+ */
+export const EXCLUDED_THEMES: string[] = [
+  // 例: "cupcake", "valentine",
+];
+
+/** 設定ページで選択可能な全テーマ一覧（EXCLUDED_THEMES を除いたもの） */
 export const ALL_THEMES: { id: string; label: string }[] = [
   "nimbus", "glacier",
   "light", "dark", "cupcake", "bumblebee", "emerald", "corporate",
@@ -44,7 +52,9 @@ export const ALL_THEMES: { id: string; label: string }[] = [
   "forest", "aqua", "lofi", "pastel", "fantasy", "wireframe", "black",
   "luxury", "dracula", "cmyk", "autumn", "business", "acid", "lemonade",
   "night", "coffee", "winter", "dim", "nord", "sunset",
-].map((id) => ({ id, label: id.charAt(0).toUpperCase() + id.slice(1) }));
+]
+  .filter((id) => !EXCLUDED_THEMES.includes(id))
+  .map((id) => ({ id, label: id.charAt(0).toUpperCase() + id.slice(1) }));
 
 // ── DOM ID / クラス名 ────────────────────────────────────────────────────────
 
