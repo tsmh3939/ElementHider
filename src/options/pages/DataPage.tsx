@@ -208,13 +208,19 @@ export function DataPage() {
     for (const [hostname, importedSite] of Object.entries(importData.sites)) {
       // 設定キーを誤って上書きしないよう除外
       if (hostname === EH_SETTINGS_KEY) continue;
+      // 不正なセレクタを除外
+      const safeElements = importedSite.elements.filter((el) => {
+        if (!el.selector) return false;
+        try { document.querySelectorAll(el.selector); return true; } catch { return false; }
+      });
+      const safeSite: SiteStorage = { ...importedSite, elements: safeElements };
       if (importMode === "overwrite" || !(hostname in existing)) {
-        updates[hostname] = importedSite;
+        updates[hostname] = safeSite;
       } else {
         // マージ: セレクタで重複排除（既存を優先、新規のみ追加）
         const existingSite = existing[hostname] as SiteStorage;
         const existingSelectors = new Set(existingSite.elements.map((el) => el.selector));
-        const newElements = importedSite.elements.filter((el) => !existingSelectors.has(el.selector));
+        const newElements = safeSite.elements.filter((el) => !existingSelectors.has(el.selector));
         updates[hostname] = {
           elements: [...existingSite.elements, ...newElements],
           lastVisited: Math.max(existingSite.lastVisited, importedSite.lastVisited),

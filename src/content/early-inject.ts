@@ -22,7 +22,10 @@ import { EH_INITIAL_HIDE_STYLE_ID } from "../shared/config";
   const hiddenSelectors = elements
     .filter((e) => e.isHidden !== false)
     .map((e) => e.selector)
-    .filter(Boolean);
+    .filter((s) => {
+      if (!s) return false;
+      try { document.querySelectorAll(s); return true; } catch { return false; }
+    });
 
   if (hiddenSelectors.length === 0) return;
 
