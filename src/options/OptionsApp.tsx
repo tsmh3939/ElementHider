@@ -20,7 +20,7 @@ const NAV_ITEMS: {
 ];
 
 export function OptionsApp() {
-  const [activePage, setActivePage] = useState<PageId>("appearance");
+  const [activePage, setActivePage] = useState<PageId>("data");
 
   // 起動時にテーマを復元・言語を Chrome i18n から設定
   useEffect(() => {
