@@ -129,7 +129,7 @@ function buildLabel(el: Element): string {
   const raw = inner || (el.textContent?.trim() ?? "");
   const normalized = raw.replace(/\s+/g, " ");
   const text = normalized.length > LABEL_MAX_LENGTH
-    ? normalized.slice(0, normalized.lastIndexOf(" ", LABEL_MAX_LENGTH) || LABEL_MAX_LENGTH) + "…"
+    ? normalized.slice(0, normalized.lastIndexOf(" ", LABEL_MAX_LENGTH) || LABEL_MAX_LENGTH)
     : normalized;
   if (text) return text;
 
