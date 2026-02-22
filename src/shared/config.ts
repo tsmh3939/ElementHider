@@ -70,9 +70,6 @@ export const EH_INITIAL_HIDE_STYLE_ID = "eh-initial-hide";
 /** ハイライト用クラス名 */
 export const EH_HIGHLIGHT_CLASS = "eh-highlight";
 
-/** ツールチップ要素の ID */
-export const EH_TOOLTIP_ID = "eh-tooltip";
-
 /** 拡張機能独自クラスのプレフィックス（セレクタ生成時に除外） */
 export const EH_CLASS_PREFIX = "eh-";
 

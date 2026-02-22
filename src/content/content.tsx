@@ -1,6 +1,6 @@
 /**
  * ElementHider Content Script
- * Uses React for the picker UI (tooltip). Picker state is managed via hooks.
+ * Picker state is managed via React hooks.
  * Mounted into a fixed host div with inline styles for style isolation.
  */
 
@@ -12,7 +12,6 @@ import {
   EH_HIDE_STYLE_ID,
   EH_INITIAL_HIDE_STYLE_ID,
   EH_HIGHLIGHT_CLASS,
-  EH_TOOLTIP_ID,
   EH_CLASS_PREFIX,
   LABEL_MAX_LENGTH,
   HIGHLIGHT_DURATION_MS,
@@ -264,46 +263,10 @@ function showElementBySelector(selector: string) {
   }
 }
 
-// ─── Tooltip Component ────────────────────────────────────────────────────────
-
-interface TooltipState {
-  x: number;
-  y: number;
-  element: Element;
-}
-
-function Tooltip({ x, y, element }: TooltipState) {
-  const tag = element.tagName.toLowerCase();
-  const id = element.id ? `#${element.id}` : "";
-  const classes = Array.from(element.classList)
-    .filter((c) => !c.startsWith(EH_CLASS_PREFIX))
-    .slice(0, 3)
-    .map((c) => `.${c}`)
-    .join("");
-
-  // Keep tooltip within viewport
-  const GAP = 14;
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-  const estW = (tag.length + id.length + classes.length) * 7 + 20;
-  const estH = 28;
-  const tx = x + GAP + estW > vw ? x - estW - GAP : x + GAP;
-  const ty = y + GAP + estH > vh ? y - estH - GAP : y + GAP;
-
-  return (
-    <div id={EH_TOOLTIP_ID} style={{ left: tx, top: ty }}>
-      <span className="eh-tag">{tag}</span>
-      <span className="eh-id">{id}</span>
-      <span className="eh-class">{classes}</span>
-    </div>
-  );
-}
-
 // ─── Main Picker App ──────────────────────────────────────────────────────────
 
 function PickerApp() {
   const [isPickerActive, setIsPickerActive] = useState(false);
-  const [tooltipState, setTooltipState] = useState<TooltipState | null>(null);
   const highlightedRef = useRef<Element | null>(null);
   // Ref to expose current picker state to the message handler synchronously
   const isPickerActiveRef = useRef(false);
@@ -369,10 +332,7 @@ function PickerApp() {
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     const target = e.target as Element;
-    if (target === highlightedRef.current) {
-      setTooltipState((t) => (t ? { ...t, x: e.clientX, y: e.clientY } : null));
-      return;
-    }
+    if (target === highlightedRef.current) return;
     highlightedRef.current?.classList.remove("eh-highlight");
     highlightedRef.current = null;
     if (
@@ -383,9 +343,6 @@ function PickerApp() {
     ) {
       target.classList.add("eh-highlight");
       highlightedRef.current = target;
-      setTooltipState({ x: e.clientX, y: e.clientY, element: target });
-    } else {
-      setTooltipState(null);
     }
   }, []);
 
@@ -436,7 +393,6 @@ function PickerApp() {
       document.removeEventListener("keydown", handleKeyDown, true);
       highlightedRef.current?.classList.remove("eh-highlight");
       highlightedRef.current = null;
-      setTooltipState(null);
     };
 
     if (isPickerActive) {
@@ -451,17 +407,7 @@ function PickerApp() {
     return cleanup;
   }, [isPickerActive, handleMouseMove, handleClick, handleKeyDown]);
 
-  // ── Render ────────────────────────────────────────────────────────────────
-
-  if (!tooltipState) return null;
-
-  return (
-    <Tooltip
-      x={tooltipState.x}
-      y={tooltipState.y}
-      element={tooltipState.element}
-    />
-  );
+  return null;
 }
 
 // ─── Bootstrap ────────────────────────────────────────────────────────────────
