@@ -48,10 +48,8 @@ export type BackgroundMessage =
 export const CONTENT_MSG = {
   ELEMENT_HIDDEN: "ELEMENT_HIDDEN",
   STATUS: "STATUS",
-  READY: "CONTENT_READY",
 } as const;
 
 export type ContentMessage =
   | { type: typeof CONTENT_MSG.ELEMENT_HIDDEN; selector: string; label: string }
-  | { type: typeof CONTENT_MSG.STATUS; isPickerActive: boolean; hostname: string }
-  | { type: typeof CONTENT_MSG.READY };
+  | { type: typeof CONTENT_MSG.STATUS; isPickerActive: boolean; hostname: string };
