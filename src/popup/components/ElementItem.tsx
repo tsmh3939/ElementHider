@@ -94,8 +94,8 @@ export function ElementItem({
             <p
               className={`text-xs truncate ${
                 element.isHidden
-                  ? "text-base-content/50 line-through"
-                  : "text-base-content/70"
+                  ? "text-base-content/70 border-l-2 border-primary pl-1"
+                  : "text-base-content/50 border-l-2 border-transparent pl-1"
               }`}
             >
               {element.label}
