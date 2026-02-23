@@ -278,8 +278,11 @@ export default function App() {
               )}
             </button>
             {isPickerActive && (
-              <>
-                <label className="flex items-center gap-1.5 cursor-pointer w-fit mt-2">
+              <div className="flex items-center justify-between mt-2">
+                <p className="text-xs text-base-content/50">
+                  要素をクリック / Esc で終了
+                </p>
+                <label className="flex items-center gap-1.5 cursor-pointer shrink-0">
                   <input
                     type="checkbox"
                     className="checkbox checkbox-xs checkbox-primary"
@@ -288,12 +291,7 @@ export default function App() {
                   />
                   <span className="text-xs text-base-content/60 select-none">複数選択</span>
                 </label>
-                <p className="text-xs text-base-content/60 mt-1 text-center">
-                  {multiSelect
-                    ? "非表示にしたい要素をクリック（連続選択可） / Esc で終了"
-                    : "非表示にしたい要素をクリック / Esc で終了"}
-                </p>
-              </>
+              </div>
             )}
           </div>
 
