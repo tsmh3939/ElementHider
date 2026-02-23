@@ -1,5 +1,5 @@
 import { defineConfig } from "vite";
-import preact from "@preact/preset-vite";
+import react from "@vitejs/plugin-react";
 import webExtension from "vite-plugin-web-extension";
 import { readFileSync } from "fs";
 import { APP_NAME, APP_VERSION } from "./src/shared/config";
@@ -8,7 +8,7 @@ const baseManifest = JSON.parse(readFileSync("./manifest.json", "utf-8"));
 
 export default defineConfig({
   plugins: [
-    preact(),
+    react(),
     webExtension({
       manifest: () => ({
         ...baseManifest,
