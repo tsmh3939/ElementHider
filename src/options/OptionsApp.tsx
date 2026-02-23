@@ -21,12 +21,14 @@ const NAV_ITEMS: {
 
 export function OptionsApp() {
   const [activePage, setActivePage] = useState<PageId>("data");
+  const [themeReady, setThemeReady] = useState(false);
 
   // 起動時にテーマを復元・言語を Chrome i18n から設定
   useEffect(() => {
     chrome.storage.sync.get(EH_SETTINGS_KEY).then((result) => {
       const saved = result[EH_SETTINGS_KEY] as EhSettings | undefined;
       document.documentElement.setAttribute("data-theme", saved?.theme ?? DEFAULT_THEME);
+      setThemeReady(true);
     });
     document.documentElement.lang = chrome.i18n.getUILanguage();
   }, []);
@@ -41,7 +43,7 @@ export function OptionsApp() {
   };
 
   return (
-    <div className="flex h-screen bg-base-100 text-base-content overflow-hidden">
+    <div className={`flex h-screen bg-base-100 text-base-content overflow-hidden transition-opacity duration-150 ${themeReady ? "opacity-100" : "opacity-0"}`}>
       <div className="flex flex-1 overflow-hidden">
         {/* サイドバー */}
         <aside className="w-52 bg-base-200 border-r border-base-300 shrink-0 flex flex-col overflow-y-auto">
