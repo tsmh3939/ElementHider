@@ -14,13 +14,6 @@ export default defineConfig({
         ...baseManifest,
         name: APP_NAME,
         version: APP_VERSION,
-        commands: {
-          ...baseManifest.commands,
-          _execute_action: {
-            ...baseManifest.commands._execute_action,
-            description: `${APP_NAME}を開く`,
-          },
-        },
       }),
       additionalInputs: [
         "src/content/early-inject.ts",
