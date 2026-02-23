@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
-import { IconPalette, IconKeyboard, IconDatabase, IconSliders, IconMenu } from "./icons";
+import { IconPalette, IconDatabase, IconSliders, IconMenu } from "./icons";
 import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME, APP_NAME_PRIMARY, APP_NAME_SECONDARY } from "../shared/config";
 import { AppearancePage } from "./pages/AppearancePage";
-import { ShortcutsPage } from "./pages/ShortcutsPage";
 import { BehaviorPage } from "./pages/BehaviorPage";
 import { DataPage } from "./pages/DataPage";
 
-type PageId = "appearance" | "shortcuts" | "behavior" | "data";
+type PageId = "appearance" | "behavior" | "data";
 
 const DRAWER_ID = "options-drawer";
 
@@ -17,7 +16,6 @@ const NAV_ITEMS: {
 }[] = [
   { id: "data",       label: "データ管理",        icon: IconDatabase },
   { id: "appearance", label: "外観",             icon: IconPalette  },
-  { id: "shortcuts",  label: "ショートカット",    icon: IconKeyboard },
   { id: "behavior",   label: "動作設定",          icon: IconSliders  },
 ];
 
@@ -38,7 +36,6 @@ export function OptionsApp() {
   const renderPage = () => {
     switch (activePage) {
       case "appearance": return <AppearancePage />;
-      case "shortcuts":  return <ShortcutsPage />;
       case "behavior":   return <BehaviorPage />;
       case "data":       return <DataPage />;
     }
