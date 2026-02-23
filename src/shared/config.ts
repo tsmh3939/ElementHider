@@ -36,27 +36,13 @@ export const DEFAULT_MULTI_SELECT = false;
 /** デフォルトテーマ */
 export const DEFAULT_THEME = "dark";
 
-/**
- * 設定ページから非表示にするテーマ名の一覧
- * ここに追加したテーマは ALL_THEMES から除外され、選択肢に表示されなくなる
- */
-export const EXCLUDED_THEMES: string[] = [
-  "cupcake", "bumblebee", "emerald", "synthwave", "retro", "cyberpunk",
-  "garden", "forest", "aqua", "lofi", "pastel", "wireframe", "black",
-  "cmyk", "autumn", "acid", "coffee", "nord", 
-];
-
-/** 設定ページで選択可能な全テーマ一覧（EXCLUDED_THEMES を除いたもの） */
+/** 設定ページで選択可能なテーマ一覧 */
 export const ALL_THEMES: { id: string; label: string }[] = [
   "nimbus",
-  "light", "dark", "cupcake", "bumblebee", "emerald", "corporate",
-  "synthwave", "retro", "cyberpunk", "valentine", "halloween", "garden",
-  "forest", "aqua", "lofi", "pastel", "fantasy", "wireframe", "black",
-  "luxury", "dracula", "cmyk", "autumn", "business", "acid", "lemonade",
-  "night", "coffee", "winter", "dim", "nord", "sunset",
-]
-  .filter((id) => !EXCLUDED_THEMES.includes(id))
-  .map((id) => ({ id, label: id.charAt(0).toUpperCase() + id.slice(1) }));
+  "light", "dark", "valentine", "halloween", "fantasy",
+  "luxury", "dracula", "business", "lemonade",
+  "night", "winter", "dim",
+].map((id) => ({ id, label: id.charAt(0).toUpperCase() + id.slice(1) }));
 
 // ── DOM ID / クラス名 ────────────────────────────────────────────────────────
 
