@@ -165,7 +165,10 @@ export default function App() {
     const result = await chrome.storage.sync.get(EH_SETTINGS_KEY);
     const saved = result[EH_SETTINGS_KEY] as EhSettings | undefined;
     await chrome.storage.sync.set({ [EH_SETTINGS_KEY]: { ...saved, multiSelect: value } });
-  }, []);
+    if (isPickerActive) {
+      await sendToActiveTab({ type: MSG.START_PICKER, multiSelect: value });
+    }
+  }, [isPickerActive]);
 
   const requestHostPermission = useCallback(async () => {
     if (!hostname) return;
@@ -274,21 +277,23 @@ export default function App() {
                 </>
               )}
             </button>
-            <label className="flex items-center gap-1.5 cursor-pointer w-fit mt-2">
-              <input
-                type="checkbox"
-                className="checkbox checkbox-xs checkbox-primary"
-                checked={multiSelect}
-                onChange={(e) => handleMultiSelectChange(e.target.checked)}
-              />
-              <span className="text-xs text-base-content/60 select-none">複数選択</span>
-            </label>
             {isPickerActive && (
-              <p className="text-xs text-base-content/60 mt-1 text-center">
-                {multiSelect
-                  ? "非表示にしたい要素をクリック（連続選択可） / Esc で終了"
-                  : "非表示にしたい要素をクリック / Esc で終了"}
-              </p>
+              <>
+                <label className="flex items-center gap-1.5 cursor-pointer w-fit mt-2">
+                  <input
+                    type="checkbox"
+                    className="checkbox checkbox-xs checkbox-primary"
+                    checked={multiSelect}
+                    onChange={(e) => handleMultiSelectChange(e.target.checked)}
+                  />
+                  <span className="text-xs text-base-content/60 select-none">複数選択</span>
+                </label>
+                <p className="text-xs text-base-content/60 mt-1 text-center">
+                  {multiSelect
+                    ? "非表示にしたい要素をクリック（連続選択可） / Esc で終了"
+                    : "非表示にしたい要素をクリック / Esc で終了"}
+                </p>
+              </>
             )}
           </div>
 
