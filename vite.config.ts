@@ -17,7 +17,7 @@ export default defineConfig({
       }),
       additionalInputs: [
         "src/content/early-inject.ts",
-        "src/content/content.tsx",
+        "src/content/content.ts",
         "src/content/picker.css",
       ],
     }),

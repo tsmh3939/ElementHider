@@ -1,11 +1,8 @@
 /**
  * ElementHider Content Script
- * Picker state is managed via React hooks.
- * Mounted into a fixed host div with inline styles for style isolation.
+ * Picker state is managed via module-scoped variables (no React dependency).
  */
 
-import { createRoot } from "react-dom/client";
-import { useState, useEffect, useRef, useCallback } from "react";
 import { MSG, CONTENT_MSG, HIDE_MODE_CSS, type ManagedElement, type HideMode, type Message, type SiteStorage } from "../shared/messages";
 import {
   EH_ROOT_ID,
@@ -16,6 +13,15 @@ import {
   LABEL_MAX_LENGTH,
   HIGHLIGHT_DURATION_MS,
 } from "../shared/config";
+
+// ─── 二重注入防止 ─────────────────────────────────────────────────────────────
+// マニフェスト自動注入 + executeScript 手動注入の衝突を回避する。
+// DOM マーカーを使い、既に注入済みの場合はスクリプト全体をスキップする。
+if (document.getElementById(EH_ROOT_ID)) throw new Error("EH: already injected");
+const _marker = document.createElement("div");
+_marker.id = EH_ROOT_ID;
+_marker.style.display = "none";
+document.documentElement.appendChild(_marker);
 
 // ─── CSS Selector Generation ──────────────────────────────────────────────────
 
@@ -150,11 +156,6 @@ function buildLabel(el: Element): string {
   return `<${tag}${id}${cls}>`;
 }
 
-/** 拡張機能自身のルート以外はすべて選択可能とする。 */
-function isSelectableTarget(el: Element): boolean {
-  return !el.closest(`#${EH_ROOT_ID}`);
-}
-
 // ─── Storage helpers ──────────────────────────────────────────────────────────
 
 /** ページ訪問時刻（コンテンツスクリプト初期化時に確定） */
@@ -262,170 +263,123 @@ function showElementBySelector(selector: string) {
   }
 }
 
-// ─── Main Picker App ──────────────────────────────────────────────────────────
+// ─── Picker state ─────────────────────────────────────────────────────────────
 
-function PickerApp() {
-  const [isPickerActive, setIsPickerActive] = useState(false);
-  const highlightedRef = useRef<Element | null>(null);
-  // Ref to expose current picker state to the message handler synchronously
-  const isPickerActiveRef = useRef(false);
-  const multiSelectRef = useRef(false);
+let isPickerActive = false;
+let multiSelect = false;
+let highlightedRef: Element | null = null;
 
-  // Keep ref in sync with state
-  useEffect(() => {
-    isPickerActiveRef.current = isPickerActive;
-  }, [isPickerActive]);
+// ─── Event handlers ───────────────────────────────────────────────────────────
 
-  // ── Message handler (registered once) ────────────────────────────────────
-  useEffect(() => {
-    const handler = (
-      message: Message,
-      _sender: chrome.runtime.MessageSender,
-      sendResponse: (response?: unknown) => void
-    ): void => {
-      switch (message.type) {
-        case MSG.START_PICKER:
-          setIsPickerActive(true);
-          multiSelectRef.current = message.multiSelect;
-          sendResponse();
-          break;
-
-        case MSG.STOP_PICKER:
-          setIsPickerActive(false);
-          sendResponse();
-          break;
-
-        case MSG.GET_STATUS:
-          sendResponse({
-            type: CONTENT_MSG.STATUS,
-            isPickerActive: isPickerActiveRef.current,
-            hostname: window.location.hostname,
-          });
-          break;
-
-        case MSG.SHOW_ELEMENT:
-          showElementBySelector(message.selector);
-          sendResponse();
-          break;
-
-        case MSG.HIDE_ELEMENT:
-          hideElementBySelector(message.selector, message.mode);
-          sendResponse();
-          break;
-
-        case MSG.SET_HIDE_MODE:
-          if (hiddenSelectors.has(message.selector)) {
-            hiddenSelectors.set(message.selector, message.mode);
-            refreshHideStyle();
-          }
-          sendResponse();
-          break;
-      }
-    };
-
-    chrome.runtime.onMessage.addListener(handler);
-    return () => chrome.runtime.onMessage.removeListener(handler);
-  }, []);
-
-  // ── Event handlers ────────────────────────────────────────────────────────
-
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    const target = e.target as Element;
-    if (target === highlightedRef.current) return;
-    highlightedRef.current?.classList.remove("eh-highlight");
-    highlightedRef.current = null;
-    if (
-      target &&
-      target !== document.documentElement &&
-      target !== document.body &&
-      isSelectableTarget(target)
-    ) {
-      target.classList.add("eh-highlight");
-      highlightedRef.current = target;
-    }
-  }, []);
-
-  const handleClick = useCallback(async (e: MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const target = e.target as Element;
-    if (
-      !target ||
-      target === document.documentElement ||
-      target === document.body
-    )
-      return;
-
-    // id がない、または id がページ内でユニークでない要素は選択不可
-    if (!isSelectableTarget(target)) return;
-
-    const selector = getUniqueCssSelector(target);
-    const label = buildLabel(target);
-
-    target.classList.remove("eh-highlight");
-    highlightedRef.current = null;
-
-    hideElementBySelector(selector, "hidden");
-    await addManagedElement({ selector, label, timestamp: Date.now(), isHidden: true, hideMode: "hidden" });
-    chrome.runtime.sendMessage({ type: CONTENT_MSG.ELEMENT_HIDDEN, selector, label });
-
-    if (!multiSelectRef.current) {
-      setIsPickerActive(false);
-      chrome.runtime.sendMessage({ type: CONTENT_MSG.STATUS, isPickerActive: false });
-    }
-  }, []);
-
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (e.key === "Escape") {
-      setIsPickerActive(false);
-      chrome.runtime.sendMessage({ type: CONTENT_MSG.STATUS, isPickerActive: false });
-    }
-  }, []);
-
-  // ── Attach / detach listeners based on picker state ───────────────────────
-
-  useEffect(() => {
-    const cleanup = () => {
-      document.documentElement.style.cursor = "";
-      document.removeEventListener("mousemove", handleMouseMove, true);
-      document.removeEventListener("click", handleClick, true);
-      document.removeEventListener("keydown", handleKeyDown, true);
-      highlightedRef.current?.classList.remove("eh-highlight");
-      highlightedRef.current = null;
-    };
-
-    if (isPickerActive) {
-      document.documentElement.style.cursor = "crosshair";
-      document.addEventListener("mousemove", handleMouseMove, true);
-      document.addEventListener("click", handleClick, true);
-      document.addEventListener("keydown", handleKeyDown, true);
-    } else {
-      cleanup();
-    }
-
-    return cleanup;
-  }, [isPickerActive, handleMouseMove, handleClick, handleKeyDown]);
-
-  return null;
+function handleMouseMove(e: MouseEvent) {
+  const target = e.target as Element;
+  if (target === highlightedRef) return;
+  highlightedRef?.classList.remove("eh-highlight");
+  highlightedRef = null;
+  if (
+    target &&
+    target !== document.documentElement &&
+    target !== document.body
+  ) {
+    target.classList.add("eh-highlight");
+    highlightedRef = target;
+  }
 }
+
+async function handleClick(e: MouseEvent) {
+  e.preventDefault();
+  e.stopPropagation();
+  const target = e.target as Element;
+  if (
+    !target ||
+    target === document.documentElement ||
+    target === document.body
+  )
+    return;
+
+  const selector = getUniqueCssSelector(target);
+  const label = buildLabel(target);
+
+  target.classList.remove("eh-highlight");
+  highlightedRef = null;
+
+  hideElementBySelector(selector, "hidden");
+  await addManagedElement({ selector, label, timestamp: Date.now(), isHidden: true, hideMode: "hidden" });
+  chrome.runtime.sendMessage({ type: CONTENT_MSG.ELEMENT_HIDDEN, selector, label });
+
+  if (!multiSelect) {
+    setPickerActive(false);
+    chrome.runtime.sendMessage({ type: CONTENT_MSG.STATUS, isPickerActive: false });
+  }
+}
+
+// ─── Picker activation ───────────────────────────────────────────────────────
+
+function setPickerActive(active: boolean) {
+  if (isPickerActive === active) return;
+  isPickerActive = active;
+
+  if (active) {
+    document.documentElement.style.cursor = "crosshair";
+    document.addEventListener("mousemove", handleMouseMove, true);
+    document.addEventListener("click", handleClick, true);
+  } else {
+    document.documentElement.style.cursor = "";
+    document.removeEventListener("mousemove", handleMouseMove, true);
+    document.removeEventListener("click", handleClick, true);
+    highlightedRef?.classList.remove("eh-highlight");
+    highlightedRef = null;
+  }
+}
+
+// ─── Message handler ──────────────────────────────────────────────────────────
+
+chrome.runtime.onMessage.addListener(
+  (message: Message, _sender: chrome.runtime.MessageSender, sendResponse: (response?: unknown) => void): void => {
+    switch (message.type) {
+      case MSG.START_PICKER:
+        multiSelect = message.multiSelect;
+        setPickerActive(true);
+        sendResponse();
+        break;
+
+      case MSG.STOP_PICKER:
+        setPickerActive(false);
+        sendResponse();
+        break;
+
+      case MSG.GET_STATUS:
+        sendResponse({
+          type: CONTENT_MSG.STATUS,
+          isPickerActive,
+          hostname: window.location.hostname,
+        });
+        break;
+
+      case MSG.SHOW_ELEMENT:
+        showElementBySelector(message.selector);
+        sendResponse();
+        break;
+
+      case MSG.HIDE_ELEMENT:
+        hideElementBySelector(message.selector, message.mode);
+        sendResponse();
+        break;
+
+      case MSG.SET_HIDE_MODE:
+        if (hiddenSelectors.has(message.selector)) {
+          hiddenSelectors.set(message.selector, message.mode);
+          refreshHideStyle();
+        }
+        sendResponse();
+        break;
+    }
+  }
+);
 
 // ─── Bootstrap ────────────────────────────────────────────────────────────────
 
-function mountPickerApp() {
-  // Host element: fixed, zero-size, pointer-events off — won't interfere with page
-  const host = document.createElement("div");
-  host.id = EH_ROOT_ID;
-  host.style.cssText =
-    "position:fixed;top:0;left:0;width:0;height:0;overflow:visible;z-index:2147483647;pointer-events:none;";
-  document.documentElement.appendChild(host);
-  createRoot(host).render(<PickerApp />);
-}
-
 (async () => {
-  // 二重注入防止（マニフェスト自動注入 + executeScript 手動注入の衝突回避）
-  if (document.getElementById(EH_ROOT_ID)) return;
-  mountPickerApp();
-
   // ストレージから非表示要素を復元し、hiddenSelectors に登録して CSS を更新。
   // #eh-initial-hide（early-inject.ts 製）を #eh-hide として引き継ぐ。
   const elements = await loadManagedElements();
