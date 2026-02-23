@@ -172,13 +172,13 @@ async function addManagedElement(el: ManagedElement): Promise<void> {
   }
 }
 
-const EH_TIMER_KEY = "__ehHighlightTimer";
+const highlightTimers = new WeakMap<Element, ReturnType<typeof setTimeout>>();
 
 function clearHighlight(el: Element) {
-  const timer = (el as Element & { [EH_TIMER_KEY]?: ReturnType<typeof setTimeout> })[EH_TIMER_KEY];
+  const timer = highlightTimers.get(el);
   if (timer !== undefined) {
     clearTimeout(timer);
-    delete (el as Element & { [EH_TIMER_KEY]?: ReturnType<typeof setTimeout> })[EH_TIMER_KEY];
+    highlightTimers.delete(el);
   }
   el.classList.remove(EH_HIGHLIGHT_CLASS);
 }
@@ -244,9 +244,9 @@ function showElementBySelector(selector: string) {
       el.classList.add(EH_HIGHLIGHT_CLASS);
       const timer = setTimeout(() => {
         el.classList.remove(EH_HIGHLIGHT_CLASS);
-        delete (el as Element & { [EH_TIMER_KEY]?: ReturnType<typeof setTimeout> })[EH_TIMER_KEY];
+        highlightTimers.delete(el);
       }, HIGHLIGHT_DURATION_MS);
-      (el as Element & { [EH_TIMER_KEY]?: ReturnType<typeof setTimeout> })[EH_TIMER_KEY] = timer;
+      highlightTimers.set(el, timer);
     });
   } catch {
     // invalid selector
