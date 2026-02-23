@@ -41,7 +41,9 @@ export const DEFAULT_THEME = "dark";
  * ここに追加したテーマは ALL_THEMES から除外され、選択肢に表示されなくなる
  */
 export const EXCLUDED_THEMES: string[] = [
-  // 例: "cupcake", "valentine",
+  "cupcake", "bumblebee", "emerald", "synthwave", "retro", "cyberpunk",
+  "garden", "forest", "aqua", "lofi", "pastel", "wireframe", "black",
+  "cmyk", "autumn", "acid", "coffee", "nord", 
 ];
 
 /** 設定ページで選択可能な全テーマ一覧（EXCLUDED_THEMES を除いたもの） */
