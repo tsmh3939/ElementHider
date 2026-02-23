@@ -37,12 +37,12 @@ export const DEFAULT_MULTI_SELECT = false;
 export const DEFAULT_THEME = "dark";
 
 /** 設定ページで選択可能なテーマ一覧 */
-export const ALL_THEMES: { id: string; label: string }[] = [
+export const ALL_THEMES = [
   "nimbus",
   "light", "dark", "valentine", "halloween", "fantasy",
   "luxury", "dracula", "business", "lemonade",
   "night", "winter", "dim",
-].map((id) => ({ id, label: id.charAt(0).toUpperCase() + id.slice(1) }));
+] as const;
 
 // ── DOM ID / クラス名 ────────────────────────────────────────────────────────
 

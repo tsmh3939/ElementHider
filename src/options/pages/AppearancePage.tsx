@@ -24,16 +24,16 @@ export function AppearancePage() {
       <p className="text-sm text-base-content/50 mb-6">パネルと設定ページのテーマを選択します</p>
 
       <div className="grid grid-cols-3 gap-3">
-        {ALL_THEMES.map((t) => (
+        {ALL_THEMES.map((id) => (
           <button
-            key={t.id}
+            key={id}
             className={`card overflow-hidden cursor-pointer border-2 transition-all text-left ${
-              settings.theme === t.id
+              settings.theme === id
                 ? "border-primary"
                 : "border-base-300 hover:border-primary/40"
             }`}
-            onClick={() => changeTheme(t.id)}
-            data-theme={t.id}
+            onClick={() => changeTheme(id)}
+            data-theme={id}
           >
             <div className="card-body p-3 gap-2 bg-base-100">
               {/* ミニプレビュー */}
@@ -53,10 +53,10 @@ export function AppearancePage() {
               </div>
 
               <div>
-                <p className="text-sm font-semibold leading-tight">{t.label}</p>
+                <p className="text-sm font-semibold leading-tight">{id.charAt(0).toUpperCase() + id.slice(1)}</p>
               </div>
 
-              {settings.theme === t.id && (
+              {settings.theme === id && (
                 <span className="badge badge-primary badge-sm self-start">使用中</span>
               )}
             </div>
