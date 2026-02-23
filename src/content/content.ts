@@ -5,7 +5,6 @@
 
 import { MSG, CONTENT_MSG, HIDE_MODE_CSS, type ManagedElement, type HideMode, type Message, type SiteStorage } from "../shared/messages";
 import {
-  EH_ROOT_ID,
   EH_HIDE_STYLE_ID,
   EH_INITIAL_HIDE_STYLE_ID,
   EH_HIGHLIGHT_CLASS,
@@ -13,15 +12,6 @@ import {
   LABEL_MAX_LENGTH,
   HIGHLIGHT_DURATION_MS,
 } from "../shared/config";
-
-// ─── 二重注入防止 ─────────────────────────────────────────────────────────────
-// マニフェスト自動注入 + executeScript 手動注入の衝突を回避する。
-// DOM マーカーを使い、既に注入済みの場合はスクリプト全体をスキップする。
-if (document.getElementById(EH_ROOT_ID)) throw new Error("EH: already injected");
-const _marker = document.createElement("div");
-_marker.id = EH_ROOT_ID;
-_marker.style.display = "none";
-document.documentElement.appendChild(_marker);
 
 // ─── CSS Selector Generation ──────────────────────────────────────────────────
 

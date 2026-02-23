@@ -44,9 +44,6 @@ export const ALL_THEMES = [
 
 // ── DOM ID / クラス名 ────────────────────────────────────────────────────────
 
-/** ピッカー UI のルートホスト要素 ID */
-export const EH_ROOT_ID = "eh-root";
-
 /** 非表示スタイルタグの ID（メインコンテンツスクリプトが管理） */
 export const EH_HIDE_STYLE_ID = "eh-hide";
 
