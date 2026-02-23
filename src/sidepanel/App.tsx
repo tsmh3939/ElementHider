@@ -285,7 +285,7 @@ export default function App() {
                 <label className="flex items-center gap-1.5 cursor-pointer shrink-0">
                   <input
                     type="checkbox"
-                    className="checkbox checkbox-xs checkbox-primary"
+                    className="checkbox checkbox-xs checkbox-primary rounded-sm"
                     checked={multiSelect}
                     onChange={(e) => handleMultiSelectChange(e.target.checked)}
                   />
