@@ -258,29 +258,22 @@ export default function App() {
           {hasHostPermission && contentScriptReady && <>
           {/* ピッカーボタン */}
           <div className="px-3 py-3 border-b border-base-300">
-            <div className="flex items-center gap-3">
-              <button
-                className={`btn flex-1 gap-2 ${isPickerActive ? "btn-warning" : "btn-neutral"}`}
-                onClick={togglePicker}
-              >
-                {isPickerActive ? (
-                  <>
-                    <IconStop className="h-4 w-4" />
-                    ピッカーを停止
-                  </>
-                ) : (
-                  <>
-                    <IconPicker className="h-4 w-4" />
-                    要素を選択して非表示
-                  </>
-                )}
-              </button>
-              {managedElements.length > 0 && (
-                <div className="badge badge-primary badge-lg font-mono">
-                  {managedElements.length}
-                </div>
+            <button
+              className={`btn w-full gap-2 ${isPickerActive ? "btn-warning" : "btn-neutral"}`}
+              onClick={togglePicker}
+            >
+              {isPickerActive ? (
+                <>
+                  <IconStop className="h-4 w-4" />
+                  ピッカーを停止
+                </>
+              ) : (
+                <>
+                  <IconPicker className="h-4 w-4" />
+                  要素を選択して非表示
+                </>
               )}
-            </div>
+            </button>
             <label className="flex items-center gap-1.5 cursor-pointer w-fit mt-2">
               <input
                 type="checkbox"
@@ -297,24 +290,6 @@ export default function App() {
                   : "非表示にしたい要素をクリック / Esc で終了"}
               </p>
             )}
-            {managedElements.length > 0 && (
-              <button
-                className="btn btn-ghost btn-sm w-full mt-2 gap-2"
-                onClick={toggleAll}
-              >
-                {managedElements.every((e) => e.isHidden) ? (
-                  <>
-                    <IconEye className="h-4 w-4" />
-                    全て表示
-                  </>
-                ) : (
-                  <>
-                    <IconEyeOff className="h-4 w-4" />
-                    全て非表示
-                  </>
-                )}
-              </button>
-            )}
           </div>
 
           {/* 管理要素リスト */}
@@ -324,8 +299,30 @@ export default function App() {
                 <IconEyeOff className="h-10 w-10 mb-2" />
                 <p className="text-sm">管理中の要素はありません</p>
               </div>
-            ) : (
-              <ul className="p-2 flex flex-col gap-1 list-none">
+            ) : (<>
+              {/* リストヘッダー */}
+              <div className="flex items-center justify-between px-3 pt-2 pb-1">
+                <span className="text-xs text-base-content/50">
+                  {managedElements.filter((e) => e.isHidden).length} 非表示 / {managedElements.filter((e) => !e.isHidden).length} 表示中
+                </span>
+                <button
+                  className="btn btn-ghost btn-xs gap-1"
+                  onClick={toggleAll}
+                >
+                  {managedElements.every((e) => e.isHidden) ? (
+                    <>
+                      <IconEye className="h-3.5 w-3.5" />
+                      すべて表示にする
+                    </>
+                  ) : (
+                    <>
+                      <IconEyeOff className="h-3.5 w-3.5" />
+                      すべて非表示にする
+                    </>
+                  )}
+                </button>
+              </div>
+              <ul className="p-2 pt-0 flex flex-col gap-1 list-none">
                 {managedElements.map((el, i) => (
                   <ElementItem
                     key={el.selector}
@@ -343,7 +340,7 @@ export default function App() {
                   />
                 ))}
               </ul>
-            )}
+            </>)}
           </div>
           </>}
         </>
