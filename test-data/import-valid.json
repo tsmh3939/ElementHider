@@ -1,0 +1,115 @@
+{
+  "version": "1.0.0",
+  "exportedAt": "2026-02-20T12:00:00.000Z",
+  "sites": {
+    "example.com": {
+      "elements": [
+        {
+          "selector": "#header-banner",
+          "label": "ヘッダーバナー",
+          "timestamp": 1740000000000,
+          "isHidden": true,
+          "hideMode": "hidden"
+        },
+        {
+          "selector": "div.ad-container",
+          "label": "広告コンテナ",
+          "timestamp": 1740000060000,
+          "isHidden": true,
+          "hideMode": "hidden"
+        },
+        {
+          "selector": "footer.site-footer",
+          "label": "サイトフッター",
+          "timestamp": 1740000120000,
+          "isHidden": false,
+          "hideMode": "hidden"
+        }
+      ],
+      "lastVisited": 1740000120000
+    },
+    "news.example.org": {
+      "elements": [
+        {
+          "selector": "div.popup-overlay",
+          "label": "ポップアップオーバーレイ",
+          "timestamp": 1739500000000,
+          "isHidden": true,
+          "hideMode": "hidden"
+        },
+        {
+          "selector": "aside.sidebar-ad",
+          "label": "サイドバー広告",
+          "timestamp": 1739500060000,
+          "isHidden": true,
+          "hideMode": "invisible"
+        }
+      ],
+      "lastVisited": 1739500060000
+    },
+    "shop.example.net": {
+      "elements": [
+        {
+          "selector": "#cookie-consent",
+          "label": "Cookie同意バナー",
+          "timestamp": 1739000000000,
+          "isHidden": true,
+          "hideMode": "hidden"
+        },
+        {
+          "selector": "div.newsletter-popup",
+          "label": "ニュースレター登録ポップアップ",
+          "timestamp": 1739000060000,
+          "isHidden": true,
+          "hideMode": "hidden"
+        },
+        {
+          "selector": "div.floating-chat",
+          "label": "チャットウィジェット",
+          "timestamp": 1739000120000,
+          "isHidden": true,
+          "hideMode": "invisible"
+        },
+        {
+          "selector": "section.recommended-products",
+          "label": "おすすめ商品セクション",
+          "timestamp": 1739000180000,
+          "isHidden": false,
+          "hideMode": "hidden"
+        }
+      ],
+      "lastVisited": 1739000180000
+    },
+    "blog.example.jp": {
+      "elements": [
+        {
+          "selector": "div.social-share-bar",
+          "label": "ソーシャル共有バー",
+          "timestamp": 1738500000000,
+          "isHidden": true,
+          "hideMode": "hidden"
+        }
+      ],
+      "lastVisited": 1738500000000
+    },
+    "docs.example.io": {
+      "elements": [
+        {
+          "selector": "div.announcement-banner",
+          "label": "お知らせバナー",
+          "timestamp": 1738000000000,
+          "isHidden": true,
+          "hideMode": "hidden"
+        },
+        {
+          "selector": "div.feedback-widget",
+          "label": "フィードバックウィジェット",
+          "timestamp": 1738000060000,
+          "isHidden": true,
+          "hideMode": "invisible"
+        }
+      ],
+      "lastVisited": 1738000060000
+    }
+  }
+}

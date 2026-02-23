@@ -1,0 +1,63 @@
+{
+  "version": "1.0.0",
+  "exportedAt": "2026-02-20T12:00:00.000Z",
+  "sites": {
+    "__eh_settings": {
+      "elements": [
+        {
+          "selector": "div",
+          "label": "設定キーの上書き試行",
+          "timestamp": 1740000000000,
+          "isHidden": true,
+          "hideMode": "hidden"
+        }
+      ],
+      "lastVisited": 1740000000000
+    },
+    "not-a-valid-hostname": {
+      "elements": [
+        {
+          "selector": "div",
+          "label": "不正なホスト名",
+          "timestamp": 1740000000000,
+          "isHidden": true,
+          "hideMode": "hidden"
+        }
+      ],
+      "lastVisited": 1740000000000
+    },
+    "valid.example.com": {
+      "elements": [
+        {
+          "selector": "div:has(invalid>>>selector)",
+          "label": "不正なセレクタ",
+          "timestamp": 1740000000000,
+          "isHidden": true,
+          "hideMode": "hidden"
+        },
+        {
+          "selector": "#safe-element",
+          "label": "正常な要素",
+          "timestamp": 1740000000000,
+          "isHidden": true,
+          "hideMode": "hidden"
+        },
+        {
+          "selector": "div.test",
+          "label": "",
+          "timestamp": -1,
+          "isHidden": true,
+          "hideMode": "hidden"
+        },
+        {
+          "selector": "div.mode-test",
+          "label": "不正なhideMode",
+          "timestamp": 1740000000000,
+          "isHidden": true,
+          "hideMode": "delete"
+        }
+      ],
+      "lastVisited": 1740000000000
+    }
+  }
+}
