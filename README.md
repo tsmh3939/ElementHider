@@ -18,15 +18,13 @@
 
 ### 要素を非表示にする
 
-1. 拡張アイコンをクリックしてポップアップを開く
+1. 拡張アイコンをクリックしてサイドパネルを開く
 2. **「要素を選択して非表示」** ボタンをクリック
-   → ポップアップが自動で閉じ、カーソルが十字に変わる
+   → カーソルが十字に変わる
 3. 非表示にしたい要素にマウスを合わせてクリック
-   → 要素が非表示になり、ポップアップが自動で再表示される
+   → 要素が非表示になり、サイドパネルに反映される
 
-> **注意：** ポップアップを閉じることでページ上の要素を選択できるようにしています。
-> 選択完了後、ポップアップは自動で開き直されます。
-> `Esc` キーでピッカーをキャンセルできます。
+> **注意：** `Esc` キーでピッカーをキャンセルできます。
 
 ### 表示/非表示をトグルする
 
@@ -60,8 +58,8 @@
 
 ```
 src/
-├── popup/
-│   ├── App.tsx      # ポップアップ UI（管理リスト・トグル・削除）
+├── sidepanel/
+│   ├── App.tsx      # サイドパネル UI（管理リスト・トグル・削除）
 │   ├── icons.tsx    # SVG アイコンコンポーネント
 │   ├── main.tsx     # React マウント
 │   └── index.css    # Tailwind エントリ
@@ -74,9 +72,9 @@ src/
 ### メッセージフロー
 
 ```
-popup → content  : START_PICKER / STOP_PICKER / SHOW_ELEMENT / HIDE_ELEMENT
-content → runtime: ELEMENT_HIDDEN（要素選択完了の通知）
-background       : ELEMENT_HIDDEN を受信 → chrome.action.openPopup() で再表示
+sidepanel → content  : START_PICKER / STOP_PICKER / SHOW_ELEMENT / HIDE_ELEMENT
+content → runtime   : ELEMENT_HIDDEN（要素選択完了の通知）
+background          : ELEMENT_HIDDEN を受信 → サイドパネルへ通知
 ```
 
 ### ストレージ構造
@@ -118,5 +116,5 @@ npm run build
 
 ## 動作要件
 
-- Chrome 127 以降
-  （`chrome.action.openPopup()` API の利用のため）
+- Chrome 116 以降
+  （`chrome.sidePanel` API の利用のため）

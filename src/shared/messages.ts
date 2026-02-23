@@ -1,4 +1,4 @@
-/** Types shared between the popup (side panel) and the content script. */
+/** Types shared between the sidepanel and the content script. */
 
 export type HideMode = "hidden" | "invisible";
 
@@ -28,7 +28,7 @@ export interface SiteStorage {
   lastVisited: number;
 }
 
-/** popup → content スクリプトへ送るメッセージ定数 */
+/** sidepanel → content スクリプトへ送るメッセージ定数 */
 export const MSG = {
   START_PICKER: "START_PICKER",
   STOP_PICKER: "STOP_PICKER",
@@ -56,7 +56,7 @@ export type BackgroundMessage =
   | { type: typeof BG_MSG.PERMISSION_GRANTED; hostname: string }
   | { type: typeof BG_MSG.PERMISSION_REVOKED; hostname: string };
 
-/** content → popup/background へ送るメッセージ定数 */
+/** content → sidepanel/background へ送るメッセージ定数 */
 export const CONTENT_MSG = {
   ELEMENT_HIDDEN: "ELEMENT_HIDDEN",
   STATUS: "STATUS",

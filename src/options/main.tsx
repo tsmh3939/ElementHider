@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import "../popup/index.css";
+import "../sidepanel/index.css";
 import { OptionsApp } from "./OptionsApp";
 
 const root = document.getElementById("root");

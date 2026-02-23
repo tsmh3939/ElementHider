@@ -6,7 +6,7 @@
   "permissions": ["storage", "sidePanel", "activeTab", "scripting"],
   "optional_host_permissions": ["*://*/*"],
   "side_panel": {
-    "default_path": "src/popup/index.html"
+    "default_path": "src/sidepanel/index.html"
   },
   "options_ui": {
     "page": "src/options/index.html",
