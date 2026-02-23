@@ -171,9 +171,9 @@ export function DataPage() {
     // ファイル入力をリセット（同じファイルを再選択できるように）
     e.target.value = "";
 
-    // 10 MB を超えるファイルは拒否
-    if (file.size > 10 * 1024 * 1024) {
-      setImportError("ファイルサイズが大きすぎます（上限: 10 MB）。");
+    // 20 MB を超えるファイルは拒否
+    if (file.size > 20 * 1024 * 1024) {
+      setImportError("ファイルサイズが大きすぎます（上限: 20 MB）。");
       setImportModalState("error");
       return;
     }
@@ -199,53 +199,72 @@ export function DataPage() {
     reader.readAsText(file);
   };
 
+  const [importing, setImporting] = useState(false);
+
   const applyImport = async () => {
-    if (!importData) return;
-    const existing = await chrome.storage.local.get(null);
+    if (!importData || importing) return;
+    setImporting(true);
 
-    const updates: Record<string, SiteStorage> = {};
+    try {
+      const existing = await chrome.storage.local.get(null);
+      const updates: Record<string, SiteStorage> = {};
+      const entries = Object.entries(importData.sites);
 
-    for (const [hostname, importedSite] of Object.entries(importData.sites)) {
-      // 設定キーを誤って上書きしないよう除外
-      if (hostname === EH_SETTINGS_KEY) continue;
-      // 不正なホスト名を除外（ドメイン形式のみ許可）
-      if (!/^([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/.test(hostname)) continue;
-      // 不正な要素データを除外・サニタイズ
-      const safeElements: ManagedElement[] = importedSite.elements
-        .filter((el): el is ManagedElement => {
-          if (!el.selector || typeof el.selector !== "string") return false;
-          if (typeof el.label !== "string") return false;
-          if (typeof el.timestamp !== "number" || el.timestamp < 0) return false;
-          if (typeof el.isHidden !== "boolean") return false;
-          if (el.hideMode !== "hidden" && el.hideMode !== "invisible") return false;
-          try { document.querySelectorAll(el.selector); return true; } catch { return false; }
-        })
-        .map((el) => ({
-          selector: el.selector,
-          label: el.label.slice(0, LABEL_MAX_LENGTH),
-          timestamp: el.timestamp,
-          isHidden: el.isHidden,
-          hideMode: el.hideMode as HideMode,
-        }));
-      const safeSite: SiteStorage = { elements: safeElements, lastVisited: importedSite.lastVisited };
-      if (importMode === "overwrite" || !(hostname in existing)) {
-        updates[hostname] = safeSite;
-      } else {
-        // マージ: セレクタで重複排除（既存を優先、新規のみ追加）
-        const existingSite = existing[hostname] as SiteStorage;
-        const existingSelectors = new Set(existingSite.elements.map((el) => el.selector));
-        const newElements = safeSite.elements.filter((el) => !existingSelectors.has(el.selector));
-        updates[hostname] = {
-          elements: [...existingSite.elements, ...newElements],
-          lastVisited: Math.max(existingSite.lastVisited, importedSite.lastVisited),
-        };
+      for (let i = 0; i < entries.length; i++) {
+        const [hostname, importedSite] = entries[i];
+        // 設定キーを誤って上書きしないよう除外
+        if (hostname === EH_SETTINGS_KEY) continue;
+        // 不正なホスト名を除外（ドメイン形式のみ許可）
+        if (!/^([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/.test(hostname)) continue;
+        // 不正な要素データを除外・サニタイズ
+        const safeElements: ManagedElement[] = importedSite.elements
+          .filter((el): el is ManagedElement => {
+            if (!el.selector || typeof el.selector !== "string") return false;
+            if (typeof el.label !== "string") return false;
+            if (typeof el.timestamp !== "number" || el.timestamp < 0) return false;
+            if (typeof el.isHidden !== "boolean") return false;
+            if (el.hideMode !== "hidden" && el.hideMode !== "invisible") return false;
+            try { document.querySelector(el.selector); return true; } catch { return false; }
+          })
+          .map((el) => ({
+            selector: el.selector,
+            label: el.label.slice(0, LABEL_MAX_LENGTH),
+            timestamp: el.timestamp,
+            isHidden: el.isHidden,
+            hideMode: el.hideMode as HideMode,
+          }));
+        const safeSite: SiteStorage = { elements: safeElements, lastVisited: importedSite.lastVisited };
+        if (importMode === "overwrite" || !(hostname in existing)) {
+          updates[hostname] = safeSite;
+        } else {
+          // マージ: セレクタで重複排除（既存を優先、新規のみ追加）
+          const existingSite = existing[hostname] as SiteStorage;
+          const existingSelectors = new Set(existingSite.elements.map((el) => el.selector));
+          const newElements = safeSite.elements.filter((el) => !existingSelectors.has(el.selector));
+          updates[hostname] = {
+            elements: [...existingSite.elements, ...newElements],
+            lastVisited: Math.max(existingSite.lastVisited, importedSite.lastVisited),
+          };
+        }
+        // 100 サイトごとにメインスレッドを解放して UI フリーズを防止
+        if (i % 100 === 99) await new Promise((r) => setTimeout(r, 0));
       }
-    }
 
-    await chrome.storage.local.set(updates);
-    loadData();
-    setImportModalState("done");
-    setTimeout(() => setImportModalState("idle"), 2000);
+      await chrome.storage.local.set(updates);
+      loadData();
+      setImportModalState("done");
+      setTimeout(() => setImportModalState("idle"), 2000);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes("QUOTA_BYTES") || msg.includes("quota")) {
+        setImportError("ストレージの容量上限を超えるため、インポートできませんでした。不要なサイトデータを削除してから再度お試しください。");
+      } else {
+        setImportError(`インポート中にエラーが発生しました: ${msg}`);
+      }
+      setImportModalState("error");
+    } finally {
+      setImporting(false);
+    }
   };
 
   // インポートプレビュー用の統計計算
@@ -585,12 +604,16 @@ export function DataPage() {
             )}
 
             <div className="modal-action">
-              <button className="btn btn-sm" onClick={() => setImportModalState("idle")}>
+              <button className="btn btn-sm" onClick={() => setImportModalState("idle")} disabled={importing}>
                 キャンセル
               </button>
-              <button className="btn btn-sm btn-primary" onClick={applyImport}>
-                <IconUpload className="h-3.5 w-3.5" />
-                インポートする
+              <button className="btn btn-sm btn-primary" onClick={applyImport} disabled={importing}>
+                {importing ? (
+                  <span className="loading loading-spinner loading-xs" />
+                ) : (
+                  <IconUpload className="h-3.5 w-3.5" />
+                )}
+                {importing ? "インポート中..." : "インポートする"}
               </button>
             </div>
           </div>
