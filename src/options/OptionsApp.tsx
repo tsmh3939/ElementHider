@@ -29,6 +29,8 @@ export function OptionsApp() {
     document.documentElement.lang = chrome.i18n.getUILanguage();
   }, []);
 
+  if (!themeReady) return null;
+
   const renderPage = () => {
     switch (activePage) {
       case "appearance": return <AppearancePage />;
@@ -37,7 +39,7 @@ export function OptionsApp() {
   };
 
   return (
-    <div className={`flex h-screen bg-base-100 text-base-content overflow-hidden transition-opacity duration-150 ${themeReady ? "opacity-100" : "opacity-0"}`}>
+    <div className="flex h-screen bg-base-100 text-base-content overflow-hidden">
       {/* サイドバー: 狭い時はアイコンのみ(w-14)、広い時はラベル付き(lg:w-48) */}
       <aside className="w-14 lg:w-48 bg-base-200 border-r border-base-300 shrink-0 flex flex-col overflow-visible transition-all duration-200">
         {/* ヘッダー */}
