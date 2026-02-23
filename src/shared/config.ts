@@ -34,7 +34,7 @@ export const DEFAULT_MULTI_SELECT = false;
 // ── テーマ ──────────────────────────────────────────────────────────────────
 
 /** デフォルトテーマ */
-export const DEFAULT_THEME = "dark";
+export const DEFAULT_THEME = "nimbus";
 
 /** 設定ページで選択可能なテーマ一覧 */
 export const ALL_THEMES = [
