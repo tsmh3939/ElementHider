@@ -8,8 +8,8 @@
  * 管理を引き継いだ後、このスタイルタグ (#eh-initial-hide) を削除する。
  */
 
-import { EH_INITIAL_HIDE_STYLE_ID, HIDE_MODE_CSS } from "../shared/config";
-import type { HideMode } from "../shared/messages";
+import { EH_INITIAL_HIDE_STYLE_ID } from "../shared/config";
+import { HIDE_MODE_CSS, type HideMode } from "../shared/messages";
 
 (async () => {
   const hostname = window.location.hostname;

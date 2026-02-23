@@ -6,7 +6,7 @@
 
 import { createRoot } from "react-dom/client";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { MSG, CONTENT_MSG, type ManagedElement, type HideMode, type Message, type SiteStorage } from "../shared/messages";
+import { MSG, CONTENT_MSG, HIDE_MODE_CSS, type ManagedElement, type HideMode, type Message, type SiteStorage } from "../shared/messages";
 import {
   EH_ROOT_ID,
   EH_HIDE_STYLE_ID,
@@ -15,7 +15,6 @@ import {
   EH_CLASS_PREFIX,
   LABEL_MAX_LENGTH,
   HIGHLIGHT_DURATION_MS,
-  HIDE_MODE_CSS,
 } from "../shared/config";
 
 // ─── CSS Selector Generation ──────────────────────────────────────────────────

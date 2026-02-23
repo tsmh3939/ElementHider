@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { IconTrash, IconPencil, IconGrip, IconHidden, IconInvisible } from "../icons";
-import type { ManagedElement, HideMode } from "../../shared/messages";
-import { HIDE_MODE_LABELS } from "../../shared/config";
+import { HIDE_MODE_LABELS, type ManagedElement, type HideMode } from "../../shared/messages";
 
 const HIDE_MODES: HideMode[] = ["hidden", "invisible"];
 

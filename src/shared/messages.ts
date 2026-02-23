@@ -2,6 +2,18 @@
 
 export type HideMode = "hidden" | "invisible";
 
+/** 非表示モードごとの CSS ルール */
+export const HIDE_MODE_CSS: Record<HideMode, string> = {
+  hidden: "display: none !important",
+  invisible: "visibility: hidden !important",
+};
+
+/** 非表示モードの表示ラベル */
+export const HIDE_MODE_LABELS: Record<HideMode, string> = {
+  hidden: "非表示",
+  invisible: "不可視",
+};
+
 export interface ManagedElement {
   selector: string;
   label: string;
