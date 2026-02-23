@@ -134,6 +134,7 @@ export function DataPage() {
     }
     if (keys.length > 0) await chrome.storage.local.remove(keys);
     setSites([]);
+    chrome.storage.local.getBytesInUse(null).then(setBytesInUse);
     setClearAllStatus("done");
     setTimeout(() => setClearAllStatus("idle"), 2000);
   };
