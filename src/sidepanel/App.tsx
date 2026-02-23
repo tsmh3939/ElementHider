@@ -217,8 +217,6 @@ export default function App() {
           <p className="text-sm font-medium">
             利用するには
             <br />
-            ページをリロードしてから
-            <br />
             サイドパネルを開き直してください
           </p>
           <p className="text-xs">chrome:// 等の特殊なページでは使用できません</p>
