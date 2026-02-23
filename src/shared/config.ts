@@ -46,7 +46,7 @@ export const EXCLUDED_THEMES: string[] = [
 
 /** 設定ページで選択可能な全テーマ一覧（EXCLUDED_THEMES を除いたもの） */
 export const ALL_THEMES: { id: string; label: string }[] = [
-  "nimbus", "glacier",
+  "nimbus",
   "light", "dark", "cupcake", "bumblebee", "emerald", "corporate",
   "synthwave", "retro", "cyberpunk", "valentine", "halloween", "garden",
   "forest", "aqua", "lofi", "pastel", "fantasy", "wireframe", "black",
