@@ -2,14 +2,23 @@
  * ストレージ容量テスト用の大量データを生成するスクリプト。
  *
  * 使い方:
- *   node test-data/generate-large.js [目標サイズMB]
+ *   node test-data/generate-large.cjs [目標サイズMB]
  *
  * 例:
- *   node test-data/generate-large.js 1     → 約 1 MB
- *   node test-data/generate-large.js 5     → 約 5 MB
- *   node test-data/generate-large.js 10    → 約 10 MB (chrome.storage.local 上限)
+ *   node test-data/generate-large.cjs 1     → 約 1 MB
+ *   node test-data/generate-large.cjs 5     → 約 5 MB
+ *   node test-data/generate-large.cjs 10    → 約 10 MB (chrome.storage.local 上限)
  *
- * デフォルト: 5 MB
+ * デフォルト (引数なし): 5 MB
+ *
+ * 出力:
+ *   test-data/import-large-{サイズ}mb.json
+ *   オプションページのインポート機能でテストデータとして読み込める形式。
+ *
+ * 生成データの内容:
+ *   - ランダムなホスト名ごとに 1〜20 個の ManagedElement を生成
+ *   - セレクタ・ラベル・タイムスタンプなどを疑似的に作成
+ *   - 指定サイズに達するまでサイトを追加し続ける
  */
 
 const fs = require("fs");
