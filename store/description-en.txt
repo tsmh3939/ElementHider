@@ -1,0 +1,61 @@
+ElementHider — Chrome Web Store Listing (English)
+
+
+[Extension Description]
+
+ElementHider is a Chrome extension that lets you hide any unwanted element on a web page with a single click. Simply use the DevTools-like picker to select and remove distracting elements such as unused links, icons, or menus.
+
+
+[Benefits of Installing]
+
+- One-click element hiding
+Use the DevTools-like picker to click on any element you want gone. No CSS or HTML knowledge required.
+
+- Privacy-first
+Permissions are granted per site only when you choose. All data stays in your browser — nothing is sent to external servers.
+
+- Automatic per-site persistence
+Once you hide an element, it stays hidden on every future visit. No reconfiguration needed.
+
+- Flicker-free hiding
+Styles are injected at the earliest stage of page loading, so hidden elements never flash on screen.
+
+- Two hide modes
+Choose between "Hidden" (completely removes the element from layout) and "Invisible" (hides the element while preserving its space) on a per-element basis.
+
+- 6 themes
+Choose from 6 themes including light and dark variants to match your preference.
+
+- Intuitive management
+Drag-and-drop reordering, inline label editing, and individual or bulk show/hide toggles — all from a convenient side panel.
+
+- Export and import
+Back up all your site data as JSON and restore it anytime.
+
+- English and Japanese
+The UI automatically adapts to your browser's language setting.
+
+
+=====================================
+Chrome Web Store — Privacy Section
+=====================================
+
+
+[Single Purpose Description]
+
+This extension serves the single purpose of hiding user-specified HTML elements on web pages. It launches a DevTools-like picker from the side panel, saves the CSS selectors of elements the user clicks, and hides those elements. Saved settings are automatically applied on subsequent visits.
+
+
+[Permission Justifications]
+
+storage:
+Required to save and load CSS selectors and labels of elements the user has chosen to hide, as well as user preferences such as theme settings, using chrome.storage. All data is stored in the browser's local storage and is never sent to any external server.
+
+sidePanel:
+Required to display the extension's main UI as a Chrome side panel, providing the interface for the user to interact with. Users launch the element picker, view the list of hidden elements, and manage them (toggle visibility, delete, reorder, edit labels) from the side panel.
+
+activeTab:
+Required to retrieve the URL (hostname) of the currently active tab when the user interacts with the side panel. This enables saving and restoring hide settings on a per-site basis. This permission is only active during user interaction and does not access tabs in the background.
+
+scripting:
+Required to dynamically register and execute content scripts (CSS style injection and the element picker) on sites where the user has granted permission. Script registration only occurs when the user explicitly grants permission for each individual site.
