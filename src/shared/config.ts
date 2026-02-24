@@ -11,7 +11,7 @@ export const APP_NAME_PRIMARY = "Element";
 export const APP_NAME_SECONDARY = "Hider";
 
 /** 拡張機能のバージョン番号 */
-export const APP_VERSION = "1.0.0";
+export const APP_VERSION = "1.0.1";
 
 // ── ストレージキー ───────────────────────────────────────────────────────────
 

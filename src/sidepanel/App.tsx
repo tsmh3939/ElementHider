@@ -229,7 +229,7 @@ export default function App() {
           {/* 権限リクエストバナー */}
           {!hasHostPermission && (
             <div className="flex flex-col gap-1.5 px-3 py-2 bg-info/20 border-b border-info/40">
-              <p className="text-xs text-info-content">
+              <p className="text-xs text-base-content/70">
                 {t("sidepanel_permissionDeniedLine1")}
                 <br />
                 {t("sidepanel_permissionDeniedLine2")}
