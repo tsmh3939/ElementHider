@@ -9,8 +9,6 @@
 export const APP_NAME_PRIMARY = "Element";
 /** アプリ名の通常表示部分 */
 export const APP_NAME_SECONDARY = "Hider";
-/** 拡張機能の名前 */
-export const APP_NAME = APP_NAME_PRIMARY + APP_NAME_SECONDARY;
 
 /** 拡張機能のバージョン番号 */
 export const APP_VERSION = "1.0.0";

@@ -7,6 +7,7 @@ import { useManagedElements } from "./hooks";
 import { ElementItem } from "./components/ElementItem";
 import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME, DEFAULT_MULTI_SELECT, APP_NAME_PRIMARY, APP_NAME_SECONDARY, buildOriginPattern } from "../shared/config";
 import { BG_MSG, type BackgroundMessage } from "../shared/messages";
+import { t } from "../shared/i18n";
 
 export default function App() {
   const [isPickerActive, setIsPickerActive] = useState(false);
@@ -203,7 +204,7 @@ export default function App() {
           <button
             className="btn btn-xs btn-ghost text-base-content/50 shrink-0"
             onClick={() => chrome.runtime.openOptionsPage()}
-            title="設定"
+            title={t("sidepanel_settings")}
           >
             <IconSettings className="h-4 w-4" />
           </button>
@@ -215,11 +216,11 @@ export default function App() {
         <div className="flex-1 flex flex-col items-center justify-center gap-3 text-base-content/40 px-6 text-center">
           <IconPicker className="h-10 w-10" />
           <p className="text-sm font-medium">
-            利用するには
+            {t("sidepanel_reopenPanelLine1")}
             <br />
-            サイドパネルを開き直してください
+            {t("sidepanel_reopenPanelLine2")}
           </p>
-          <p className="text-xs">chrome:// 等の特殊なページでは使用できません</p>
+          <p className="text-xs">{t("sidepanel_specialPageNote")}</p>
         </div>
       )}
 
@@ -229,15 +230,15 @@ export default function App() {
           {!hasHostPermission && (
             <div className="flex flex-col gap-1.5 px-3 py-2 bg-info/20 border-b border-info/40">
               <p className="text-xs text-info-content">
-                サイトへのアクセスが許可されていないため利用できません。
+                {t("sidepanel_permissionDeniedLine1")}
                 <br />
-                利用するにはアクセスを許可してください。
+                {t("sidepanel_permissionDeniedLine2")}
               </p>
               <button
                 className="btn btn-xs btn-info w-full"
                 onClick={requestHostPermission}
               >
-                アクセスを許可
+                {t("sidepanel_grantAccess")}
               </button>
             </div>
           )}
@@ -246,12 +247,12 @@ export default function App() {
             <div className="flex-1 flex flex-col items-center justify-center gap-3 text-base-content/40 px-6 text-center">
               <IconPicker className="h-10 w-10" />
               <p className="text-sm font-medium">
-                ページをリロードしてください
+                {t("sidepanel_reloadPage")}
               </p>
               <p className="text-xs">
-                コンテンツスクリプトが読み込まれていません。
+                {t("sidepanel_contentScriptNotReadyLine1")}
                 <br />
-                ページをリロードすると自動的に有効になります。
+                {t("sidepanel_contentScriptNotReadyLine2")}
               </p>
             </div>
           )}
@@ -266,19 +267,19 @@ export default function App() {
               {isPickerActive ? (
                 <>
                   <IconStop className="h-4 w-4" />
-                  ピッカーを停止
+                  {t("sidepanel_stopPicker")}
                 </>
               ) : (
                 <>
                   <IconPicker className="h-4 w-4" />
-                  要素を選択して非表示
+                  {t("sidepanel_selectElement")}
                 </>
               )}
             </button>
             {isPickerActive && (
               <div className="flex items-center justify-between mt-2">
                 <p className="text-xs text-base-content/50">
-                  要素をクリック / Esc で終了
+                  {t("sidepanel_pickerHint")}
                 </p>
                 <label className="flex items-center gap-1.5 cursor-pointer shrink-0">
                   <input
@@ -287,7 +288,7 @@ export default function App() {
                     checked={multiSelect}
                     onChange={(e) => handleMultiSelectChange(e.target.checked)}
                   />
-                  <span className="text-xs text-base-content/60 select-none">複数選択</span>
+                  <span className="text-xs text-base-content/60 select-none">{t("sidepanel_multiSelect")}</span>
                 </label>
               </div>
             )}
@@ -298,13 +299,16 @@ export default function App() {
             {managedElements.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 text-base-content/40">
                 <IconEyeOff className="h-10 w-10 mb-2" />
-                <p className="text-sm">管理中の要素はありません</p>
+                <p className="text-sm">{t("sidepanel_noElements")}</p>
               </div>
             ) : (<>
               {/* リストヘッダー */}
               <div className="flex items-center justify-between px-3 pt-2 pb-1">
                 <span className="text-xs text-base-content/50">
-                  {managedElements.filter((e) => e.isHidden).length} 非表示 / {managedElements.filter((e) => !e.isHidden).length} 表示中
+                  {t("sidepanel_hiddenCount", [
+                    managedElements.filter((e) => e.isHidden).length.toString(),
+                    managedElements.filter((e) => !e.isHidden).length.toString(),
+                  ])}
                 </span>
                 <button
                   className="btn btn-ghost btn-xs gap-1"
@@ -313,12 +317,12 @@ export default function App() {
                   {managedElements.every((e) => e.isHidden) ? (
                     <>
                       <IconEye className="h-3.5 w-3.5" />
-                      すべて表示にする
+                      {t("sidepanel_showAll")}
                     </>
                   ) : (
                     <>
                       <IconEyeOff className="h-3.5 w-3.5" />
-                      すべて非表示にする
+                      {t("sidepanel_hideAll")}
                     </>
                   )}
                 </button>

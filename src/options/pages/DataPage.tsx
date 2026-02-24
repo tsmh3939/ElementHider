@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { IconTrash, IconSortAsc, IconSortDesc, IconEmpty, IconSearch, IconDownload, IconUpload } from "../icons";
 import { EH_SETTINGS_KEY, APP_VERSION, LABEL_MAX_LENGTH, buildOriginPattern } from "../../shared/config";
 import { BG_MSG, type HideMode, type ManagedElement, type SiteStorage, type BackgroundMessage } from "../../shared/messages";
+import { t } from "../../shared/i18n";
 
 type SortKey = "hostname" | "lastVisited" | "elementCount";
 
@@ -174,7 +175,7 @@ export function DataPage() {
 
     // 20 MB を超えるファイルは拒否
     if (file.size > 20 * 1024 * 1024) {
-      setImportError("ファイルサイズが大きすぎます（上限: 20 MB）。");
+      setImportError(t("data_importErrorFileSize"));
       setImportModalState("error");
       return;
     }
@@ -184,7 +185,7 @@ export function DataPage() {
       try {
         const parsed = JSON.parse(ev.target?.result as string);
         if (!isValidExportData(parsed)) {
-          setImportError("ファイルの形式が正しくありません。ElementHider のエクスポートファイルを選択してください。");
+          setImportError(t("data_importErrorInvalidFormat"));
           setImportModalState("error");
           return;
         }
@@ -193,7 +194,7 @@ export function DataPage() {
         setImportError(null);
         setImportModalState("preview");
       } catch {
-        setImportError("JSON の解析に失敗しました。ファイルが破損しているか、形式が正しくありません。");
+        setImportError(t("data_importErrorJsonParse"));
         setImportModalState("error");
       }
     };
@@ -258,9 +259,9 @@ export function DataPage() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       if (msg.includes("QUOTA_BYTES") || msg.includes("quota")) {
-        setImportError("ストレージの容量上限を超えるため、インポートできませんでした。不要なサイトデータを削除してから再度お試しください。");
+        setImportError(t("data_importErrorQuota"));
       } else {
-        setImportError(`インポート中にエラーが発生しました: ${msg}`);
+        setImportError(t("data_importErrorGeneric", msg));
       }
       setImportModalState("error");
     } finally {
@@ -303,19 +304,19 @@ export function DataPage() {
       {/* ページヘッダー */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h2 className="text-xl font-semibold mb-1">データ管理</h2>
+          <h2 className="text-xl font-semibold mb-1">{t("data_pageTitle")}</h2>
           <p className="text-sm text-base-content/50">
-            {sites.length} サイト / {totalElements} 要素を管理中
+            {t("data_summary", [sites.length.toString(), totalElements.toString()])}
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <button
             className="btn btn-sm btn-ghost gap-2"
             onClick={() => fileInputRef.current?.click()}
-            title="JSON ファイルからデータをインポート"
+            title={t("data_importTooltip")}
           >
             <IconUpload className="h-3.5 w-3.5" />
-            インポート
+            {t("data_import")}
           </button>
           {(sites.length > 0 || clearing) && (
             <>
@@ -323,10 +324,10 @@ export function DataPage() {
                 className={`btn btn-sm gap-2 ${exportStatus === "done" ? "btn-success" : "btn-ghost"}`}
                 onClick={handleExport}
                 disabled={exportStatus === "done" || clearing}
-                title="データを JSON ファイルにエクスポート"
+                title={t("data_exportTooltip")}
               >
                 <IconDownload className="h-3.5 w-3.5" />
-                {exportStatus === "done" ? "保存しました" : "エクスポート"}
+                {exportStatus === "done" ? t("data_exportDone") : t("data_export")}
               </button>
               <button
                 className="btn btn-sm gap-2 btn-error btn-outline"
@@ -338,7 +339,7 @@ export function DataPage() {
                 ) : (
                   <IconTrash className="h-3.5 w-3.5" />
                 )}
-                {clearing ? "削除中..." : "全て削除"}
+                {clearing ? t("data_deleting") : t("data_deleteAll")}
               </button>
             </>
           )}
@@ -349,11 +350,11 @@ export function DataPage() {
       {sites.length > 0 && (
         <div className="grid grid-cols-2 gap-3 mb-6">
           <div className="stat bg-base-200 rounded-xl py-3 px-4">
-            <div className="stat-title text-xs">管理中のサイト</div>
+            <div className="stat-title text-xs">{t("data_statSites")}</div>
             <div className="stat-value text-2xl">{sites.length}</div>
           </div>
           <div className="stat bg-base-200 rounded-xl py-3 px-4">
-            <div className="stat-title text-xs">管理中の要素</div>
+            <div className="stat-title text-xs">{t("data_statElements")}</div>
             <div className="stat-value text-2xl">{totalElements}</div>
           </div>
         </div>
@@ -366,7 +367,7 @@ export function DataPage() {
         return (
           <div className="bg-base-200 rounded-xl px-4 py-3 mb-6">
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs text-base-content/60">ストレージ使用量</span>
+              <span className="text-xs text-base-content/60">{t("data_storageUsage")}</span>
               <span className="text-xs font-mono text-base-content/70">
                 {formatBytes(bytesInUse)} / {formatBytes(QUOTA_BYTES)}
               </span>
@@ -377,7 +378,7 @@ export function DataPage() {
               max={QUOTA_BYTES}
             />
             <p className="text-xs text-base-content/40 mt-1 text-right">
-              {(pct * 100).toFixed(2)}% 使用中
+              {t("data_storagePercent", (pct * 100).toFixed(2))}
             </p>
           </div>
         );
@@ -386,14 +387,14 @@ export function DataPage() {
       {/* 権限管理リンク */}
       <div className="bg-base-200 rounded-xl px-4 py-3 mb-6 flex items-center justify-between">
         <span className="text-xs text-base-content/60">
-          サイトごとに付与した権限は Chrome の拡張機能管理ページから確認・削除できます
+          {t("data_permissionNote")}
         </span>
         <a
           className="link link-sm link-primary shrink-0 ml-3 no-underline hover:underline cursor-pointer"
           title={extensionDetailsUrl}
           onClick={(e) => { e.preventDefault(); chrome.tabs.create({ url: extensionDetailsUrl }); }}
         >
-          権限を管理
+          {t("data_managePermissions")}
         </a>
       </div>
 
@@ -401,7 +402,7 @@ export function DataPage() {
       {sites.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-base-content/30 gap-2">
           <IconEmpty className="h-12 w-12" />
-          <p className="text-sm">管理中のデータはありません</p>
+          <p className="text-sm">{t("data_noData")}</p>
         </div>
       ) : (
         <div className="flex flex-col gap-2">
@@ -412,7 +413,7 @@ export function DataPage() {
               <input
                 type="text"
                 className="grow"
-                placeholder="サイトを検索..."
+                placeholder={t("data_searchPlaceholder")}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />
@@ -427,14 +428,14 @@ export function DataPage() {
               value={sortKey}
               onChange={(e) => setSortKey(e.target.value as SortKey)}
             >
-              <option value="hostname">ホスト名順</option>
-              <option value="lastVisited">最終訪問順</option>
-              <option value="elementCount">要素数順</option>
+              <option value="hostname">{t("data_sortHostname")}</option>
+              <option value="lastVisited">{t("data_sortLastVisited")}</option>
+              <option value="elementCount">{t("data_sortElementCount")}</option>
             </select>
             <button
               className="btn btn-xs btn-ghost"
               onClick={() => setSortAsc((v) => !v)}
-              title={sortAsc ? "昇順" : "降順"}
+              title={sortAsc ? t("data_sortAsc") : t("data_sortDesc")}
             >
               {sortAsc ? <IconSortAsc className="h-3.5 w-3.5" /> : <IconSortDesc className="h-3.5 w-3.5" />}
             </button>
@@ -442,7 +443,7 @@ export function DataPage() {
           {filteredSites.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-base-content/30 gap-2">
               <IconSearch className="h-10 w-10" />
-              <p className="text-sm">「{query}」に一致するサイトはありません</p>
+              <p className="text-sm">{t("data_noSearchResults", query)}</p>
             </div>
           ) : filteredSites.map((site) => {
             const isOpen = expanded === site.hostname;
@@ -461,12 +462,12 @@ export function DataPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    title={`https://${site.hostname} を開く`}
+                    title={t("data_openSiteTooltip", site.hostname)}
                   >{stripWww(site.hostname)}</a>
                   <span className="text-xs text-base-content/50 shrink-0">
-                    {site.elements.length} 要素
+                    {t("data_elementCount", site.elements.length.toString())}
                     {hiddenCount > 0 && (
-                      <span className="text-error ml-1">({hiddenCount} 非表示)</span>
+                      <span className="text-error ml-1">{t("data_hiddenCountBadge", hiddenCount.toString())}</span>
                     )}
                   </span>
                   <span className="text-xs text-base-content/40 shrink-0">
@@ -483,7 +484,7 @@ export function DataPage() {
                   <button
                     className="btn btn-xs btn-ghost text-error shrink-0"
                     onClick={(e) => { e.stopPropagation(); deleteSite(site.hostname); }}
-                    title="このサイトのデータを削除"
+                    title={t("data_deleteSiteTooltip")}
                   >
                     <IconTrash className="h-3.5 w-3.5" />
                   </button>
@@ -499,14 +500,14 @@ export function DataPage() {
                             className={`w-2 h-2 rounded-full shrink-0 ${
                               el.isHidden ? "bg-error" : "bg-success"
                             }`}
-                            title={el.isHidden ? "非表示" : "表示中"}
+                            title={el.isHidden ? t("common_hidden") : t("common_visible")}
                           />
                           <div className="flex-1 min-w-0">
                             <p className="text-sm truncate">{el.label}</p>
                             <p className="text-xs text-base-content/40 font-mono truncate">{el.selector}</p>
                           </div>
                           <span className={`badge badge-sm shrink-0 ${el.isHidden ? "badge-error" : "badge-success"}`}>
-                            {el.isHidden ? "非表示" : "表示中"}
+                            {el.isHidden ? t("common_hidden") : t("common_visible")}
                           </span>
                         </li>
                       ))}
@@ -523,20 +524,20 @@ export function DataPage() {
       {confirmOpen && (
         <div className="modal modal-open">
           <div className="modal-box max-w-sm">
-            <h3 className="font-semibold text-lg">全データを削除しますか？</h3>
+            <h3 className="font-semibold text-lg">{t("data_confirmDeleteTitle")}</h3>
             <p className="text-sm text-base-content/60 mt-2">
-              全 {sites.length} サイト・{totalElements} 要素のデータが削除されます。この操作は元に戻せません。
+              {t("data_confirmDeleteBody", [sites.length.toString(), totalElements.toString()])}
             </p>
             <div className="modal-action">
               <button className="btn btn-sm" onClick={() => setConfirmOpen(false)}>
-                キャンセル
+                {t("common_cancel")}
               </button>
               <button
                 className="btn btn-sm btn-error"
                 onClick={() => { setConfirmOpen(false); clearAll(); }}
               >
                 <IconTrash className="h-3.5 w-3.5" />
-                削除する
+                {t("data_confirmDeleteButton")}
               </button>
             </div>
           </div>
@@ -548,31 +549,31 @@ export function DataPage() {
       {importModalState === "preview" && importData && importStats && (
         <div className="modal modal-open">
           <div className="modal-box max-w-sm">
-            <h3 className="font-semibold text-lg">データをインポートしますか？</h3>
+            <h3 className="font-semibold text-lg">{t("data_importConfirmTitle")}</h3>
             <p className="text-xs text-base-content/40 mt-1 mb-4">
-              エクスポート日時: {new Date(importData.exportedAt).toLocaleString(chrome.i18n.getUILanguage())}
+              {t("data_importExportedAt")} {new Date(importData.exportedAt).toLocaleString(chrome.i18n.getUILanguage())}
             </p>
 
             {/* インポート統計 */}
             <div className="grid grid-cols-3 gap-2 mb-4">
               <div className="bg-base-200 rounded-lg p-2 text-center">
                 <div className="text-lg font-semibold">{importStats.newSites}</div>
-                <div className="text-xs text-base-content/50">新規サイト</div>
+                <div className="text-xs text-base-content/50">{t("data_importNewSites")}</div>
               </div>
               <div className="bg-base-200 rounded-lg p-2 text-center">
                 <div className="text-lg font-semibold">{importStats.updatedSites}</div>
-                <div className="text-xs text-base-content/50">既存サイト</div>
+                <div className="text-xs text-base-content/50">{t("data_importExistingSites")}</div>
               </div>
               <div className="bg-base-200 rounded-lg p-2 text-center">
                 <div className="text-lg font-semibold">{importStats.totalElements}</div>
-                <div className="text-xs text-base-content/50">総要素数</div>
+                <div className="text-xs text-base-content/50">{t("data_importTotalElements")}</div>
               </div>
             </div>
 
             {/* マージ / 上書き 選択 */}
             {importStats.updatedSites > 0 && (
               <div className="mb-4">
-                <p className="text-xs text-base-content/60 mb-2">既存サイトの処理方法:</p>
+                <p className="text-xs text-base-content/60 mb-2">{t("data_importModeLabel")}</p>
                 <div className="flex flex-col gap-1.5">
                   <label className="flex items-start gap-2 cursor-pointer">
                     <input
@@ -582,9 +583,9 @@ export function DataPage() {
                       onChange={() => setImportMode("merge")}
                     />
                     <span className="text-sm">
-                      <span className="font-medium">マージ</span>
+                      <span className="font-medium">{t("data_importMerge")}</span>
                       <span className="text-base-content/50 text-xs block">
-                        既存のデータを保持しつつ、新しい要素のみ追加します
+                        {t("data_importMergeDesc")}
                       </span>
                     </span>
                   </label>
@@ -596,9 +597,9 @@ export function DataPage() {
                       onChange={() => setImportMode("overwrite")}
                     />
                     <span className="text-sm">
-                      <span className="font-medium">上書き</span>
+                      <span className="font-medium">{t("data_importOverwrite")}</span>
                       <span className="text-base-content/50 text-xs block">
-                        既存のサイトデータをインポートデータで置き換えます
+                        {t("data_importOverwriteDesc")}
                       </span>
                     </span>
                   </label>
@@ -608,7 +609,7 @@ export function DataPage() {
 
             <div className="modal-action">
               <button className="btn btn-sm" onClick={() => setImportModalState("idle")} disabled={importing}>
-                キャンセル
+                {t("common_cancel")}
               </button>
               <button className="btn btn-sm btn-primary" onClick={applyImport} disabled={importing}>
                 {importing ? (
@@ -616,7 +617,7 @@ export function DataPage() {
                 ) : (
                   <IconUpload className="h-3.5 w-3.5" />
                 )}
-                {importing ? "インポート中..." : "インポートする"}
+                {importing ? t("data_importing") : t("data_importButton")}
               </button>
             </div>
           </div>
@@ -628,11 +629,11 @@ export function DataPage() {
       {importModalState === "error" && (
         <div className="modal modal-open">
           <div className="modal-box max-w-sm">
-            <h3 className="font-semibold text-lg">インポートに失敗しました</h3>
+            <h3 className="font-semibold text-lg">{t("data_importFailedTitle")}</h3>
             <p className="text-sm text-base-content/60 mt-2">{importError}</p>
             <div className="modal-action">
               <button className="btn btn-sm" onClick={() => setImportModalState("idle")}>
-                閉じる
+                {t("common_close")}
               </button>
             </div>
           </div>

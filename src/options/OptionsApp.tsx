@@ -3,16 +3,17 @@ import { IconPalette, IconDatabase } from "./icons";
 import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME, APP_NAME_PRIMARY, APP_NAME_SECONDARY } from "../shared/config";
 import { AppearancePage } from "./pages/AppearancePage";
 import { DataPage } from "./pages/DataPage";
+import { t } from "../shared/i18n";
 
 type PageId = "appearance" | "data";
 
 const NAV_ITEMS: {
   id: PageId;
-  label: string;
+  labelKey: string;
   icon: React.ComponentType<{ className?: string }>;
 }[] = [
-  { id: "data",       label: "データ管理",  icon: IconDatabase },
-  { id: "appearance", label: "外観",       icon: IconPalette  },
+  { id: "data",       labelKey: "options_navData",       icon: IconDatabase },
+  { id: "appearance", labelKey: "options_navAppearance", icon: IconPalette  },
 ];
 
 export function OptionsApp() {
@@ -62,35 +63,38 @@ export function OptionsApp() {
         {/* ナビゲーション */}
         <nav className="py-3 lg:p-3 flex-1">
           <ul className="flex flex-col items-center lg:items-stretch gap-3 lg:gap-0.5">
-            {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
-              <li key={id}>
-                {/* 狭い時: tooltip付きアイコンボタン */}
-                <div className="tooltip tooltip-right lg:hidden" data-tip={label}>
+            {NAV_ITEMS.map(({ id, labelKey, icon: Icon }) => {
+              const label = t(labelKey);
+              return (
+                <li key={id}>
+                  {/* 狭い時: tooltip付きアイコンボタン */}
+                  <div className="tooltip tooltip-right lg:hidden" data-tip={label}>
+                    <button
+                      className={`btn btn-ghost btn-square btn-sm ${
+                        activePage === id
+                          ? "bg-primary text-primary-content hover:bg-primary/80"
+                          : "text-base-content/70 hover:bg-base-300 hover:text-base-content"
+                      }`}
+                      onClick={() => setActivePage(id)}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </button>
+                  </div>
+                  {/* 広い時: アイコン+ラベルボタン */}
                   <button
-                    className={`btn btn-ghost btn-square btn-sm ${
+                    className={`hidden lg:flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm whitespace-nowrap transition-colors text-left ${
                       activePage === id
-                        ? "bg-primary text-primary-content hover:bg-primary/80"
+                        ? "bg-primary text-primary-content font-medium"
                         : "text-base-content/70 hover:bg-base-300 hover:text-base-content"
                     }`}
                     onClick={() => setActivePage(id)}
                   >
-                    <Icon className="h-5 w-5" />
+                    <Icon className="h-4 w-4 shrink-0" />
+                    {label}
                   </button>
-                </div>
-                {/* 広い時: アイコン+ラベルボタン */}
-                <button
-                  className={`hidden lg:flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm whitespace-nowrap transition-colors text-left ${
-                    activePage === id
-                      ? "bg-primary text-primary-content font-medium"
-                      : "text-base-content/70 hover:bg-base-300 hover:text-base-content"
-                  }`}
-                  onClick={() => setActivePage(id)}
-                >
-                  <Icon className="h-4 w-4 shrink-0" />
-                  {label}
-                </button>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
         </nav>
       </aside>

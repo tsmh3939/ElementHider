@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { IconTrash, IconPencil, IconGrip, IconHidden, IconInvisible } from "../icons";
-import { HIDE_MODE_LABELS, type ManagedElement, type HideMode } from "../../shared/messages";
+import { getHideModeLabel, type ManagedElement, type HideMode } from "../../shared/messages";
+import { t } from "../../shared/i18n";
 
 const HIDE_MODES: HideMode[] = ["hidden", "invisible"];
 
@@ -71,7 +72,7 @@ export function ElementItem({
       >
         <span
           className="btn btn-xs btn-ghost shrink-0 cursor-grab text-base-content/20 hover:text-base-content/50 px-1"
-          title="ドラッグして並べ替え"
+          title={t("element_dragToReorder")}
         >
           <IconGrip className="h-3.5 w-3.5" />
         </span>
@@ -112,7 +113,7 @@ export function ElementItem({
                 const nextIndex = (HIDE_MODES.indexOf(element.hideMode) + 1) % HIDE_MODES.length;
                 onSetHideMode(element.selector, HIDE_MODES[nextIndex]);
               }}
-              title={`${HIDE_MODE_LABELS[element.hideMode]}（クリックで切替）`}
+              title={t("element_hideModeToggle", getHideModeLabel(element.hideMode))}
             >
               {element.hideMode === "hidden"
                 ? <IconHidden className="h-3.5 w-3.5" />
@@ -123,7 +124,7 @@ export function ElementItem({
             <button
               className="btn btn-xs btn-ghost shrink-0 text-base-content/30 hover:text-base-content"
               onClick={startEdit}
-              title="名前を編集"
+              title={t("element_editName")}
             >
               <IconPencil className="h-3.5 w-3.5" />
             </button>
@@ -134,20 +135,20 @@ export function ElementItem({
                   className="btn btn-xs btn-error shrink-0 text-xs"
                   onClick={() => { onDelete(element.selector); setConfirmingDelete(false); }}
                 >
-                  削除
+                  {t("element_delete")}
                 </button>
                 <button
                   className="btn btn-xs btn-ghost shrink-0 text-xs"
                   onClick={() => setConfirmingDelete(false)}
                 >
-                  取消
+                  {t("element_cancelDelete")}
                 </button>
               </>
             ) : (
               <button
                 className="btn btn-xs btn-ghost text-error shrink-0"
                 onClick={() => setConfirmingDelete(true)}
-                title="管理から削除"
+                title={t("element_removeFromList")}
               >
                 <IconTrash className="h-3.5 w-3.5" />
               </button>

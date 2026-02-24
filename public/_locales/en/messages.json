@@ -1,0 +1,381 @@
+{
+  "manifest_name": {
+    "message": "ElementHider",
+    "description": "Extension name"
+  },
+  "manifest_description": {
+    "message": "Hide page elements with a DevTools-like picker",
+    "description": "Extension description"
+  },
+  "manifest_commandDescription": {
+    "message": "Open ElementHider",
+    "description": "Keyboard shortcut description"
+  },
+
+  "common_hidden": {
+    "message": "Hidden",
+    "description": "Element state: hidden via display:none"
+  },
+  "common_invisible": {
+    "message": "Invisible",
+    "description": "Element state: hidden via visibility:hidden"
+  },
+  "common_visible": {
+    "message": "Visible",
+    "description": "Element state: currently visible"
+  },
+  "common_cancel": {
+    "message": "Cancel",
+    "description": "Cancel button label"
+  },
+  "common_close": {
+    "message": "Close",
+    "description": "Close button label"
+  },
+  "common_inUse": {
+    "message": "In use",
+    "description": "Badge indicating the currently active theme"
+  },
+
+  "sidepanel_settings": {
+    "message": "Settings",
+    "description": "Settings button tooltip"
+  },
+  "sidepanel_reopenPanelLine1": {
+    "message": "To use this extension,",
+    "description": "First line of message when sidepanel needs to be reopened"
+  },
+  "sidepanel_reopenPanelLine2": {
+    "message": "please reopen the side panel",
+    "description": "Second line of message when sidepanel needs to be reopened"
+  },
+  "sidepanel_specialPageNote": {
+    "message": "Cannot be used on special pages such as chrome://",
+    "description": "Note about special pages"
+  },
+  "sidepanel_permissionDeniedLine1": {
+    "message": "Cannot be used because access to this site is not granted.",
+    "description": "First line of permission denied message"
+  },
+  "sidepanel_permissionDeniedLine2": {
+    "message": "Please grant access to use this extension.",
+    "description": "Second line of permission denied message"
+  },
+  "sidepanel_grantAccess": {
+    "message": "Grant access",
+    "description": "Button to grant host permission"
+  },
+  "sidepanel_reloadPage": {
+    "message": "Please reload the page",
+    "description": "Heading when content script is not ready"
+  },
+  "sidepanel_contentScriptNotReadyLine1": {
+    "message": "Content script is not loaded.",
+    "description": "First line of content script not ready message"
+  },
+  "sidepanel_contentScriptNotReadyLine2": {
+    "message": "Reloading the page will enable it automatically.",
+    "description": "Second line of content script not ready message"
+  },
+  "sidepanel_stopPicker": {
+    "message": "Stop picker",
+    "description": "Button to stop element picker"
+  },
+  "sidepanel_selectElement": {
+    "message": "Select elements to hide",
+    "description": "Button to start element picker"
+  },
+  "sidepanel_pickerHint": {
+    "message": "Click an element / Esc to exit",
+    "description": "Instruction text when picker is active"
+  },
+  "sidepanel_multiSelect": {
+    "message": "Multi-select",
+    "description": "Checkbox label for multi-select mode"
+  },
+  "sidepanel_noElements": {
+    "message": "No managed elements",
+    "description": "Empty state when no elements are managed"
+  },
+  "sidepanel_hiddenCount": {
+    "message": "$1 hidden / $2 visible",
+    "description": "Element count summary in list header",
+    "placeholders": {
+      "1": { "content": "$1", "example": "3" },
+      "2": { "content": "$2", "example": "5" }
+    }
+  },
+  "sidepanel_showAll": {
+    "message": "Show all",
+    "description": "Button to show all elements"
+  },
+  "sidepanel_hideAll": {
+    "message": "Hide all",
+    "description": "Button to hide all elements"
+  },
+
+  "element_dragToReorder": {
+    "message": "Drag to reorder",
+    "description": "Drag handle tooltip"
+  },
+  "element_hideModeToggle": {
+    "message": "$1 (click to toggle)",
+    "description": "Hide mode button tooltip",
+    "placeholders": {
+      "1": { "content": "$1", "example": "Hidden" }
+    }
+  },
+  "element_editName": {
+    "message": "Edit name",
+    "description": "Edit button tooltip"
+  },
+  "element_delete": {
+    "message": "Delete",
+    "description": "Delete confirmation button"
+  },
+  "element_cancelDelete": {
+    "message": "Cancel",
+    "description": "Cancel delete button"
+  },
+  "element_removeFromList": {
+    "message": "Remove from list",
+    "description": "Delete button tooltip"
+  },
+
+  "options_navData": {
+    "message": "Data Management",
+    "description": "Navigation label for data management page"
+  },
+  "options_navAppearance": {
+    "message": "Appearance",
+    "description": "Navigation label for appearance page"
+  },
+
+  "appearance_pageTitle": {
+    "message": "Appearance",
+    "description": "Appearance page heading"
+  },
+  "appearance_description": {
+    "message": "Choose a theme for the panel and settings page",
+    "description": "Appearance page subtitle"
+  },
+
+  "data_pageTitle": {
+    "message": "Data Management",
+    "description": "Data page heading"
+  },
+  "data_summary": {
+    "message": "Managing $1 sites / $2 elements",
+    "description": "Data page subtitle with counts",
+    "placeholders": {
+      "1": { "content": "$1", "example": "10" },
+      "2": { "content": "$2", "example": "42" }
+    }
+  },
+  "data_import": {
+    "message": "Import",
+    "description": "Import button label"
+  },
+  "data_importTooltip": {
+    "message": "Import data from JSON file",
+    "description": "Import button tooltip"
+  },
+  "data_export": {
+    "message": "Export",
+    "description": "Export button label"
+  },
+  "data_exportTooltip": {
+    "message": "Export data to JSON file",
+    "description": "Export button tooltip"
+  },
+  "data_exportDone": {
+    "message": "Saved",
+    "description": "Export success message"
+  },
+  "data_deleteAll": {
+    "message": "Delete all",
+    "description": "Delete all button label"
+  },
+  "data_deleting": {
+    "message": "Deleting...",
+    "description": "Delete in progress label"
+  },
+  "data_statSites": {
+    "message": "Managed sites",
+    "description": "Summary card title for site count"
+  },
+  "data_statElements": {
+    "message": "Managed elements",
+    "description": "Summary card title for element count"
+  },
+  "data_storageUsage": {
+    "message": "Storage usage",
+    "description": "Storage usage label"
+  },
+  "data_storagePercent": {
+    "message": "$1% used",
+    "description": "Storage usage percentage",
+    "placeholders": {
+      "1": { "content": "$1", "example": "12.34" }
+    }
+  },
+  "data_permissionNote": {
+    "message": "Per-site permissions can be viewed and removed from the Chrome extension management page",
+    "description": "Permission management info text"
+  },
+  "data_managePermissions": {
+    "message": "Manage permissions",
+    "description": "Permission management link"
+  },
+  "data_noData": {
+    "message": "No managed data",
+    "description": "Empty state message"
+  },
+  "data_searchPlaceholder": {
+    "message": "Search sites...",
+    "description": "Search input placeholder"
+  },
+  "data_sortHostname": {
+    "message": "By hostname",
+    "description": "Sort option: hostname"
+  },
+  "data_sortLastVisited": {
+    "message": "By last visited",
+    "description": "Sort option: last visited"
+  },
+  "data_sortElementCount": {
+    "message": "By element count",
+    "description": "Sort option: element count"
+  },
+  "data_sortAsc": {
+    "message": "Ascending",
+    "description": "Ascending sort tooltip"
+  },
+  "data_sortDesc": {
+    "message": "Descending",
+    "description": "Descending sort tooltip"
+  },
+  "data_noSearchResults": {
+    "message": "No sites matching \"$1\"",
+    "description": "No search results message",
+    "placeholders": {
+      "1": { "content": "$1", "example": "example.com" }
+    }
+  },
+  "data_elementCount": {
+    "message": "$1 elements",
+    "description": "Element count display",
+    "placeholders": {
+      "1": { "content": "$1", "example": "5" }
+    }
+  },
+  "data_hiddenCountBadge": {
+    "message": "($1 hidden)",
+    "description": "Hidden element count in parentheses",
+    "placeholders": {
+      "1": { "content": "$1", "example": "3" }
+    }
+  },
+  "data_deleteSiteTooltip": {
+    "message": "Delete this site's data",
+    "description": "Delete site button tooltip"
+  },
+  "data_openSiteTooltip": {
+    "message": "Open https://$1",
+    "description": "Open site link tooltip",
+    "placeholders": {
+      "1": { "content": "$1", "example": "example.com" }
+    }
+  },
+  "data_confirmDeleteTitle": {
+    "message": "Delete all data?",
+    "description": "Delete confirmation modal heading"
+  },
+  "data_confirmDeleteBody": {
+    "message": "All data for $1 sites and $2 elements will be deleted. This action cannot be undone.",
+    "description": "Delete confirmation modal text",
+    "placeholders": {
+      "1": { "content": "$1", "example": "10" },
+      "2": { "content": "$2", "example": "42" }
+    }
+  },
+  "data_confirmDeleteButton": {
+    "message": "Delete",
+    "description": "Confirm delete button"
+  },
+  "data_importConfirmTitle": {
+    "message": "Import data?",
+    "description": "Import confirmation modal heading"
+  },
+  "data_importExportedAt": {
+    "message": "Exported at:",
+    "description": "Export timestamp label"
+  },
+  "data_importNewSites": {
+    "message": "New sites",
+    "description": "Import stats: new sites"
+  },
+  "data_importExistingSites": {
+    "message": "Existing sites",
+    "description": "Import stats: existing sites"
+  },
+  "data_importTotalElements": {
+    "message": "Total elements",
+    "description": "Import stats: total elements"
+  },
+  "data_importModeLabel": {
+    "message": "How to handle existing sites:",
+    "description": "Import mode selection label"
+  },
+  "data_importMerge": {
+    "message": "Merge",
+    "description": "Merge import option label"
+  },
+  "data_importMergeDesc": {
+    "message": "Keep existing data and add only new elements",
+    "description": "Merge import option description"
+  },
+  "data_importOverwrite": {
+    "message": "Overwrite",
+    "description": "Overwrite import option label"
+  },
+  "data_importOverwriteDesc": {
+    "message": "Replace existing site data with imported data",
+    "description": "Overwrite import option description"
+  },
+  "data_importButton": {
+    "message": "Import",
+    "description": "Import confirm button"
+  },
+  "data_importing": {
+    "message": "Importing...",
+    "description": "Import in progress label"
+  },
+  "data_importFailedTitle": {
+    "message": "Import failed",
+    "description": "Import error modal heading"
+  },
+  "data_importErrorFileSize": {
+    "message": "File size is too large (limit: 20 MB).",
+    "description": "Error: file too large"
+  },
+  "data_importErrorInvalidFormat": {
+    "message": "Invalid file format. Please select an ElementHider export file.",
+    "description": "Error: invalid format"
+  },
+  "data_importErrorJsonParse": {
+    "message": "Failed to parse JSON. The file may be corrupted or in an invalid format.",
+    "description": "Error: JSON parse failure"
+  },
+  "data_importErrorQuota": {
+    "message": "Import failed because the storage quota would be exceeded. Please delete unnecessary site data and try again.",
+    "description": "Error: storage quota exceeded"
+  },
+  "data_importErrorGeneric": {
+    "message": "An error occurred during import: $1",
+    "description": "Generic import error",
+    "placeholders": {
+      "1": { "content": "$1", "example": "Unknown error" }
+    }
+  }
+}

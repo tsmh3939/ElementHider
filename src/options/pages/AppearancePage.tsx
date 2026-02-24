@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { EH_SETTINGS_KEY, type EhSettings, DEFAULT_THEME, DEFAULT_MULTI_SELECT, ALL_THEMES } from "../../shared/config";
+import { t } from "../../shared/i18n";
 
 export function AppearancePage() {
   const [settings, setSettings] = useState<EhSettings>({ theme: DEFAULT_THEME, multiSelect: DEFAULT_MULTI_SELECT });
@@ -20,8 +21,8 @@ export function AppearancePage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h2 className="text-xl font-semibold mb-1">外観</h2>
-      <p className="text-sm text-base-content/50 mb-6">パネルと設定ページのテーマを選択します</p>
+      <h2 className="text-xl font-semibold mb-1">{t("appearance_pageTitle")}</h2>
+      <p className="text-sm text-base-content/50 mb-6">{t("appearance_description")}</p>
 
       <div className="grid grid-cols-3 gap-3">
         {ALL_THEMES.map((id) => (
@@ -57,7 +58,7 @@ export function AppearancePage() {
               </div>
 
               {settings.theme === id && (
-                <span className="badge badge-primary badge-sm self-start">使用中</span>
+                <span className="badge badge-primary badge-sm self-start">{t("common_inUse")}</span>
               )}
             </div>
           </button>

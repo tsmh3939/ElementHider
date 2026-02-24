@@ -1,0 +1,381 @@
+{
+  "manifest_name": {
+    "message": "ElementHider",
+    "description": "Extension name"
+  },
+  "manifest_description": {
+    "message": "DevTools ライクなピッカーでページの要素を非表示にします",
+    "description": "Extension description"
+  },
+  "manifest_commandDescription": {
+    "message": "ElementHiderを開く",
+    "description": "Keyboard shortcut description"
+  },
+
+  "common_hidden": {
+    "message": "非表示",
+    "description": "Element state: hidden via display:none"
+  },
+  "common_invisible": {
+    "message": "不可視",
+    "description": "Element state: hidden via visibility:hidden"
+  },
+  "common_visible": {
+    "message": "表示中",
+    "description": "Element state: currently visible"
+  },
+  "common_cancel": {
+    "message": "キャンセル",
+    "description": "Cancel button label"
+  },
+  "common_close": {
+    "message": "閉じる",
+    "description": "Close button label"
+  },
+  "common_inUse": {
+    "message": "使用中",
+    "description": "Badge indicating the currently active theme"
+  },
+
+  "sidepanel_settings": {
+    "message": "設定",
+    "description": "Settings button tooltip"
+  },
+  "sidepanel_reopenPanelLine1": {
+    "message": "利用するには",
+    "description": "First line of message when sidepanel needs to be reopened"
+  },
+  "sidepanel_reopenPanelLine2": {
+    "message": "サイドパネルを開き直してください",
+    "description": "Second line of message when sidepanel needs to be reopened"
+  },
+  "sidepanel_specialPageNote": {
+    "message": "chrome:// 等の特殊なページでは使用できません",
+    "description": "Note about special pages"
+  },
+  "sidepanel_permissionDeniedLine1": {
+    "message": "サイトへのアクセスが許可されていないため利用できません。",
+    "description": "First line of permission denied message"
+  },
+  "sidepanel_permissionDeniedLine2": {
+    "message": "利用するにはアクセスを許可してください。",
+    "description": "Second line of permission denied message"
+  },
+  "sidepanel_grantAccess": {
+    "message": "アクセスを許可",
+    "description": "Button to grant host permission"
+  },
+  "sidepanel_reloadPage": {
+    "message": "ページをリロードしてください",
+    "description": "Heading when content script is not ready"
+  },
+  "sidepanel_contentScriptNotReadyLine1": {
+    "message": "コンテンツスクリプトが読み込まれていません。",
+    "description": "First line of content script not ready message"
+  },
+  "sidepanel_contentScriptNotReadyLine2": {
+    "message": "ページをリロードすると自動的に有効になります。",
+    "description": "Second line of content script not ready message"
+  },
+  "sidepanel_stopPicker": {
+    "message": "ピッカーを停止",
+    "description": "Button to stop element picker"
+  },
+  "sidepanel_selectElement": {
+    "message": "要素を選択して非表示",
+    "description": "Button to start element picker"
+  },
+  "sidepanel_pickerHint": {
+    "message": "要素をクリック / Esc で終了",
+    "description": "Instruction text when picker is active"
+  },
+  "sidepanel_multiSelect": {
+    "message": "複数選択",
+    "description": "Checkbox label for multi-select mode"
+  },
+  "sidepanel_noElements": {
+    "message": "管理中の要素はありません",
+    "description": "Empty state when no elements are managed"
+  },
+  "sidepanel_hiddenCount": {
+    "message": "$1 非表示 / $2 表示中",
+    "description": "Element count summary in list header",
+    "placeholders": {
+      "1": { "content": "$1", "example": "3" },
+      "2": { "content": "$2", "example": "5" }
+    }
+  },
+  "sidepanel_showAll": {
+    "message": "すべて表示にする",
+    "description": "Button to show all elements"
+  },
+  "sidepanel_hideAll": {
+    "message": "すべて非表示にする",
+    "description": "Button to hide all elements"
+  },
+
+  "element_dragToReorder": {
+    "message": "ドラッグして並べ替え",
+    "description": "Drag handle tooltip"
+  },
+  "element_hideModeToggle": {
+    "message": "$1（クリックで切替）",
+    "description": "Hide mode button tooltip",
+    "placeholders": {
+      "1": { "content": "$1", "example": "非表示" }
+    }
+  },
+  "element_editName": {
+    "message": "名前を編集",
+    "description": "Edit button tooltip"
+  },
+  "element_delete": {
+    "message": "削除",
+    "description": "Delete confirmation button"
+  },
+  "element_cancelDelete": {
+    "message": "取消",
+    "description": "Cancel delete button"
+  },
+  "element_removeFromList": {
+    "message": "管理から削除",
+    "description": "Delete button tooltip"
+  },
+
+  "options_navData": {
+    "message": "データ管理",
+    "description": "Navigation label for data management page"
+  },
+  "options_navAppearance": {
+    "message": "外観",
+    "description": "Navigation label for appearance page"
+  },
+
+  "appearance_pageTitle": {
+    "message": "外観",
+    "description": "Appearance page heading"
+  },
+  "appearance_description": {
+    "message": "パネルと設定ページのテーマを選択します",
+    "description": "Appearance page subtitle"
+  },
+
+  "data_pageTitle": {
+    "message": "データ管理",
+    "description": "Data page heading"
+  },
+  "data_summary": {
+    "message": "$1 サイト / $2 要素を管理中",
+    "description": "Data page subtitle with counts",
+    "placeholders": {
+      "1": { "content": "$1", "example": "10" },
+      "2": { "content": "$2", "example": "42" }
+    }
+  },
+  "data_import": {
+    "message": "インポート",
+    "description": "Import button label"
+  },
+  "data_importTooltip": {
+    "message": "JSON ファイルからデータをインポート",
+    "description": "Import button tooltip"
+  },
+  "data_export": {
+    "message": "エクスポート",
+    "description": "Export button label"
+  },
+  "data_exportTooltip": {
+    "message": "データを JSON ファイルにエクスポート",
+    "description": "Export button tooltip"
+  },
+  "data_exportDone": {
+    "message": "保存しました",
+    "description": "Export success message"
+  },
+  "data_deleteAll": {
+    "message": "全て削除",
+    "description": "Delete all button label"
+  },
+  "data_deleting": {
+    "message": "削除中...",
+    "description": "Delete in progress label"
+  },
+  "data_statSites": {
+    "message": "管理中のサイト",
+    "description": "Summary card title for site count"
+  },
+  "data_statElements": {
+    "message": "管理中の要素",
+    "description": "Summary card title for element count"
+  },
+  "data_storageUsage": {
+    "message": "ストレージ使用量",
+    "description": "Storage usage label"
+  },
+  "data_storagePercent": {
+    "message": "$1% 使用中",
+    "description": "Storage usage percentage",
+    "placeholders": {
+      "1": { "content": "$1", "example": "12.34" }
+    }
+  },
+  "data_permissionNote": {
+    "message": "サイトごとに付与した権限は Chrome の拡張機能管理ページから確認・削除できます",
+    "description": "Permission management info text"
+  },
+  "data_managePermissions": {
+    "message": "権限を管理",
+    "description": "Permission management link"
+  },
+  "data_noData": {
+    "message": "管理中のデータはありません",
+    "description": "Empty state message"
+  },
+  "data_searchPlaceholder": {
+    "message": "サイトを検索...",
+    "description": "Search input placeholder"
+  },
+  "data_sortHostname": {
+    "message": "ホスト名順",
+    "description": "Sort option: hostname"
+  },
+  "data_sortLastVisited": {
+    "message": "最終訪問順",
+    "description": "Sort option: last visited"
+  },
+  "data_sortElementCount": {
+    "message": "要素数順",
+    "description": "Sort option: element count"
+  },
+  "data_sortAsc": {
+    "message": "昇順",
+    "description": "Ascending sort tooltip"
+  },
+  "data_sortDesc": {
+    "message": "降順",
+    "description": "Descending sort tooltip"
+  },
+  "data_noSearchResults": {
+    "message": "「$1」に一致するサイトはありません",
+    "description": "No search results message",
+    "placeholders": {
+      "1": { "content": "$1", "example": "example.com" }
+    }
+  },
+  "data_elementCount": {
+    "message": "$1 要素",
+    "description": "Element count display",
+    "placeholders": {
+      "1": { "content": "$1", "example": "5" }
+    }
+  },
+  "data_hiddenCountBadge": {
+    "message": "($1 非表示)",
+    "description": "Hidden element count in parentheses",
+    "placeholders": {
+      "1": { "content": "$1", "example": "3" }
+    }
+  },
+  "data_deleteSiteTooltip": {
+    "message": "このサイトのデータを削除",
+    "description": "Delete site button tooltip"
+  },
+  "data_openSiteTooltip": {
+    "message": "https://$1 を開く",
+    "description": "Open site link tooltip",
+    "placeholders": {
+      "1": { "content": "$1", "example": "example.com" }
+    }
+  },
+  "data_confirmDeleteTitle": {
+    "message": "全データを削除しますか？",
+    "description": "Delete confirmation modal heading"
+  },
+  "data_confirmDeleteBody": {
+    "message": "全 $1 サイト・$2 要素のデータが削除されます。この操作は元に戻せません。",
+    "description": "Delete confirmation modal text",
+    "placeholders": {
+      "1": { "content": "$1", "example": "10" },
+      "2": { "content": "$2", "example": "42" }
+    }
+  },
+  "data_confirmDeleteButton": {
+    "message": "削除する",
+    "description": "Confirm delete button"
+  },
+  "data_importConfirmTitle": {
+    "message": "データをインポートしますか？",
+    "description": "Import confirmation modal heading"
+  },
+  "data_importExportedAt": {
+    "message": "エクスポート日時:",
+    "description": "Export timestamp label"
+  },
+  "data_importNewSites": {
+    "message": "新規サイト",
+    "description": "Import stats: new sites"
+  },
+  "data_importExistingSites": {
+    "message": "既存サイト",
+    "description": "Import stats: existing sites"
+  },
+  "data_importTotalElements": {
+    "message": "総要素数",
+    "description": "Import stats: total elements"
+  },
+  "data_importModeLabel": {
+    "message": "既存サイトの処理方法:",
+    "description": "Import mode selection label"
+  },
+  "data_importMerge": {
+    "message": "マージ",
+    "description": "Merge import option label"
+  },
+  "data_importMergeDesc": {
+    "message": "既存のデータを保持しつつ、新しい要素のみ追加します",
+    "description": "Merge import option description"
+  },
+  "data_importOverwrite": {
+    "message": "上書き",
+    "description": "Overwrite import option label"
+  },
+  "data_importOverwriteDesc": {
+    "message": "既存のサイトデータをインポートデータで置き換えます",
+    "description": "Overwrite import option description"
+  },
+  "data_importButton": {
+    "message": "インポートする",
+    "description": "Import confirm button"
+  },
+  "data_importing": {
+    "message": "インポート中...",
+    "description": "Import in progress label"
+  },
+  "data_importFailedTitle": {
+    "message": "インポートに失敗しました",
+    "description": "Import error modal heading"
+  },
+  "data_importErrorFileSize": {
+    "message": "ファイルサイズが大きすぎます（上限: 20 MB）。",
+    "description": "Error: file too large"
+  },
+  "data_importErrorInvalidFormat": {
+    "message": "ファイルの形式が正しくありません。ElementHider のエクスポートファイルを選択してください。",
+    "description": "Error: invalid format"
+  },
+  "data_importErrorJsonParse": {
+    "message": "JSON の解析に失敗しました。ファイルが破損しているか、形式が正しくありません。",
+    "description": "Error: JSON parse failure"
+  },
+  "data_importErrorQuota": {
+    "message": "ストレージの容量上限を超えるため、インポートできませんでした。不要なサイトデータを削除してから再度お試しください。",
+    "description": "Error: storage quota exceeded"
+  },
+  "data_importErrorGeneric": {
+    "message": "インポート中にエラーが発生しました: $1",
+    "description": "Generic import error",
+    "placeholders": {
+      "1": { "content": "$1", "example": "Unknown error" }
+    }
+  }
+}

@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "",
+  "name": "__MSG_manifest_name__",
   "version": "",
-  "description": "Hide page elements with a DevTools-like picker",
+  "description": "__MSG_manifest_description__",
+  "default_locale": "en",
   "permissions": ["storage", "sidePanel", "activeTab", "scripting"],
   "optional_host_permissions": ["*://*/*"],
   "side_panel": {
@@ -18,7 +19,7 @@
       "suggested_key": {
         "default": "Alt+Shift+H"
       },
-      "description": "ElementHiderを開く"
+      "description": "__MSG_manifest_commandDescription__"
     }
   },
   "icons": {
