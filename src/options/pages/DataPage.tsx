@@ -54,7 +54,7 @@ function formatBytes(bytes: number): string {
 
 export function DataPage() {
   const [sites, setSites] = useState<SiteData[]>([]);
-  const [clearAllStatus, setClearAllStatus] = useState<"idle" | "done">("idle");
+  const [clearing, setClearing] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [bytesInUse, setBytesInUse] = useState<number | null>(null);
@@ -124,6 +124,7 @@ export function DataPage() {
   };
 
   const clearAll = async () => {
+    setClearing(true);
     const all = await chrome.storage.local.get(null);
     const keys = Object.keys(all).filter((k) => k !== EH_SETTINGS_KEY);
     // 全ホストのスクリプト登録解除 + 権限取り消し
@@ -135,8 +136,7 @@ export function DataPage() {
     if (keys.length > 0) await chrome.storage.local.remove(keys);
     setSites([]);
     chrome.storage.local.getBytesInUse(null).then(setBytesInUse);
-    setClearAllStatus("done");
-    setTimeout(() => setClearAllStatus("idle"), 2000);
+    setClearing(false);
   };
 
   // ── エクスポート ──────────────────────────────────────────────────────────
@@ -317,26 +317,28 @@ export function DataPage() {
             <IconUpload className="h-3.5 w-3.5" />
             インポート
           </button>
-          {sites.length > 0 && (
+          {(sites.length > 0 || clearing) && (
             <>
               <button
                 className={`btn btn-sm gap-2 ${exportStatus === "done" ? "btn-success" : "btn-ghost"}`}
                 onClick={handleExport}
-                disabled={exportStatus === "done"}
+                disabled={exportStatus === "done" || clearing}
                 title="データを JSON ファイルにエクスポート"
               >
                 <IconDownload className="h-3.5 w-3.5" />
                 {exportStatus === "done" ? "保存しました" : "エクスポート"}
               </button>
               <button
-                className={`btn btn-sm gap-2 ${
-                  clearAllStatus === "done" ? "btn-success" : "btn-error btn-outline"
-                }`}
+                className="btn btn-sm gap-2 btn-error btn-outline"
                 onClick={() => setConfirmOpen(true)}
-                disabled={clearAllStatus === "done"}
+                disabled={clearing}
               >
-                <IconTrash className="h-3.5 w-3.5" />
-                {clearAllStatus === "done" ? "削除しました" : "全て削除"}
+                {clearing ? (
+                  <span className="loading loading-spinner loading-xs" />
+                ) : (
+                  <IconTrash className="h-3.5 w-3.5" />
+                )}
+                {clearing ? "削除中..." : "全て削除"}
               </button>
             </>
           )}
