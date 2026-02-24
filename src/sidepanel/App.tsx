@@ -253,6 +253,8 @@ export default function App() {
                 {t("sidepanel_contentScriptNotReadyLine1")}
                 <br />
                 {t("sidepanel_contentScriptNotReadyLine2")}
+                <br />
+                {t("sidepanel_specialPageNote")}
               </p>
             </div>
           )}
